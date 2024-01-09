@@ -1,6 +1,9 @@
-############################
-###Clean Supplementary SEM code###
-############################
+#####################################
+# This script produces summary outputs of structural equation 
+# models used for creating supplemental SEM pathway figures. These figures 
+# break down the variance ratio and inverse coefficient of variation into
+# their mathematical components, and report all direct effects.
+#####################################
 
 #Packages:
 library(tidyverse)
@@ -11,15 +14,12 @@ library(vegan)
 
 library(lavaan)
 library(psych)
-library(semPlot)
-library(piecewiseSEM)
 library(here)
 
 #Read in data and functions
 source(here("data_cleaning/subsetting_CC.R"))
 
 ###Transformations###----
-
 #Stability
 MASS::boxcox(lm(SEM.b.df$Stability ~ 1)) #Determine ideal lambda
 SEM.b.df$TStability <- boxcox_transform(SEM.b.df$Stability, -0.3) #Transform var
@@ -68,7 +68,7 @@ SEM.a.df$Tmean_biomass <- boxcox_transform(SEM.a.df$mean_biomass, 0.1)
 shapiro.test(SEM.a.df$Tmean_biomass)
 hist(SEM.a.df$Tmean_biomass)
 
-#Community
+#Community Variance
 MASS::boxcox(lm(SEM.b.df$comm ~ 1))
 SEM.b.df$Tcomm <- boxcox_transform(SEM.b.df$comm, 0.25)
 shapiro.test(SEM.b.df$Tcomm)
@@ -79,7 +79,7 @@ SEM.a.df$Tcomm <- boxcox_transform(SEM.a.df$comm, 0)
 shapiro.test(SEM.a.df$Tcomm)
 hist(SEM.a.df$Tcomm)
 
-#Population
+#Population Variance
 MASS::boxcox(lm(SEM.b.df$pop ~ 1))
 SEM.b.df$Tpop <- boxcox_transform(SEM.b.df$pop, 0.25)
 shapiro.test(SEM.b.df$Tpop)
@@ -91,26 +91,13 @@ shapiro.test(SEM.a.df$Tpop)
 hist(SEM.a.df$Tpop)
 
 
-###SEM path building###----
-#Build transient and post-transient models with paths of interest, using transformed variables
+############################
+###SEM model building###
+# Produce summary outputs of direct effects of exogenous factors
+# on community properties
+############################
 
-#piecewiseSEM model, transient-----
-#Add fields in, transient
-field.cat <- as.data.frame(model.matrix(~ field, data = SEM.b.df)) %>% 
-  dplyr::rename(fieldA = `(Intercept)`) %>% 
-  dplyr::mutate(uniqueID = SEM.b.df$uniqueID)
-
-SEM.b.df.cat <- left_join(SEM.b.df, field.cat, by = "uniqueID")
-SEM.b.df.cat$Disturbance <- as.factor(SEM.b.df.cat$Disturbance)
-
-#Add fields in, post-transient
-field.cat.a <- as.data.frame(model.matrix(~ field, data = SEM.a.df)) %>% 
-  dplyr::rename(fieldA = `(Intercept)`) %>% 
-  dplyr::mutate(uniqueID = SEM.a.df$uniqueID)
-
-SEM.a.df.cat <- left_join(SEM.a.df, field.cat.a, by = "uniqueID")
-SEM.a.df.cat$Disturbance <- as.factor(SEM.b.df.cat$Disturbance)
-
+#Create model structure
 m1 <- 'Tmean_biomass ~ TRichness + TEvenness + Disturbance + Nitrogen + fieldB + fieldC
        Tcomm ~ TRichness + TEvenness + Disturbance + Nitrogen + fieldB + fieldC
        Tpop ~ TRichness + TEvenness + Nitrogen + Disturbance + fieldB + fieldC
@@ -120,69 +107,31 @@ m1 <- 'Tmean_biomass ~ TRichness + TEvenness + Disturbance + Nitrogen + fieldB +
        Tmean_biomass ~~ Tcomm
        Tpop ~~ Tcomm'
 
-#Fit transient years model
+###Lavaan model, transient phase
+#Add in field to dataframe
+field.cat <- as.data.frame(model.matrix(~ field, data = SEM.b.df)) %>% 
+  dplyr::rename(fieldA = `(Intercept)`) %>% 
+  dplyr::mutate(uniqueID = SEM.b.df$uniqueID)
+SEM.b.df.cat <- left_join(SEM.b.df, field.cat, by = "uniqueID")
+SEM.b.df.cat$Disturbance <- as.factor(SEM.b.df.cat$Disturbance)
+
+#Fit model to transient phase data
 m1.fit <- sem(m1, data=SEM.b.df.cat, se="bootstrap", test="bootstrap")
-summary(m1.fit, stand=TRUE, rsq=TRUE)
 standardizedSolution(m1.fit, type="std.all")
 #Save data
 saveRDS(standardizedSolution(m1.fit, type="std.all"), 
         file = here::here("data/SEM_supp_transient.rds")) 
-  #To read: object <- readRDS(here("data/SEM_supp_transient.rds"))
 
-#Fit post-transient years model
+#Add in field to dataframe
+field.cat.a <- as.data.frame(model.matrix(~ field, data = SEM.a.df)) %>% 
+  dplyr::rename(fieldA = `(Intercept)`) %>% 
+  dplyr::mutate(uniqueID = SEM.a.df$uniqueID)
+SEM.a.df.cat <- left_join(SEM.a.df, field.cat.a, by = "uniqueID")
+SEM.a.df.cat$Disturbance <- as.factor(SEM.b.df.cat$Disturbance)
+
+#Fit model to post-transient phase data
 m2.fit <- sem(m1, data=SEM.a.df.cat, se="bootstrap", test="bootstrap")
-summary(m2.fit, stand=TRUE, rsq=TRUE)
 standardizedSolution(m2.fit, type="std.all")
 #Save data
 saveRDS(standardizedSolution(m2.fit, type="std.all"), 
-        file = here::here("data/SEM_supp_posttransient.rds")) 
-#To read: object <- readRDS(here("data/SEM_supp_posttransient.rds"))
-
-
-# m1psem_supp <- psem(
-#   lm(mean_biomass ~ TRichness + TEvenness + Disturbance + Nitrogen + field, data = SEM.b.df),
-#   lm(comm ~ TRichness + TEvenness + Disturbance + Nitrogen + field, data = SEM.b.df),
-#   lm(pop ~ TRichness + TEvenness + Nitrogen + Disturbance + field, data = SEM.b.df),
-#   lm(TRichness ~  Nitrogen + Disturbance + field, data = SEM.b.df),
-#   lm(TEvenness ~  Nitrogen + Disturbance + field, data = SEM.b.df),
-#   Tmean_biomass %~~% Tpop,
-#   Tmean_biomass %~~% Tcomm,
-#   Tpop %~~% Tcomm
-# )
-# summary(m1psem_supp) 
-
-# bootstrapped model fit
-m1psem_boot_supp <- semEff::bootEff(m1psem_supp, R = 4000, parallel = "multicore", ncpus = 4)
-m1semeff_supp <- semEff::semEff(m1psem_boot_supp)
-summary(m1semeff_supp)
-summary(semEff::semEff(m1psem_boot_supp, predictor = "TRichness"), response = "TStability")
-
-
-
-#piecewiseSEM model, post-transient------
-
-m2psem_supp <- psem(
-  lm(mean_biomass ~ TRichness + TEvenness + Disturbance + Nitrogen + field, data = SEM.a.df),
-  lm(comm ~ TRichness + TEvenness + Disturbance + Nitrogen + field, data = SEM.a.df),
-  lm(pop ~ TRichness + TEvenness + Nitrogen + Disturbance + field, data = SEM.a.df),
-  lm(TRichness ~  Nitrogen + Disturbance + field, data = SEM.a.df),
-  lm(TEvenness ~  Nitrogen + Disturbance + field, data = SEM.a.df),
-  mean_biomass %~~% pop,
-  mean_biomass %~~% comm,
-  pop %~~% comm
-)
-summary(m2psem_supp) 
-
-# bootstrapped model fit
-m2psem_boot_supp <- semEff::bootEff(m2psem_supp, R = 4000, parallel = "multicore", ncpus = 4)
-m2semeff_supp <- semEff::semEff(m2psem_boot_supp)
-summary(m2semeff)
-
-# save supplemental bootstrapped fits
-saveRDS(
-  list(
-    first7 = m1psem_boot_supp,
-    last7 = m2psem_boot_supp
-  ),
-  file = here("data/bootstrapped_supp_semfits.rds")
-)
+        file = here::here("data/SEM_supp_posttransient.rds"))

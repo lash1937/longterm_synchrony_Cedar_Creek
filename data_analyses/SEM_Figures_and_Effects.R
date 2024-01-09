@@ -2,7 +2,7 @@
 # This script produces summary outputs of structural equation models,
 # which are used for creating SEM pathway figures. These figures 
 # represent the effects of nitrogen addition and soil 
-# disturbance on community properties, and calculates all 
+# disturbance on community properties, and report all 
 # direct and selected indirect effects.
 #####################################
 
@@ -57,29 +57,25 @@ MASS::boxcox(lm(SEM.a.df$Evenness ~ 1))
 SEM.a.df$TEvenness <- boxcox_transform(SEM.a.df$Evenness, 0)
 shapiro.test(SEM.a.df$TEvenness)
 
-###SEM path building###----
-#Build transient and post-transient models with paths of interest, 
-#using transformed variables
-
 ############################
 ###SEM model building###
 # Produce summary outputs of direct effects of exogenous factors
 # on community properties
 ############################
 
-###Lavaan model, transient phase
-#Add in field as separate columns
-field.cat <- as.data.frame(model.matrix(~ field, data = SEM.b.df)) %>% 
-  dplyr::rename(fieldA = `(Intercept)`) %>% 
-  dplyr::mutate(uniqueID = SEM.b.df$uniqueID)
-SEM.b.df.cat <- left_join(SEM.b.df, field.cat, by = "uniqueID")
-SEM.b.df.cat$Disturbance <- as.factor(SEM.b.df.cat$Disturbance)
-
 #Create model structure
 m1 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + Disturbance + fieldB + fieldC
        TVR ~ TRichness + TEvenness + Nitrogen + Disturbance + fieldB + fieldC
        TRichness ~  Nitrogen + Disturbance + fieldB + fieldC
        TEvenness ~ TRichness + Nitrogen + Disturbance + fieldB + fieldC'
+
+###Lavaan model, transient phase
+#Add in field to dataframe
+field.cat <- as.data.frame(model.matrix(~ field, data = SEM.b.df)) %>% 
+  dplyr::rename(fieldA = `(Intercept)`) %>% 
+  dplyr::mutate(uniqueID = SEM.b.df$uniqueID)
+SEM.b.df.cat <- left_join(SEM.b.df, field.cat, by = "uniqueID")
+SEM.b.df.cat$Disturbance <- as.factor(SEM.b.df.cat$Disturbance)
 
 #Fit model to transient phase data
 m1.fit <- sem(m1, data=SEM.b.df.cat, se="bootstrap", test="bootstrap")
@@ -89,7 +85,7 @@ saveRDS(standardizedSolution(m1.fit, type="std.all"),
         file = here::here("data/SEM_transient.rds")) 
 
 ###Lavaan model, post-transient phase
-#Add in field as separate columns
+#Add in field to dataframe
 field.cat.a <- as.data.frame(model.matrix(~ field, data = SEM.a.df)) %>% 
   dplyr::rename(fieldA = `(Intercept)`) %>% 
   dplyr::mutate(uniqueID = SEM.a.df$uniqueID)
