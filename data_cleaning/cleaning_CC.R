@@ -193,8 +193,7 @@ design.orig <- design.orig[design.orig$ntrt.origin==1,]  #dim #7799   12#
 #design.orig <- design.orig[design.orig$burn.origin==1,]
 design.orig<-subset(design.orig, year < 1992| year >= 1992 & burn.origin==1) #dim #6153   12#
 
-# Some field level data is not represented in both data sets
-# Get this sorted out across merged data set
+
 # Fences removed in 2004 (partial removal in field C but still open generally)
 # After 2004 all of E002 is unfenced
 design.orig$fence[design.orig$year <= 2004 & design.orig$exp==2] <- 1
@@ -223,8 +222,7 @@ da$burn <- NULL
 da <- merge(da, df.burn, by=c("field", "year"), all.x=TRUE)
 
 
-# MERGE IN DESIGN.ORIG FILE TO ONLY HAVE FILES FOR WHICH TREATMENTS HAVE NOT CHANGED
-
+# Merge design.orig file, to extract files for which treatments have not changed
 dim(da)  ##72737  X  19### ##includes N cessation and burned plots###
 dim(design.orig)  # Unique plot_years with correct treatments### ##dim 6396##
 
@@ -233,8 +231,6 @@ design.orig2<-design.orig %>% dplyr::select(field, year, exp, disk, plot, subplo
 da_min<-da %>% dplyr::select(field, year, exp, disk, plot, subplot, ntrt,  species, mass.above) #72737  X 9### ##includes N cessation and burned plots###
 
 da_orig<-merge(design.orig2, da_min, by =c("field", "year", "exp", "disk", "plot", "subplot", "ntrt")) # ##dim 52192   13### 
-
-### da_orig has all the plot years with the original treatments...still need to subset out more plots ##
 
 
 ##### get counts by plot year to crosscheck with excel file "Datasubset_CC Convergence###
@@ -255,10 +251,9 @@ sum(plotcountcheck$n)  ## 6396 total plot  years to be analyzed with full times 
 
 
 
-################# TAXONOMIC AND OTHER SMALL DATA FIXES####################
+####Taxonomic and other small data fixes####
 
-
-# Capitalize species to get rid of capilization differences in spelling
+# Capitalize species to get rid of capitalization differences in spelling
 da_orig$species <- toupper(as.character(da_orig$species))
 
 
@@ -268,14 +263,14 @@ da_orig$sorted <- 1
 da_orig$wood <- 0
 da_orig$vasc <- 1
 
-# Do some general substitutions
+#Substitute outdated names with new names
 
 da_orig$species <- gsub("APOCYNUM CANNABINUM", "APOCYNUM ANDROSAEMIFOLIUM", da_orig$species) ## MD 11/1 based off email with Eric##
 da_orig$species <- gsub("MISC. FORB", "MISCELLANEOUS FORB", da_orig$species)
 da_orig$species <- gsub("SEDGES", "CAREX SP.", da_orig$species)
 da_orig$species <- gsub("QUERCUS RUBRUM", "QUERCUS RUBRA", da_orig$species)
 
-# Find litter and code as not alive
+# Set litter as not alive
 sel<-da_orig$species == 'MISCELLANEOUS LITTER'
 da_orig$live[sel] <- 0
 
@@ -295,7 +290,7 @@ da_orig$sorted[sel] <- 0
 sel<-grep("LICHEN", da_orig$species)
 da_orig$sorted[sel] <- 0
 
-# Woody stuff
+# Woody species
 sel<-grep("ACER NEGUNDO", da_orig$species)
 da_orig$wood[sel] <- 1
 sel<-grep("CEANOTHUS", da_orig$species)
@@ -339,7 +334,7 @@ names(sp.df[1])<-"species"
 
 da_full <- merge(da_orig,sp.df, by='species', all.x=TRUE)
 
-# Set Unknowns to missing
+# Set Unknown species to missing
 da_full$origin[da_full$origin == 'UNKNOWN'] <- NA
 da_full$origin[da_full$origin == 'NATIVE AND/OR INTRODUCED'] <- NA
 
@@ -381,7 +376,7 @@ da_full$lifeform[sel] <- "SEDGE"
 da_full$origin[sel] <- "NATIVE"
 
 
-# Capitalize species to get rid of capilization differences in spelling
+# Capitalize species to get rid of capitalization differences in spelling
 da_full$species <- toupper(as.character(da_full$species))
 
 ##deal with some entries where sp. were weighed twice##
@@ -399,8 +394,6 @@ doubles.df[c("field", "exp","plot", "year", "species", "mass.above")]
 # There are a few cases where there are multiple species weighed per sample. 
 # Options are taking max, min, mean, or sum. 
 
-#da.mn <- ddply(da_full, .(field, exp, plot, subplot, year, disk, ntrt, nadd, species, live, sorted, wood, functional.group, lifeform, duration, origin), colwise(mean, .(mass.above)))
-##takes a while##
 
 # subset to live, sorted, herbaceous plants
 d2 <- da_full[da_full$sorted ==1 & da_full$live ==1 & da_full$wood==0, c("field", "exp","plot", "subplot", "year", "disk", "ntrt",  "species", "mass.above")]
@@ -414,15 +407,12 @@ d3woody<-d2woody %>% mutate(expfieldplot=paste(exp,field,plot, sep = '_') , expn
 d3 <- d2 %>% mutate(expfieldplot=paste(exp,field,plot, sep = '_') , expntrtfieldyear= paste(exp,field, ntrt, year, sep = '_'), expntrtyear= paste(exp,ntrt, year, sep = '_'), ntrt2=ntrt) 
 
 
-
-###### Janette and Kait started cleaning 6/20/23 ###########################
-# remove tree species, sp. repeats and seedlings entries
+# remove woody species, species repeats, and seedling entries using new data file###
 cleaned.d3woody <- read.csv(here::here("data/NEW.sp.decisions.csv"),header=T, fileEncoding = "UTF-8-BOM")
 cleaned.d3woody <- cleaned.d3woody %>%
   filter(keep != "NO")
 
-######## combine sp. biomass with single species biomass #################
-
+# combine sp. biomass with single species biomass 
 species.keep <- cleaned.d3woody$species
 cleaned.d3.sp <- d3woody %>%
   filter(species %in% species.keep)%>%
@@ -456,10 +446,6 @@ cleaned.d3 <- rbind(cleaned.d3, combine.mass)
 cleaned.d3 <- left_join(cleaned.d3, d3woody)%>%
   select(2:14)
 
-
-##These data frames (d3 or d3woody) has fields A, B, C, experiment 1 (intact) & exp 2 (disked in 1982) in a long data dataformat ##9 levels of nutrient addition#### years 1982 - 2019 (not every field / exp sampeled in every year## 
-#### Has both whole plots and suplots...###
-
 # Transpose data to be a site by species matrix
 da.wide.woody <- reshape(d3woody,
                         v.names="mass.above",
@@ -486,28 +472,28 @@ da.wide$year<-as.factor(da.wide$year)
 
 da.wide.woody$ntrt<-as.factor(da.wide.woody$ntrt)
 da.wide.woody$year<-as.factor(da.wide.woody$year)
-########Combine east / west subplots into "whole" to match up with rest of data (from 2015)#######
+##Combine east / west subplots into "whole" to match up with rest of data (from 2015)
 
-##make only the biomasses the numeric variables##
+# Set experiment and disturbance treatments as factors
 da.wide$exp<-as.factor(da.wide$exp)
 da.wide$disk<-as.factor(da.wide$disk)
 
 da.wide.woody$exp<-as.factor(da.wide.woody$exp)
 da.wide.woody$disk<-as.factor(da.wide.woody$disk)
 
-#subset out the east/ west subplots plots and the whole plots ##
+#subset out the east/ west subplots plots and the whole plots
 da.wideeastwest<-subset(da.wide, subplot=="East"|subplot=="West", row.names=NULL)
 da.widewhole<-subset(da.wide, subplot=="Whole", row.names=NULL)
 
 da.wideeastwest.woody<-subset(da.wide.woody, subplot=="East"|subplot=="West", row.names=NULL)
 da.widewhole.woody<-subset(da.wide.woody, subplot=="Whole", row.names=NULL)
-##Add the values from the subplots together##
 
+##Add the values from the subplots together##
 EWaddall<-as.data.frame(da.wideeastwest%>%group_by(field,exp,plot,year,disk,ntrt,expfieldplot,expntrtyear, expntrtfieldyear, ntrt2) %>% summarise_if(is.numeric,mean)%>% mutate(subplot="Whole"))
 EWaddall.woody<-as.data.frame(da.wideeastwest.woody%>%group_by(field,exp,plot,year,disk,ntrt,expfieldplot,expntrtyear, expntrtfieldyear, ntrt2) %>% summarise_if(is.numeric,mean)%>% mutate(subplot="Whole"))
 
 
-###merge the whole plots back together###
+##Merge the whole plots back together###
 da.wide_allwhole<-rbind(da.widewhole,EWaddall)
 da.wide_allwhole.woody<-rbind(da.widewhole.woody,EWaddall.woody)
 
@@ -526,9 +512,6 @@ da.wide5.woody<-da.wide_allwhole.woody %>%
   arrange(plot) %>%
   arrange(exp) %>%
   arrange(field) 
-
-##This data frame (da.wide5) has fields A, B, C, experiment 1 (intact) & exp 2 (disked in 1982) ## years 1982 - 2019 for E002 and years 1982 - 2004 for exp E001 (not every field / exp sampeled in every year## INCLUDES WOODY PLANTS
-###wide version format###
 
 ### take out all plot years after 2004###
 
@@ -554,7 +537,7 @@ da.widesynch.woody= da.wide6.woody %>%  filter(expfieldplot %in% plotyearchecksy
 # dim = 5292 X 199 #####
 
 
-##### get counts by plot year to crosscheck with excel file "Datasubset_CC synchrony###
+# Return counts by plot and year to crosscheck with excel file "Datasubset_CC synchrony"
 
 
 plotcountchecksych<-da.widesynch%>%group_by(exp, field, year) %>%  tally()
@@ -562,38 +545,3 @@ plotcountchecksych.woody<-da.widesynch.woody%>%group_by(exp, field, year) %>%  t
 
 plotcountchecksynch2<-da.widesynch%>%group_by(exp, year) %>%  tally()  ## matches exactly w/ excel file##
 plotcountchecksynch2.woody<-da.widesynch.woody%>%group_by(exp, year) %>%  tally()
-
-
-###Climate data cleaning
-
-# #Read in temp and precip data
-# climdat <- read.table(here::here("data/CCclimatedata.txt"), 
-#                       quote="\"", comment.char="", fill = TRUE)
-# colnames(climdat) <- c("Date", "MaxTemp", "MinTemp", "Precip")
-# climdat <- subset(climdat, select = c("Date", "MaxTemp", "MinTemp", "Precip"))
-# 
-# str(climdat)
-# climdat$MaxTemp <- as.numeric(climdat$MaxTemp)
-# climdat$MinTemp <- as.numeric(climdat$MinTemp)
-# climdat$Precip <- as.numeric(climdat$Precip)
-# 
-# #Convert to date format
-# climdat$Date <- mdy(climdat$Date)
-# #Remove rows with mistake "Weather Station" chars
-# climdat <- na.omit(climdat)
-# which(is.na(climdat))
-# #subset out year 1982-2004
-# climdat <- subset(climdat, year(climdat$Date) >= 1982 & year(climdat$Date) <= 2004)
-# 
-# #Create a column with average daily temperatures
-# climdat$AvgTemp <- (climdat$MaxTemp + climdat$MinTemp)/2
-# 
-# #Average everything by year, 1 value per year
-# climdat2 <- aggregate(climdat[, 2:5], list(year(climdat$Date)), mean)
-# colnames(climdat2)[1] <- 'year'
-# 
-# 
-# # Drought severity data (from https://arcgis.dnr.state.mn.us/ewr/climateexplorer/main/historical)
-# pdsi <- read.csv(here::here("data/Anoka-county_PDSI.csv")) %>%
-#   dplyr::select(c('year','PDSI'))
-
