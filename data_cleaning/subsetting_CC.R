@@ -1,11 +1,15 @@
-# Last Modified April 13 by Lauren Shoemaker
-# Creates 4 subsetted datasets from the Cedar Creek E001 and E002 datasets
-# before_years: wide dataframe of all info at the species level from the first 7 year (1982-1988)
-# SEM.b.df: calcuated synchrony, stability, richness, and evenness for each unique ID using the first 7 years of data
-
-# after_years: wide dataframe of all info at the species level from the last 7 years
-# NOTE: only including years with data from E001 and E002 (1994, 1996, 1997, 1999, 2000, 2002, 2004)
-# SEM.a.df: calcuated synchrony, stability, richness, and evenness for each unique ID using the last 7 years of data
+#####################################
+# This script subsets and tidies data from the Cedar Creek E001 and E002 
+# datasets, for use in analyses and figure creation. 
+# Four resulting datasets are created: 1. before_years, which is a wide 
+# dataframe of all species-level info from the first 7 years, 2. SEM.b.df, 
+# which compiles calculations of synchrony, stability, richness, and evenness 
+# for each unique plot from the first 7 years, 3. after_years, which is a wide 
+# dataframe of all species-level info from the last 7 years with data(1994, 1996, 
+# 1997, 1999, 2000, 2002, 2004), and 4. SEM.a.df, which compiles calculations 
+# of synchrony, stability, richness, and evenness for each unique plot from 
+# the last 7 years.
+#####################################
 
 library(here)
 library(codyn)
@@ -72,11 +76,11 @@ SEM.df$Disturbance <- as.factor(SEM.df$Disturbance)
 SEM.df <- subset(SEM.df, Micronut!=0)
 
 
-#Before Years Data Subset-----
+#Transient Years Data Subset-----
 before_years <- subset(da.widesynch, as.numeric(year) <= 7)
 before_years$years <- droplevels(before_years$year)
 
-##Before years dataframe-----
+##Transient years dataframe-----
 unique_ID_exp12_before <- tidyr::unite(before_years, "uniqueID", c(field, exp, plot, disk, ntrt), sep="_")
 
 unique_ID_long_before <- tidyr::pivot_longer(unique_ID_exp12_before, cols = 8:(length(unique_ID_exp12_before)-1),
@@ -106,7 +110,7 @@ VR_before <- variance_ratio(unique_ID_long_before, time.var = "year",
                             bootnumber = 1, replicate = "uniqueID",
                             average.replicates = FALSE)
 
-#Pop & Comm Var-----
+#Population & Community Variability-----
 sub_bf_wide <- unique_ID_long_before %>% 
   dplyr::select(uniqueID, years, Species, Abundance) %>% 
   tidyr::pivot_wider(names_from = years, values_from = Abundance) %>%
@@ -143,9 +147,9 @@ biomass_overtime_bf <- unique_ID_long_before %>%
   dplyr::summarise(mean_biomass = mean(total_biomass), stdev_biomass = sd(total_biomass))%>%
   dplyr::mutate(hand_stab = mean_biomass/stdev_biomass)
 
-#All Variables-----
-#Create consolidated dataframe of diversity metrics, VR, stability, population and community
-  #variance, mean biomass, disturbance, and nutrients
+#All Transient Variables-----
+# Create consolidated dataframe of diversity metrics, VR, stability, population and 
+# community variance, mean biomass, disturbance, and nutrients
 
 SEM.b.df <- left_join(Richness.b.df, Evenness.b.df) %>%
   dplyr::left_join(VR_before)%>%
@@ -174,11 +178,11 @@ SEM.b.df <- SEM.b.df %>%
   subset(Micronut!=0)
 
 
-#After Years Data Subset-----
+#Post-transient Years Data Subset-----
 after_years <- subset(da.widesynch, year %in% c(1994, 1996, 1997, 1999, 2000, 2002, 2004))
 after_years$years <- droplevels(after_years$year)
 
-##After years dataframe-----
+#Post-transient years dataframe-----
 unique_ID_exp12_after <- tidyr::unite(after_years, "uniqueID", c(field, exp, plot, disk, ntrt), sep="_")
 
 unique_ID_long_after <- tidyr::pivot_longer(unique_ID_exp12_after, 8:(length(unique_ID_exp12_after)-1),
@@ -208,7 +212,7 @@ VR_after <- variance_ratio(unique_ID_long_after, time.var = "year",
                            bootnumber = 1, replicate = "uniqueID",
                            average.replicates = FALSE)
 
-#Pop & Comm Var-----
+#Population & Community Variability-----
 sub_af_wide <- unique_ID_long_after %>% 
   dplyr::select(uniqueID, years, Species, Abundance) %>% 
   tidyr::pivot_wider(names_from = years, values_from = Abundance)%>%
@@ -246,9 +250,9 @@ biomass_overtime_af <- unique_ID_long_after %>%
   dplyr::summarise(mean_biomass = mean(total_biomass), stdev_biomass = sd(total_biomass)) %>%
   dplyr::mutate(hand_stab = mean_biomass/stdev_biomass)
 
-#All Variables Together
-#Create consolidated dataframe of diversity metrics, VR, stability, population and community
-    #variance, mean biomass, disturbance, and nutrients
+#All Post-transient Variables
+# Create consolidated dataframe of diversity metrics, VR, stability, population and 
+# community variance, mean biomass, disturbance, and nutrients
 
 SEM.a.df <- left_join(Richness.a.df, Evenness.a.df) %>%
   dplyr::left_join(VR_after)%>%
