@@ -1,104 +1,42 @@
 
-####################################################################
-# FIGURE 1   EFFECTS OF N+ & DISTURBANCE ON SYNCHRONY AND STABILITY
-####################################################################
+#####################################
+# This script produces summary outputs of linear and quadratic models,
+# which are tested to fit the relationships between global change drivers
+# and synchrony and stability. The figures produced represent the effects 
+# of nitrogen addition and soil disturbance on synchrony and stability.
+#####################################
 
+#Read in data and functions
 source(here::here("data_analyses/Source_figures.R"))
 
-Fig_control_VR <- ggplot(data=VR_all_cont_control, aes(x=ntrt, y=VR, fill = disk)) +
-  #geom_point(data=VR_all_cont_control, aes(x=ntrt, y=VR, group = disk, col = disk), shape = 21) +
-  geom_violin(position=position_dodge(1)) +
-  stat_summary(fun.data=data_summary, position=position_dodge(1)) +
-  scale_fill_manual(values = c("#D55E00", "skyblue"),
-                    name="Disturbance",
-                    breaks=c("0", "1"),
-                    labels=c("Intact in 1982", "Disturbed in 1982"))+
-  ylab("Synchrony")+
-  xlab("") + 
-  geom_hline(yintercept=1, color="darkgrey", linetype = "dashed") +
-  theme_bw()+
-  lims(y=c(0,1.6))+
-  theme(axis.text.x = element_text(color = "grey20", size = 12, angle = 0, hjust = .5, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 12, angle = 0, hjust = .5, vjust = 0, face = "plain"),
-        axis.title.x = element_text(color = "black", size = 12, angle = 0, hjust = .5, face = "plain"),
-        axis.title.y = element_text(color = "black", size = 12, angle = 90, hjust = .5, face = "plain"),
-        legend.title = element_blank(),
-        legend.position = "none",
-        legend.text = element_text(color = "grey20", size = 12,angle = 0, hjust = 0, face = "plain"),
-        panel.grid.minor.y=element_blank(),
-        panel.grid.major.y=element_blank(),
-        panel.grid.minor.x=element_blank(),
-        panel.grid.major.x=element_blank()) +
-  scale_y_continuous(breaks = c(0.0,0.5,1.0,1.5,2.0)) +   
-  scale_x_discrete(labels=c(expression("0 N + "~mu, "0 N + 0"~mu))) +
-  labs(tag = "A")
 
-Fig_control_stability <- ggplot(data=st_all_cont_control, aes(x=ntrt, y=stability, fill = disk)) +
-  #geom_point(data=VR_all_cont_control, aes(x=ntrt, y=VR, group = disk, col = disk), shape = 21) +
-  geom_violin(position=position_dodge(1)) +
-  stat_summary(fun.data=data_summary, position=position_dodge(1)) +
-  scale_fill_manual(values = c("#D55E00", "skyblue"),
-                    name="Disturbance",
-                    breaks=c("0", "1"),
-                    labels=c("Intact in 1982", "Disturbed in 1982"))+
-  ylab("Stability")+
-  xlab("Treatment") +
-  theme_bw()+
-  lims(y=c(.5,4.25)) +
-  theme(axis.text.x = element_text(color = "grey20", size = 12, angle = 0, hjust = .5, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 12, angle = 0, hjust = .5, vjust = 0, face = "plain"),
-        axis.title.x = element_text(color = "black", size = 12, angle = 0, hjust = .5, face = "plain"),
-        axis.title.y = element_text(color = "black", size = 12, angle = 90, hjust = .5, face = "plain"),
-        legend.title = element_blank(),
-        legend.text = element_text(color = "grey20", size = 12,angle = 0, hjust = 0, face = "plain"),
-        panel.grid.minor.y=element_blank(),
-        panel.grid.major.y=element_blank(),
-        panel.grid.minor.x=element_blank(),
-        panel.grid.major.x=element_blank()) +
-  scale_x_discrete(labels=c(expression("0 N + "~mu, "0 N + 0"~mu))) + labs(tag = "B")
+#### Fig 1A. The effect of global change drivers on synchrony ####
+#Linear model 
+mVRl <- lm(VR ~ disk * Nitrogen + field, 
+          data= VR_all_cont_minus9)
+#Quadratic model
+mVRq <-  lm(VR ~ disk * poly(Nitrogen,2,raw=TRUE) + field, 
+            data = VR_all_cont_minus9)
 
-
-legend_controlfig <- get_legend(Fig_control_stability)
-quartz(width = 6, height = 4)
-
-control_plots<- Fig_control_VR / Fig_control_stability + plot_layout(ncol=1, widths = c(2,2)) & theme(legend.position = "none")
-
-pdf(file = "Figures/Controlfigures_AB.pdf",width = 4, height = 6)
-control_plots / as_ggplot(legend_controlfig) + plot_layout(heights=c(2,2,2))
-dev.off()
-
-# check for significance
-VR_control_model <- lm(VR ~  ntrt*disk + field, data=VR_all_cont_control)
-summary(VR_control_model) # only for field B and disk
-library(xtable)
-plot(VR_control_model)
-xtable(VR_control_model)
-
-
-stability_control_model <- lm(stability ~  ntrt*disk + field, data=st_all_cont_control)
-summary(stability_control_model) # nothing significant
-plot(stability_control_model)
-xtable(stability_control_model)
-
-#### TEST MODEL FIT: SYNCHRONY & STABILITY ####
-## A. SYNCHRONY ##
-m2 <-
-  lm(VR ~ disk * Nitrogen + field,data= VR_all_cont_minus9)
-m2q <-  lm(VR ~ disk * poly(Nitrogen,2,raw=TRUE) + field, data = VR_all_cont_minus9)
-
-rawaic <- AIC(m2, m2q)
+#Model fit using AIC function
+rawaic <- AIC(mVRl, mVRq)
 nR <- dim(VR_all_cont_minus9)[1]
 aictable(rawaic, nR)
 
-EM <- emmeans::emmeans(m2q, ~disk |Nitrogen, at = list(Nitrogen = c(0)))
+#Effect of lowest N+ (0)
+EM <- emmeans::emmeans(mVRq, ~disk |Nitrogen, at = list(Nitrogen = c(0)))
 pairs(EM)
-
-EM2 <- emmeans::emmeans(m2q, ~disk|Nitrogen, at = list(Nitrogen = c(27)))
+#Effect of highest N+ (27)
+EM2 <- emmeans::emmeans(mVRq, ~disk|Nitrogen, at = list(Nitrogen = c(27)))
 pairs(EM2)
 
-# quadratic model fit best
-# refit the model with contrast / sum / deviations coding for field
-#  so that the plot will show the curve for the "average field"
+
+
+
+
+#Quadratic model fit best
+#Refit the model with contrast / sum / deviations coding for field
+#so that the plot will show the curve for the "average field"
 VR_all_cont_minus9$field_contr <- as.factor(VR_all_cont_minus9$field)
 contrasts(VR_all_cont_minus9$field_contr) <- contr.sum(
   length(levels(VR_all_cont_minus9$field_contr))
