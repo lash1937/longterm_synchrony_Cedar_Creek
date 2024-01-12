@@ -16,7 +16,7 @@ library(codyn)
 
 #Read in data and functions
 source(here::here("data_cleaning/cleaning_CC.R"))
-source(here::here("R/functions.R"))
+source(here::here("Functions/functions.R"))
 
 ###All Years Data###
 #Sum total biomass of each species per plot over all the years
