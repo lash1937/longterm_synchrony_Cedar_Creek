@@ -48,8 +48,6 @@ aictable<-function(X,m){
 # Figure 1 data cleaning
 ###########################
 
-
-
 # want data formatted with species, year, location, abundance
 
 unique_ID_exp12 <- tidyr::unite(da.widesynch, "uniqueID", c(field, exp, plot, disk, ntrt), sep="_")
