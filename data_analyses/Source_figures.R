@@ -230,9 +230,6 @@ plotnames<-c(unique(sub_exp1_long$uniqueID))
 
 plotnames2<-str_sort(plotnames)
 
-matrix1<-matrix(NA, ncol=4, nrow=length(plotnames))
-colnames(matrix1)<-c("plot", "classic", "short", "long")
-
 vreq_exp_1<-sub_exp1_wide
 
 matrix3<-matrix(NA, ncol=4, nrow=length(plotnames))   ### creating a blank matrix####
@@ -296,14 +293,12 @@ for(s in 1:length(plotnames_exp2)){
   matrix4[s,1] <- current.plot
   matrix4[s,3]<- vr[[1]]
   matrix4[s,4]<- vr[[2]]
-  # calculate mean as mean(total_biomass) across time
-  # calculate stdev as sd(total_biomass) across time
 }
 
 
 popcomvar_exp_2 <- as.data.frame(matrix4)
 
-### combine E001 and E002 dataframes###
+# combine E001 and E002 dataframes###
 
 popcomvar_exp12<-rbind(popcomvar_exp_1, popcomvar_exp_2)
 

@@ -1,14 +1,124 @@
+#####################################
+# This script produces figure 3, used to compare the component 
+# metrics of synchrony and stability
+########################
 
-#############################################################
-# FIGURE 2 - SYNCHRONY AND STABILITY BREAK DOWN
-#############################################################
+# Read in data and functions from source code
+source(here::here("data_cleaning/subsetting_CC.R"))
 
-source(here::here("data_analyses/Source_figures.R"))
+#### Fig 3A. comparing population variance to community variance. ####
+# prepare E001 data for analyses
+sub_exp1_long <- da.widesynch %>% 
+  dplyr::filter(exp == "1") %>% 
+  tidyr::unite(uniqueID, field, exp, plot, disk, ntrt, sep="_", remove = FALSE) %>% 
+  dplyr::select(-subplot, -ntrt2, -expntrtyear, -expntrtfieldyear)
 
-Fig2A<- ggplot()+
+sub_exp1_long <- sub_exp1_long %>% 
+  tidyr::pivot_longer(9:length(sub_exp1_long),
+                      names_to = "Species", values_to = "Abundance") %>% 
+  filter(Abundance > 0)
+
+sub_exp1_wide <- tidyr::pivot_wider(sub_exp1_long, names_from = year, 
+                                    values_from = Abundance) %>% 
+  select(-Species,-field,-exp,-plot,-disk,-ntrt,-expfieldplot)
+
+sub_exp1_wide[is.na(sub_exp1_wide)] <- 0
+plotnames<-c(unique(sub_exp1_long$uniqueID))
+plotnames2<-str_sort(plotnames)
+
+vreq_exp_1<-sub_exp1_wide
+
+# create a blank matrix to fill 
+matrix3<-matrix(NA, ncol=4, nrow=length(plotnames))
+colnames(matrix3)<-c("plot", "classicVR", "comm", "pop")
+plotnames_exp1<-c(unique(vreq_exp_1$uniqueID))
+
+# loop through each unique ID (plot) and calculate pop variability,
+# comm variability, and total variance ratio
+for(s in 1:length(plotnames_exp1)){
+  current.plot<-plotnames_exp1[s]
+  temp<-vreq_exp_1 %>% 
+    dplyr::filter(uniqueID %in% current.plot) %>% 
+    dplyr::select(-uniqueID)
+  temp<-as.matrix(temp)
+  vr<-vreq_classic(temp)
+  matrix3[s,2] <- vr[[3]]
+  matrix3[s,1] <- current.plot
+  matrix3[s,3]<- vr[[1]]
+  matrix3[s,4]<- vr[[2]]
+}
+popcomvar_exp_1 <- as.data.frame(matrix3)
+
+# prepare E002 data for analyses
+sub_exp2_long <- da.widesynch %>% 
+  dplyr::filter(exp == "2") %>% 
+  tidyr::unite(uniqueID, field, exp, plot, disk, ntrt, sep="_", remove = FALSE)%>% 
+  dplyr::select(-subplot, -ntrt2, -expntrtyear, -expntrtfieldyear)
+
+sub_exp2_long <- sub_exp2_long %>% tidyr::pivot_longer(9:length(sub_exp2_long),
+                                                       names_to = "Species", 
+                                                       values_to = "Abundance") %>% 
+  filter(Abundance > 0)
+
+sub_exp2_wide <- tidyr::pivot_wider(sub_exp2_long, names_from = year, 
+                                    values_from = Abundance) %>% 
+  select(-Species,-field,-exp,-plot,-disk,-ntrt,-expfieldplot)
+
+sub_exp2_wide[is.na(sub_exp2_wide)] <- 0
+
+plotnames<-c(unique(sub_exp2_long$uniqueID))
+plotnames2<-str_sort(plotnames)
+
+vreq_exp_2<-sub_exp2_wide
+# create blank matrix to fill
+matrix4<-matrix(NA, ncol=4, nrow=length(plotnames))  
+colnames(matrix4)<-c("plot", "classicVR", "comm", "pop") 
+plotnames_exp2<-c(unique(vreq_exp_2$uniqueID))
+
+# Loop through each unique ID (plot) and calculate pop variability,
+# comm variability, and total variance ratio
+for(s in 1:length(plotnames_exp2)){
+  current.plot<-plotnames_exp2[s]
+  temp<-vreq_exp_2 %>% 
+    dplyr::filter(uniqueID %in% current.plot) %>% 
+    dplyr::select(-uniqueID)
+  temp<-as.matrix(temp)
+  vr<-vreq_classic(temp)
+  matrix4[s,2] <- vr[[3]]
+  matrix4[s,1] <- current.plot
+  matrix4[s,3]<- vr[[1]]
+  matrix4[s,4]<- vr[[2]]
+}
+popcomvar_exp_2 <- as.data.frame(matrix4)
+
+# combine E001 and E002 dataframes
+popcomvar_exp12<-rbind(popcomvar_exp_1, popcomvar_exp_2)
+popcomvar_exp12_2<- tidyr::separate(popcomvar_exp12, "plot", c("field", "exp", "plot", "disk", "ntrt"), sep="_")
+
+# mutate nutrient column to reflect nitrogen concentration added
+popcomvar_exp12_2<-popcomvar_exp12_2 %>% dplyr::mutate(Nitrogen=ntrt)
+popcomvar_exp12_2$Nitrogen<-mapvalues(popcomvar_exp12_2$Nitrogen, 
+                                      from=c( "1", "2", "3" ,"4", 
+                                              "5", "6", "7", "8", "9"),
+                                      to=c("0.0", "1.0", "2.0" ,"3.4",
+                                           "5.4", "9.5", "17", "27.2", "0.0"))
+popcomvar_exp12_2$Nitrogen<-as.numeric(as.character(popcomvar_exp12_2$Nitrogen))
+
+
+# average across the disk and nutrients
+popcomvar_exp12_2$disk<-as.factor(popcomvar_exp12_2$disk)
+popcomvar_exp12_2$Nitrogen<-as.factor(popcomvar_exp12_2$Nitrogen)
+popcomvar_exp12_2$classicVR<-as.numeric(popcomvar_exp12_2$classicVR)
+popcomvar_exp12_2$comm<-as.numeric(popcomvar_exp12_2$comm)
+popcomvar_exp12_2$pop<-as.numeric(popcomvar_exp12_2$pop)
+
+# summarize mean population variance, and mean community variance
+avgpopcommvar<- popcomvar_exp12_2 %>% dplyr::group_by(disk,Nitrogen) %>% 
+  dplyr::summarize(meanVR = mean(classicVR), meanpop=mean(pop), meancomm=mean(comm))
+
+Fig3A<- ggplot()+
   geom_point(data = popcomvar_exp12_2, mapping =aes(x=pop,y=comm, col=Nitrogen,shape=disk),alpha=0.4)+
   geom_point(data= avgpopcommvar, mapping = aes(x=meanpop,y=meancomm, fill=Nitrogen,shape=disk),size=3)+
-  #transition_reveal(cvcommip)+
   geom_abline(slope = 1)+
   scale_x_continuous(limits=c(0,0.6))+
   scale_y_continuous(limits=c(0,0.6))+
@@ -42,9 +152,90 @@ Fig2A<- ggplot()+
   guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "left", direction = "verticle"))+ 
   guides(theme(legend.title = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),
                legend.text=element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"))) 
-Fig2A
 
-#### FIGURE 3B - mean over standard devation of total biomass ####
+#### Fig 3B. comparing mean to the standard deviation of total biomass ####
+# create total biomass data fram
+biomass_df <- unique_ID_long %>%
+  dplyr::group_by(uniqueID, year)%>%
+  dplyr::summarize(total_biomass = sum(Abundance))
+
+# find mean of total biomass and std dev of total biomass per plot
+biomass_overtime <- biomass_df %>%
+  dplyr::group_by(uniqueID)%>%
+  dplyr::summarise(mean_biomass = mean(total_biomass), stdev_biomass = sd(total_biomass))%>%
+  dplyr::mutate(hand_stab = mean_biomass/stdev_biomass)
+
+biomass_all_sep <- tidyr::separate(biomass_overtime, "uniqueID", 
+                                   c("field", "exp", "plot", "disk", "ntrt"), 
+                                   sep="_", remove = FALSE)
+
+biomass_all_cont<-biomass_all_sep %>% dplyr::mutate(Nitrogen=ntrt)
+biomass_all_cont$Nitrogen<-mapvalues(biomass_all_cont$Nitrogen, 
+                                     from=c( "1", "2", "3" ,"4", 
+                                             "5", "6", "7", "8", "9"),
+                                     to=c("0.0", "1.0", "2.0" ,"3.4", 
+                                          "5.4", "9.5", "17", "27.2", "0.0"))
+biomass_all_cont$Nitrogen<-as.numeric(as.character(biomass_all_cont$Nitrogen))
+
+#remove control treatment 9 -  no micronutrients
+biomass_all_cont_minus9 <- biomass_all_cont%>%  
+  dplyr::filter(ntrt < 9)
+
+# remove outliers for plotting purposes
+biomass_all_cont_minus9andoutliers <- biomass_all_cont_minus9
+
+# calculate stability
+st_all <- codyn::community_stability(unique_ID_long, 
+                                     time.var = "year", 
+                                     abundance.var = "Abundance", 
+                                     replicate.var = "uniqueID")
+
+# separate the unique ID string into its five identifiers
+st_all_sep <- tidyr::separate(st_all, "uniqueID", 
+                              c("field", "exp", "plot", "disk", "ntrt"), 
+                              sep="_", remove = FALSE)
+
+# mutate nitrogen treatments to reflect the concentrations applied
+st_all_cont<-st_all_sep %>% dplyr::mutate(Nitrogen=ntrt)
+st_all_cont$Nitrogen<-mapvalues(st_all_cont$Nitrogen, 
+                                from=c( "1", "2", "3" ,"4", 
+                                        "5", "6", "7", "8", "9"),
+                                to=c("0.0", "1.0", "2.0" ,"3.4", 
+                                     "5.4", "9.5", "17", "27.2", "0.0"))
+st_all_cont$Nitrogen<-as.numeric(as.character(st_all_cont$Nitrogen))
+
+# subset out nutrient treatment 9, control plots without micronutrients
+st_all_cont_minus9 <- st_all_cont%>%
+  dplyr::filter(ntrt < 9)
+
+# unite unique ID identifers in new dataset
+st_all_cont_minus9 <- st_all_cont_minus9 %>% 
+  tidyr::unite("uniqueID", 1:5, sep="_",remove = FALSE)
+
+# soil disturbance treatment, disk, as a factor
+st_all_cont_minus9$disk <- as.factor(st_all_cont_minus9$disk)
+
+# combine dataframes
+test_stab <- dplyr::left_join(biomass_all_cont_minus9, st_all_cont_minus9)
+
+avg_test_stab <- test_stab %>%
+  dplyr::group_by(disk, Nitrogen)%>%
+  dplyr::summarise(mean_st = mean(stability))
+
+# still calculate averages with outliers included
+biomass_disk_N <- biomass_all_cont_minus9 %>%
+  dplyr::group_by(disk, Nitrogen)%>%
+  dplyr::summarise(meanofmean_biomass = mean(mean_biomass), meanofsd_biomass = mean(stdev_biomass))%>%
+  dplyr::mutate(hand_stab = meanofmean_biomass/meanofsd_biomass)
+
+# prepare data to plot
+avg_test <- dplyr::left_join(avg_test_stab, biomass_disk_N)
+biomass_disk_N$disk<-as.factor(biomass_disk_N$disk)
+biomass_disk_N$Nitrogen<-as.factor(biomass_disk_N$Nitrogen)
+biomass_all_cont_minus9andoutliers$disk<-as.factor(biomass_all_cont_minus9andoutliers$disk)
+biomass_all_cont_minus9andoutliers$Nitrogen<-as.factor(biomass_all_cont_minus9andoutliers$Nitrogen)
+
+# calculate a reference line for stability
 {
   ref_stability <- 161.8789/62.76717
   x <- seq(0,500)
@@ -54,56 +245,64 @@ Fig2A
   ggplot() +
     geom_line(data=ref_line, mapping=aes(x=x, y=y))
   
-  Fig2B<- ggplot()+
-    geom_point(data = biomass_all_cont_minus9andoutliers, mapping =aes(x=stdev_biomass,y=mean_biomass, col=Nitrogen,shape=disk),alpha=0.4)+
-    geom_point(data = biomass_disk_N, mapping =aes(x=meanofsd_biomass,y=meanofmean_biomass, fill=Nitrogen,shape=disk),size=3)+
-    #transition_reveal(cvcommip)+
-    #geom_abline(slope = 1, intercept = 99.11173)+
-    #geom_line(data = ref_line, mapping=aes(x=x, y=y), color="black")+
+  Fig3B<- ggplot()+
+    geom_point(data = biomass_all_cont_minus9andoutliers, mapping = 
+                 aes(x=stdev_biomass,y=mean_biomass, 
+                     col=Nitrogen,shape=disk),alpha=0.4)+
+    geom_point(data = biomass_disk_N, mapping =
+                 aes(x=meanofsd_biomass,y=meanofmean_biomass, 
+                     fill=Nitrogen,shape=disk),size=3)+
     geom_abline(slope = ref_stability)+
-    #scale_x_continuous(limits=c(50,300))+
-    #scale_y_continuous(limits=c(100,400))+
     labs(x="Standard Deviation \n of Total Biomass", y="Mean of Total Biomass",tag = "B")+
-    #coord_fixed()+
     theme_bw() +
-    theme(axis.text.x = element_text(color = "grey20", size = 14, angle = 0, hjust = .5, face = "plain"),
-          axis.text.y = element_text(color = "grey20", size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain"),  
-          axis.title.x = element_text(color = "black", size = 16, angle = 0, hjust = .5, face = "plain"),
-          axis.title.y = element_text(color = "black", size = 16, angle = 90, hjust = .5, face = "plain"),
-          legend.title = element_text(color = "black", size = 16, angle = 0, hjust = .5, face = "plain"),
-          legend.text = element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"),
+    theme(axis.text.x = element_text(color = "grey20", size = 14, 
+                                     angle = 0, hjust = .5, face = "plain"),
+          axis.text.y = element_text(color = "grey20", size = 14,
+                                     angle = 0, hjust = .5, vjust = 0, face = "plain"),  
+          axis.title.x = element_text(color = "black", size = 16, 
+                                      angle = 0, hjust = .5, face = "plain"),
+          axis.title.y = element_text(color = "black", size = 16,
+                                      angle = 90, hjust = .5, face = "plain"),
+          legend.title = element_text(color = "black", size = 16,
+                                      angle = 0, hjust = .5, face = "plain"),
+          legend.text = element_text(color = "grey20", size = 14,
+                                     angle = 0, hjust = 0, face = "plain"),
           panel.grid.minor.y=element_blank(),
           panel.grid.major.y=element_blank(),
           panel.grid.minor.x=element_blank(),
           panel.grid.major.x=element_blank(),
           legend.position = 'bottom')+
-    geom_line(data = biomass_disk_N, mapping = aes(x=meanofsd_biomass, y=meanofmean_biomass, group=Nitrogen, col=Nitrogen))+
+    geom_line(data = biomass_disk_N, mapping = 
+                aes(x=meanofsd_biomass, y=meanofmean_biomass, 
+                    group=Nitrogen, col=Nitrogen))+
     scale_shape_manual(name = "Disturbance",
                        labels = c("Intact in 1982", "Disturbed in 1982"),
                        values=c(21,24))+
     scale_fill_viridis_d(option = "D",direction=-1, na.value="grey72",
                          name="Nitrogen Addition",
                          breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
-                         labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"))+
+                         labels=c("0.0", "1.0", "2.0", "3.4", 
+                                  "5.4", "9.5", "17.0", "27.2"))+
     scale_colour_viridis_d(option = "D",direction=-1, na.value="grey72",
                            name="Nitrogen Addition",
                            breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
-                           labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"))+
+                           labels=c("0.0", "1.0", "2.0", "3.4", 
+                                    "5.4", "9.5", "17.0", "27.2"))+
     guides(fill=guide_legend(override.aes=list(shape=21)))+ 
-    guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "left", direction = "verticle"))+ 
-    guides(theme(legend.title = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),
-                 legend.text=element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"))) 
-  Fig2B
+    guides(shape = guide_legend(override.aes = list(size = 3), 
+                                title = "Disturbance", title.position = "left", 
+                                direction = "verticle"))+ 
+    guides(theme(legend.title = element_text(color = "black", size = 14, 
+                                             angle = 0, hjust = .5, face = "plain"),
+                 legend.text=element_text(color = "grey20", size = 14,
+                                          angle = 0, hjust = 0, face = "plain"))) 
 }
-# calculate mean as mean(total_biomass) across time
-# calculate stdev as sd(total_biomass) across time
-# summarize (mean_of_stab = mean(mean), std_of_stab=mean(std))
 
-Fig2_fin <-  Fig2A + Fig2B + plot_layout(ncol = 2, guides = 'collect') & 
+Fig3_fin <-  Fig3A + Fig3B + plot_layout(ncol = 2, guides = 'collect') & 
   theme(legend.position = 'bottom') 
 
-pdf(file = "Figures/Figure2_AB.pdf", width = 10, height = 6)
-Fig2_fin
+pdf(file = "Figures/Figure3_AB.pdf", width = 10, height = 6)
+Fig3_fin
 dev.off()
 
 
@@ -123,6 +322,7 @@ AIC(comm_mod_int,comm_mod_noint)
 xtable(comm_mod_noint)
 xtable(pop_mod_noint)
 
+# modelling the effect of nitrogen and disk on the mean and standard deviation of total biomass
 biomass_all_cont_minus9$Nitrogen <- as.factor(biomass_all_cont_minus9$Nitrogen)
 mean_mod <- lm(mean_biomass~Nitrogen*disk + field, data = biomass_all_cont_minus9)
 std_mod <- lm(stdev_biomass~Nitrogen*disk + field, data = biomass_all_cont_minus9)

@@ -1,14 +1,14 @@
+#####################################
+# This script produces figure 4 that compares the synchrony stability relationship
+# across successional timescales and supplemental figure 2 that breaks down the
+# slopes and intercepts of this relationship
+########################
 
-####################################
-# FIGURE  3  STABILITY VS SYNCHRONY
-####################################
-
+# Read in data and functions from source code
 source(here::here("data_cleaning/subsetting_CC.R"))
 
-#####################################
-# Data cleaning
-####################################
-
+#### Fig 4. synchrony stability relationships ####
+# prep data for analyses
 SEM.b.df$transience<-"Transient"
 SEM.a.df$transience<-"Post-transient"
 all_bothtime<-rbind(SEM.b.df, SEM.a.df)
@@ -21,12 +21,7 @@ vr_st_df_bothtime$Nitrogen <- as.factor(vr_st_df_bothtime$Nitrogen)
 vr_st_df_bothtime$Disturbance <- as.factor(vr_st_df_bothtime$Disturbance)
 vr_st_df_bothtime$field <- as.factor(vr_st_df_bothtime$field)
 
-#################################
-# Models
-#################################
-
 # Slopes and intercepts for stability v synchrony
-
 # Loop to find linear models fits of each treatment, for synchrony against stability
 vr_st_df_bothtime <- as.data.frame(vr_st_df_bothtime)
 library(lme4)
@@ -176,13 +171,10 @@ model_response$transience <- factor(model_response$transience,
 model_response$VR <- NA
 model_response$VR <- rep(VR_seq, times = 32)
 
-###############
-# FIGURE 3
-###############
-
+# produce figure
 labels <- c("0" = "Intact in 1982", "1"= "Disturbed in 1982")
 
-fig2_bothtime <- ggplot(data = vr_st_df_bothtime, aes(x=VR,y=Stability, col=Nitrogen))+
+fig4_bothtime <- ggplot(data = vr_st_df_bothtime, aes(x=VR,y=Stability, col=Nitrogen))+
   geom_point(shape = 21, alpha = 0.4)+
   facet_grid(transience~ Disturbance, labeller=labeller(Disturbance = labels))+
   # geom_smooth(data = vr_st_df_bothtime, aes(x=VR, y=Stability,col=Nitrogen), method = 'lm', 
@@ -211,16 +203,13 @@ fig2_bothtime <- ggplot(data = vr_st_df_bothtime, aes(x=VR,y=Stability, col=Nitr
                          name="Nitrogen Addition",
                          breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
                          labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"))
-fig2_bothtime
+fig4_bothtime
 
-pdf(file = "Figures/Figure3_stabilityvssynch_bothtime.pdf",width = 8, height = 5)
-fig2_bothtime
+pdf(file = "Figures/Figure4_stabilityvssynch_bothtime.pdf",width = 8, height = 5)
+fig4_bothtime
 dev.off()
 
-#################################
-# SUPPLEMENTAL FIGURE 3
-#################################
-
+#### FigS2. slopes and intercepts ####
 # For slopes
 view(lm_results_bothtime)
 lm_results_bothtime$Disturbance <- case_match(lm_results_bothtime$Disturbance, 
@@ -284,6 +273,6 @@ fig2_bothtime_int
 
 # Full Figure 3 figure for collaborators
 library(patchwork)
-pdf(file = "Figures/SupFigure3_slopes_int.pdf",width = 10, height = 5)
+pdf(file = "Figures/SupFigure2_slopes_int.pdf",width = 10, height = 5)
 (fig2_bothtime_slopes | fig2_bothtime_int)
 dev.off()

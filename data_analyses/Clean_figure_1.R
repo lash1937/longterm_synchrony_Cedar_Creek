@@ -106,17 +106,22 @@ st_all_cont_minus9$disk <- as.factor(st_all_cont_minus9$disk)
 # NEED COMMENTS ADDED IN THIS SECTION # ---------------------------------------
 st_all_cont_minus9_E001<-subset(st_all_cont_minus9, exp==1)
 st_all_cont_minus9_E002<-subset(st_all_cont_minus9, exp==2)
+
 stabilityE001lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E001)
 stabilityE002lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E002)
+
 NitrogenX <- data.frame(Nitrogen= seq(0, 30))
+
 predE001Stability<-as.data.frame(predFit(stabilityE001lm, newdata = NitrogenX, 
                                          interval = "confidence", level=0.95))
 predE002Stability<-as.data.frame(predFit(stabilityE002lm, newdata = NitrogenX, 
                                          interval = "confidence", level=0.95))
+
 predE001Stability_1<-cbind(NitrogenX, predE001Stability)
 predE001Stability_1$disk<-0
 predE002Stability_1<-cbind(NitrogenX, predE002Stability)
 predE002Stability_1$disk<-1
+
 confdfStability<-rbind(predE001Stability_1, predE002Stability_1)
 #-----------------------------------------------------------------------------
 

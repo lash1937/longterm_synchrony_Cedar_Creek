@@ -1,7 +1,9 @@
 
 #####################################
-# This script produces 
+# This script produces figure 2, breaking down total biomass across functional groups
 #####################################
+
+source(here::here("data_cleaning/subsetting_CC.R"))
 
 unique_ID_long2 <- unique_ID_long %>%  tidyr::separate("uniqueID", c("field", "exp", "plot", "disk", "ntrt"), sep="_") %>%  separate("expntrtyear", c("exp2", "ntrt2", "year"), sep="_") %>% select(field, exp, ntrt, plot, year, Species, Abundance )
 
@@ -72,7 +74,7 @@ biomasstopfunc<-topbyfunc_subset%>% ggplot(aes(x=year, y=meanbiomass, group=spec
 biomasstopfunc
 
 # save to repo
-pdf(file = "Figures/Figure5_timeseries.pdf", width = 7.5, height = 6)
+pdf(file = "Figures/Figure2_timeseries.pdf", width = 7.5, height = 6)
 biomasstopfunc
 dev.off()
 
