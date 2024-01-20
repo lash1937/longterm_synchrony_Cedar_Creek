@@ -202,14 +202,77 @@ predE002Stability_1$disk<-1
 
 confdfStability<-rbind(predE001Stability_1, predE002Stability_1)
 
+#######################
+# Fig 2
+# Time series figure
+########################
+
+
+##unique_ID_long
+
+unique_ID_long2 <- unique_ID_long %>%  tidyr::separate("uniqueID", c("field", "exp", "plot", "disk", "ntrt"), sep="_") %>%  separate("expntrtyear", c("exp2", "ntrt2", "year"), sep="_") %>% select(field, exp, ntrt, plot, year, Species, Abundance )
+
+##remove extra text##
+
+unique_ID_long2$species<-str_remove(unique_ID_long2$Species, "mass.above.")
+
+## summarize biomass all to get most abundance spp ###, 
+
+
+biomassbysp<-unique_ID_long2 %>% dplyr::group_by(species) %>% dplyr::summarise(totalbiomass=sum(Abundance, na.rm=TRUE))
+
+biomassbysp2 <- merge(biomassbysp,sp.df, by='species', all.x=TRUE)
+
+
+
+##pull out the top 5 most abundance species ##
+
+
+top5sp<-subset(unique_ID_long2, species=="AGROPYRON REPENS"|Species=="POA PRATENSIS"|Species=="ARTEMISIA LUDOVICIANA"|Species=="SCHIZACHYRIUM SCOPARIUM"|Species=="SOLIDAGO RIGIDA")
+
+topbyfunc<-subset(unique_ID_long2, species=="AGROPYRON REPENS"|species=="POA PRATENSIS"|species=="ARTEMISIA LUDOVICIANA"|species=="SCHIZACHYRIUM SCOPARIUM"|species=="SOLIDAGO RIGIDA"|species=="RUBUS SP."|species=="LATHYRUS VENOSUS"|species=="POLYGONUM CONVOLVULUS")
+
+
+totalbiomass<-unique_ID_long2 %>% dplyr::group_by(field, exp,year, plot, ntrt) %>% dplyr::summarise(totalbiomass=sum(Abundance, na.rm=TRUE))
+
+
+##average across treatments##
+
+top5sp_avg<-top5sp%>% dplyr::group_by(exp,year,ntrt, species) %>% dplyr::summarise(meanbiomass=mean(Abundance))
+
+topbyfunc_avg<-topbyfunc%>% dplyr::group_by(exp,year,ntrt, species) %>% dplyr::summarise(meanbiomass=mean(Abundance))
+
+
+totalbiomass_avg<-totalbiomass %>% dplyr::group_by(exp,year,ntrt) %>% dplyr::summarise(meantotalbiomass=mean(totalbiomass))
+
+
+##subset to only control and high nutrient###
+
+top5sp_avg_subset<-subset(top5sp_avg, ntrt==1|ntrt==6)
+
+topbyfunc_subset<-subset<-subset(topbyfunc_avg, ntrt==1|ntrt==6)
+
+top5sp_avg_subset$ntrt <- factor(top5sp_avg_subset$ntrt, levels = c("1", "6"))
+
+topbyfunc_subset$ntrt <- factor(topbyfunc_subset$ntrt, levels = c("1", "6"))
+
+
+totalbiomass_subset<-subset(totalbiomass_avg, ntrt==1|ntrt==6)
+
+totalbiomass_subset$ntrt <- factor(totalbiomass_subset$ntrt, levels = c("1", "6"))
+
+totalbiomass_subset<-totalbiomass_subset %>% dplyr::mutate(species="total biomass")
+
+
+
+
+
 
 ##############
-# FIGURE 2
+# FIGURE 3
 ##############
 
 ## sub-setting synchrony calculations into exp 1 and exp 2 to handle missing years in exp 2
-
-########WE NEED TO DOUBLE CHECK WITH LAUREN IF ITS OKAY TO OMIT THESE MISSING YEARS OR WE NEED TO IMPUTE SOMETHING###
 
 ###E001 #####
 
@@ -343,154 +406,6 @@ biomass_all_cont_minus9andoutliers$disk<-as.factor(biomass_all_cont_minus9andout
 biomass_all_cont_minus9andoutliers$Nitrogen<-as.factor(biomass_all_cont_minus9andoutliers$Nitrogen)
 
 
-####################
-# SUPPLEMENTAL
-# sum of covariances
-####################
-
-# DOESN'T RUN BC 'nadd' doesn't exist 
-
-# # computing var-cov matrix for each plot and disturbance
-# 
-# # function to subset the dataframe and compute the covariance matrix
-# cov_subset <- function(plot_id, df){
-#   
-#   df_sub <- dplyr::filter(df, uniqueID == plot_id)
-#   
-#   # convert the biomass columns to a matrix
-#   mass_mat <- as.matrix(select(
-#     df_sub,
-#     contains("mass.above")
-#   ))
-#   
-#   # remove species not present in the community and center and scale
-#   mass_mat_pres <-mass_mat[, colSums(mass_mat) > 0]
-#   
-#   # compute the variance-covariance matrix
-#   V <- cov(mass_mat_pres)
-#   
-#   # return the sum of variances and 2 * covariances
-#   return(c(
-#     sum_var = sum(diag(V)),
-#     sum_2cov = sum(`diag<-`(V, 0))
-#   ))
-#   
-# }
-# 
-# # apply the above function to each plot
-# plot_ids <- unique(unique_ID_exp12$uniqueID)
-# vnc_byplot <- as.data.frame(
-#   t(sapply(
-#     plot_ids, 
-#     FUN = cov_subset,
-#     df = unique_ID_exp12
-#   )))
-# 
-# # convert rownames to a column
-# vnc_byplot$uniqueID <- row.names(vnc_byplot)
-# 
-# # merge in other necessary data
-# vnc_byplot <- vnc_byplot %>% dplyr::left_join(
-#   ., y = unique(
-#     dplyr::select(unique_ID_exp12, uniqueID, subplot, nadd, ntrt2)
-#   )
-# )
-# 
-# # add the disturbance and ntrt columns back
-# vnc_byplot <- vnc_byplot %>% mutate(
-#   disk = as.numeric(
-#     str_extract(vnc_byplot$uniqueID, "._\\d+_\\d+_\\d") %>%
-#       str_sub(., start = -1, end = -1)
-#   ),
-#   ntrt = str_sub(uniqueID, start = -1, end = -1)
-# )
-# 
-# # standardize the values by the sd of the sum of pop variances
-# sd_spv <- sd(vnc_byplot$sum_var)
-# vnc_byplot <- vnc_byplot %>% mutate(
-#   sum_var_std = sum_var / sd_spv,
-#   sum_2cov_std = sum_2cov / sd_spv
-# )
-# 
-# # format columns as above
-# vnc_byplot <- vnc_byplot %>% 
-#   mutate(Nitrogen=ntrt)
-# vnc_byplot$Nitrogen <- mapvalues(
-#   vnc_byplot$Nitrogen, 
-#   from=c( "1", "2", "3" ,"4", "5", "6", "9"),
-#   to=c("0.0", "1.0", "2.0" ,"3.4", "5.4", "9.5", "0.0")
-# )
-# vnc_byplot$Nitrogen <- as.numeric(as.character(vnc_byplot$Nitrogen))
-# 
-# # average across the disk and nutrients 
-# vnc_byplot$disk <- as.factor(vnc_byplot$disk)
-# vnc_byplot$Nitrogen <- as.factor(vnc_byplot$Nitrogen)
-# avg_by_disk_N <- vnc_byplot %>% dplyr::group_by(disk, Nitrogen) %>% 
-#   dplyr::summarize(
-#     mean_var = mean(sum_var_std),
-#     mean_cov = mean(sum_2cov_std)
-#   )
 
 
-########################
-# SUPPLEMENTAL
-# Time series figure
-########################
-
-
-##unique_ID_long
-
-unique_ID_long2 <- unique_ID_long %>%  tidyr::separate("uniqueID", c("field", "exp", "plot", "disk", "ntrt"), sep="_") %>%  separate("expntrtyear", c("exp2", "ntrt2", "year"), sep="_") %>% select(field, exp, ntrt, plot, year, Species, Abundance )
-
-##remove extra text##
-
-unique_ID_long2$species<-str_remove(unique_ID_long2$Species, "mass.above.")
-
-## summarize biomass all to get most abundance spp ###, 
-
-
-biomassbysp<-unique_ID_long2 %>% dplyr::group_by(species) %>% dplyr::summarise(totalbiomass=sum(Abundance, na.rm=TRUE))
-
-biomassbysp2 <- merge(biomassbysp,sp.df, by='species', all.x=TRUE)
-
-
-
-##pull out the top 5 most abundance species ##
-
-
-top5sp<-subset(unique_ID_long2, species=="AGROPYRON REPENS"|Species=="POA PRATENSIS"|Species=="ARTEMISIA LUDOVICIANA"|Species=="SCHIZACHYRIUM SCOPARIUM"|Species=="SOLIDAGO RIGIDA")
-
-topbyfunc<-subset(unique_ID_long2, species=="AGROPYRON REPENS"|species=="POA PRATENSIS"|species=="ARTEMISIA LUDOVICIANA"|species=="SCHIZACHYRIUM SCOPARIUM"|species=="SOLIDAGO RIGIDA"|species=="RUBUS SP."|species=="LATHYRUS VENOSUS"|species=="POLYGONUM CONVOLVULUS")
-
-
-totalbiomass<-unique_ID_long2 %>% dplyr::group_by(field, exp,year, plot, ntrt) %>% dplyr::summarise(totalbiomass=sum(Abundance, na.rm=TRUE))
-
-
-##average across treatments##
-
-top5sp_avg<-top5sp%>% dplyr::group_by(exp,year,ntrt, species) %>% dplyr::summarise(meanbiomass=mean(Abundance))
-
-topbyfunc_avg<-topbyfunc%>% dplyr::group_by(exp,year,ntrt, species) %>% dplyr::summarise(meanbiomass=mean(Abundance))
-
-
-totalbiomass_avg<-totalbiomass %>% dplyr::group_by(exp,year,ntrt) %>% dplyr::summarise(meantotalbiomass=mean(totalbiomass))
-
-
-##subset to only control and high nutrient###
-
-top5sp_avg_subset<-subset(top5sp_avg, ntrt==1|ntrt==6)
-
-topbyfunc_subset<-subset<-subset(topbyfunc_avg, ntrt==1|ntrt==6)
-
-top5sp_avg_subset$ntrt <- factor(top5sp_avg_subset$ntrt, levels = c("1", "6"))
-
-topbyfunc_subset$ntrt <- factor(topbyfunc_subset$ntrt, levels = c("1", "6"))
-
-
-totalbiomass_subset<-subset(totalbiomass_avg, ntrt==1|ntrt==6)
-
-totalbiomass_subset$ntrt <- factor(totalbiomass_subset$ntrt, levels = c("1", "6"))
-
-totalbiomass_subset<-totalbiomass_subset %>% dplyr::mutate(species="total biomass")
-
-
+#

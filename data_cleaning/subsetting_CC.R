@@ -2,11 +2,11 @@
 # This script subsets and tidies data from the Cedar Creek E001 and E002 
 # datasets, for use in analyses and figure creation. 
 # Four resulting datasets are created: 1. before_years, which is a wide 
-# dataframe of all species-level info from the first 7 years, 2. SEM.b.df, 
+# dataframe of all species-level info from the first 7 years (transient state), 2. SEM.b.df, 
 # which compiles calculations of synchrony, stability, richness, and evenness 
 # for each unique plot from the first 7 years, 3. after_years, which is a wide 
 # dataframe of all species-level info from the last 7 years with data(1994, 1996, 
-# 1997, 1999, 2000, 2002, 2004), and 4. SEM.a.df, which compiles calculations 
+# 1997, 1999, 2000, 2002, 2004, post-transient state), and 4. SEM.a.df, which compiles calculations 
 # of synchrony, stability, richness, and evenness for each unique plot from 
 # the last 7 years.
 #####################################
