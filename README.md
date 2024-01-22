@@ -45,7 +45,7 @@ and table (/Tables) files.
     cleaning protocols follow those found in Seabloom et al. 2020 and
     DeSiervo et al. 2023 (see references for citations).
 
-    *sp.decisions.csv -* found in /cleaning_CC.R and used to test
+    *sp.decisions.csv -* found in /cleaning_CC.R used to test
     sensitivity of removing woody species
 
     *spaabundance.csv -* found in /cleaning_CC.R and used to plot
@@ -59,9 +59,8 @@ and table (/Tables) files.
     *subsetting_CC.R* - script contains data subsetting methods
     intotransient and post-tranisent phases
 
-```{=html}
 <!-- -->
-```
+
 3.  **Data Analyses**
 
     *Clean_figure_1.R* - analyses for global change driver effects on

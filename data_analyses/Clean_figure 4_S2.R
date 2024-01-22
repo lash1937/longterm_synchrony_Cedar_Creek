@@ -41,7 +41,7 @@ for(d in dist) {
                             Disturbance %in% d &
                               transience %in% t &
                               Nitrogen %in% n)
-      mod = lm(Stability ~ VR + field, data = temp) 
+      mod = lm(Stability ~ VR + field, data = temp)----------------------------- 
       em.mod = emtrends(mod, "field", var = "VR")
       em.field = ggemmeans(mod, terms = "VR[0]") # find field intercepts
       lm_results_bothtime[k,] <- c(
