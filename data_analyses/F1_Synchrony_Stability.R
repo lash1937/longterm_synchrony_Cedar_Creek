@@ -44,34 +44,34 @@ VR_all_cont_minus9 <- VR_all_cont_minus9 %>%
 # soil disturbance treatment, disk, as a factor
 VR_all_cont_minus9$disk <- as.factor(VR_all_cont_minus9$disk)
 
-# calculate confidence intervals for synchrony
-# subset each experiment
-VR_all_cont_minus9_E001<-subset(VR_all_cont_minus9, exp==1)
-VR_all_cont_minus9_E002<-subset(VR_all_cont_minus9, exp==2)
+# # calculate confidence intervals for synchrony
+# # subset each experiment
+# VR_all_cont_minus9_E001<-subset(VR_all_cont_minus9, exp==1)
+# VR_all_cont_minus9_E002<-subset(VR_all_cont_minus9, exp==2)
 
 # run same linear model for N effect on stability
-synchE001lm<-lm(VR~Nitrogen, data = VR_all_cont_minus9_E001)
-synchE002lm<-lm(VR~Nitrogen, data = VR_all_cont_minus9_E002)
-
-# create a dataframe of continous N between 0 - 30 'g'
-NitrogenX <- data.frame(Nitrogen= seq(0, 30))
-
-# calculate confidence intervals 
-predE001VR<-as.data.frame(investr::predFit(synchE001lm, 
-                                  newdata = NitrogenX, 
-                                  interval = "confidence",
-                                  level=0.95))
-predE002VR<-as.data.frame(investr::predFit(synchE002lm, 
-                                  newdata = NitrogenX, 
-                                  interval = "confidence", 
-                                  level=0.95))
-
-# combine results into full dataframe 
-predE001VR_1<-cbind(NitrogenX, predE001VR)
-predE001VR_1$disk<-0
-predE002VR_2<-cbind(NitrogenX, predE002VR)
-predE002VR_2$disk<-1
-confdfVR<-rbind(predE001VR_1, predE002VR_2)
+# synchE001lm<-lm(VR~Nitrogen, data = VR_all_cont_minus9_E001)
+# synchE002lm<-lm(VR~Nitrogen, data = VR_all_cont_minus9_E002)
+# 
+# # create a dataframe of continous N between 0 - 30 'g'
+# NitrogenX <- data.frame(Nitrogen= seq(0, 30))
+# 
+# # calculate confidence intervals 
+# predE001VR<-as.data.frame(investr::predFit(synchE001lm, 
+#                                   newdata = NitrogenX, 
+#                                   interval = "confidence",
+#                                   level=0.95))
+# predE002VR<-as.data.frame(investr::predFit(synchE002lm, 
+#                                   newdata = NitrogenX, 
+#                                   interval = "confidence", 
+#                                   level=0.95))
+# 
+# # combine results into full dataframe 
+# predE001VR_1<-cbind(NitrogenX, predE001VR)
+# predE001VR_1$disk<-0
+# predE002VR_2<-cbind(NitrogenX, predE002VR)
+# predE002VR_2$disk<-1
+# confdfVR<-rbind(predE001VR_1, predE002VR_2)
 
 #### Calculate Stability ####
 # calculate stability for each plot using year as the time variable
@@ -105,35 +105,37 @@ st_all_cont_minus9 <- st_all_cont_minus9 %>%
 # soil disturbance treatment, disk, as a factor
 st_all_cont_minus9$disk <- as.factor(st_all_cont_minus9$disk)
 
-# calculate confidence intervals for stability
-# subset each experiment
-st_all_cont_minus9_E001<-subset(st_all_cont_minus9, exp==1)
-st_all_cont_minus9_E002<-subset(st_all_cont_minus9, exp==2)
-
-# run same linear model for N effect on stability
-stabilityE001lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E001)
-stabilityE002lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E002)
-
-# create a dataframe of continous N between 0 - 30 'g'
-NitrogenX <- data.frame(Nitrogen= seq(0, 30))
-
-# calculate confidence intervals 
-predE001Stability<-as.data.frame(investr::predFit(stabilityE001lm, newdata = NitrogenX, 
-                                         interval = "confidence", level=0.95))
-predE002Stability<-as.data.frame(investr::predFit(stabilityE002lm, newdata = NitrogenX, 
-                                         interval = "confidence", level=0.95))
-# combine results into full dataframe 
-predE001Stability_1<-cbind(NitrogenX, predE001Stability)
-predE001Stability_1$disk<-0
-predE002Stability_1<-cbind(NitrogenX, predE002Stability)
-predE002Stability_1$disk<-1
-confdfStability<-rbind(predE001Stability_1, predE002Stability_1)
+# # calculate confidence intervals for stability
+# # subset each experiment
+# st_all_cont_minus9_E001<-subset(st_all_cont_minus9, exp==1)
+# st_all_cont_minus9_E002<-subset(st_all_cont_minus9, exp==2)
+# 
+# # run same linear model for N effect on stability
+# stabilityE001lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E001)
+# stabilityE002lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E002)
+# 
+# # create a dataframe of continous N between 0 - 30 'g'
+# NitrogenX <- data.frame(Nitrogen= seq(0, 30))
+# 
+# # calculate confidence intervals 
+# predE001Stability<-as.data.frame(investr::predFit(stabilityE001lm, newdata = NitrogenX, 
+#                                          interval = "confidence", level=0.95))
+# predE002Stability<-as.data.frame(investr::predFit(stabilityE002lm, newdata = NitrogenX, 
+#                                          interval = "confidence", level=0.95))
+# # combine results into full dataframe 
+# predE001Stability_1<-cbind(NitrogenX, predE001Stability)
+# predE001Stability_1$disk<-0
+# predE002Stability_1<-cbind(NitrogenX, predE002Stability)
+# predE002Stability_1$disk<-1
+# confdfStability<-rbind(predE001Stability_1, predE002Stability_1)
 
 
 #### Fig 1A. The effect of global change drivers on synchrony ####
 
 # compare a linear model to a quadratic model to best describe the relationship 
 # between synchrony and global change drivers
+
+
 
 # linear model 
 mVRl <- lm(VR ~ disk * Nitrogen + field, 
@@ -328,7 +330,6 @@ Fig1B_newmod<- ggplot() +
   theme(legend.position="top") + labs(tag = "B")
 
 # produce final figure as a pdf
-legend_fig1 <- get_legend(Fig_control_stability)
 quartz(width = 10, height = 5)
 library(patchwork)
 
