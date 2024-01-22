@@ -3,8 +3,10 @@
 # This script produces figure 2, breaking down total biomass across functional groups
 #####################################
 
+# Read in data and functions from source code
 source(here::here("data_cleaning/subsetting_CC.R"))
 
+# prepare dataframe for figure
 unique_ID_long2 <- unique_ID_long %>%  tidyr::separate("uniqueID", c("field", "exp", "plot", "disk", "ntrt"), sep="_") %>%  separate("expntrtyear", c("exp2", "ntrt2", "year"), sep="_") %>% select(field, exp, ntrt, plot, year, Species, Abundance )
 
 # remove extra text

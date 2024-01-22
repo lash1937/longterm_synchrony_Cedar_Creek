@@ -45,31 +45,34 @@ VR_all_cont_minus9 <- VR_all_cont_minus9 %>%
 VR_all_cont_minus9$disk <- as.factor(VR_all_cont_minus9$disk)
 
 # calculate confidence intervals for synchrony
-# NEED COMMENTS ADDED IN THIS SECTION # --------------------------------------
+# subset each experiment
 VR_all_cont_minus9_E001<-subset(VR_all_cont_minus9, exp==1)
 VR_all_cont_minus9_E002<-subset(VR_all_cont_minus9, exp==2)
 
+# run same linear model for N effect on stability
 synchE001lm<-lm(VR~Nitrogen, data = VR_all_cont_minus9_E001)
 synchE002lm<-lm(VR~Nitrogen, data = VR_all_cont_minus9_E002)
 
+# create a dataframe of continous N between 0 - 30 'g'
 NitrogenX <- data.frame(Nitrogen= seq(0, 30))
 
-predE001VR<-as.data.frame(predFit(synchE001lm, 
+# calculate confidence intervals 
+predE001VR<-as.data.frame(investr::predFit(synchE001lm, 
                                   newdata = NitrogenX, 
                                   interval = "confidence",
                                   level=0.95))
-predE002VR<-as.data.frame(predFit(synchE002lm, 
+predE002VR<-as.data.frame(investr::predFit(synchE002lm, 
                                   newdata = NitrogenX, 
                                   interval = "confidence", 
                                   level=0.95))
 
+# combine results into full dataframe 
 predE001VR_1<-cbind(NitrogenX, predE001VR)
 predE001VR_1$disk<-0
 predE002VR_2<-cbind(NitrogenX, predE002VR)
 predE002VR_2$disk<-1
-
 confdfVR<-rbind(predE001VR_1, predE002VR_2)
-# -----------------------------------------------------------------------------
+
 #### Calculate Stability ####
 # calculate stability for each plot using year as the time variable
 st_all <- codyn::community_stability(unique_ID_long, 
@@ -102,28 +105,30 @@ st_all_cont_minus9 <- st_all_cont_minus9 %>%
 # soil disturbance treatment, disk, as a factor
 st_all_cont_minus9$disk <- as.factor(st_all_cont_minus9$disk)
 
-# calculate confidence intervals for synchrony
-# NEED COMMENTS ADDED IN THIS SECTION # ---------------------------------------
+# calculate confidence intervals for stability
+# subset each experiment
 st_all_cont_minus9_E001<-subset(st_all_cont_minus9, exp==1)
 st_all_cont_minus9_E002<-subset(st_all_cont_minus9, exp==2)
 
+# run same linear model for N effect on stability
 stabilityE001lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E001)
 stabilityE002lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E002)
 
+# create a dataframe of continous N between 0 - 30 'g'
 NitrogenX <- data.frame(Nitrogen= seq(0, 30))
 
-predE001Stability<-as.data.frame(predFit(stabilityE001lm, newdata = NitrogenX, 
+# calculate confidence intervals 
+predE001Stability<-as.data.frame(investr::predFit(stabilityE001lm, newdata = NitrogenX, 
                                          interval = "confidence", level=0.95))
-predE002Stability<-as.data.frame(predFit(stabilityE002lm, newdata = NitrogenX, 
+predE002Stability<-as.data.frame(investr::predFit(stabilityE002lm, newdata = NitrogenX, 
                                          interval = "confidence", level=0.95))
-
+# combine results into full dataframe 
 predE001Stability_1<-cbind(NitrogenX, predE001Stability)
 predE001Stability_1$disk<-0
 predE002Stability_1<-cbind(NitrogenX, predE002Stability)
 predE002Stability_1$disk<-1
-
 confdfStability<-rbind(predE001Stability_1, predE002Stability_1)
-#-----------------------------------------------------------------------------
+
 
 #### Fig 1A. The effect of global change drivers on synchrony ####
 
@@ -203,7 +208,7 @@ Fig1A_newmod<- ggplot() +
                       labels=c("Intact in 1982", "Disturbed in 1982"))+
   scale_y_continuous(breaks = c(0.0,0.5,1.0,1.5,2.0))+
   scale_x_continuous(breaks = c(0, 10, 20, 30), labels=c("", "", "", ""))+
-  ylab("")+
+  ylab("Synchrony")+
   xlab("")+
   geom_hline(yintercept=1, color="darkgrey", linetype = "dashed") +
   theme_bw()+
@@ -299,7 +304,7 @@ Fig1B_newmod<- ggplot() +
                       name="Disturbance",
                       breaks=c("0", "1"),
                       labels=c("Intact in 1982", "Disturbed in 1982"))+
-  ylab("")+
+  ylab("Stability")+
   xlab(expression(paste("Nitrogen (g/",m^2,"/year)")))+
   lims(y=c(.5,4.25))+
   labs(legend="Disturbance")+
@@ -325,6 +330,7 @@ Fig1B_newmod<- ggplot() +
 # produce final figure as a pdf
 legend_fig1 <- get_legend(Fig_control_stability)
 quartz(width = 10, height = 5)
+library(patchwork)
 
 Figure1ab<- Fig1A_newmod / Fig1B_newmod + 
   plot_layout(ncol=1, widths = c(3,3)) & 

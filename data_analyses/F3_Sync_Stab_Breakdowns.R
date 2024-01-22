@@ -237,7 +237,7 @@ biomass_all_cont_minus9andoutliers$Nitrogen<-as.factor(biomass_all_cont_minus9an
 
 # calculate a reference line for stability
 {
-  ref_stability <- 161.8789/62.76717
+  ref_stability <- 161.8789/62.76717 #control values
   x <- seq(0,500)
   y <- x*ref_stability
   ref_line <- as.data.frame(cbind(x,y))
