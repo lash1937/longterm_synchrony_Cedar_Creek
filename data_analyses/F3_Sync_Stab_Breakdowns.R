@@ -309,26 +309,38 @@ dev.off()
 
 # modelling the effect of nitrogen and disk on population variability and community variability
 popcomvar_exp12_2$Nitrogen <- as.numeric(popcomvar_exp12_2$Nitrogen)
-pop_mod_int <- lm(pop ~ Nitrogen*disk + field, data=popcomvar_exp12_2)
-pop_mod_noint <- lm(pop ~ Nitrogen+disk + field, data=popcomvar_exp12_2)
-comm_mod_int <- lm(comm ~ Nitrogen*disk + field, data=popcomvar_exp12_2)
-comm_mod_noint <- lm(comm ~ Nitrogen+disk + field, data=popcomvar_exp12_2)
+
+# create unique grid variable
+popcomvar_exp12_2 <- popcomvar_exp12_2 %>%
+  mutate(
+    grid = factor(paste0(field, exp)))
+
+pop_mod_int <- nlme::lme(pop ~ Nitrogen*disk + field, random = (~1|grid), data=popcomvar_exp12_2)
+pop_mod_noint <- nlme::lme(pop ~ Nitrogen+disk + field, random = (~1|grid), data=popcomvar_exp12_2)
+comm_mod_int <- nlme::lme(comm ~ Nitrogen*disk + field, random = (~1|grid), data=popcomvar_exp12_2)
+comm_mod_noint <- nlme::lme(comm ~ Nitrogen+disk + field, random = (~1|grid), data=popcomvar_exp12_2)
 summary(pop_mod_int)
 summary(pop_mod_noint)
 summary(comm_mod_int)
 summary(comm_mod_noint)
-AIC(pop_mod_int, pop_mod_noint)
-AIC(comm_mod_int,comm_mod_noint)
+AIC(pop_mod_int, pop_mod_noint) # no interaction fit best
+AIC(comm_mod_int,comm_mod_noint) # no interaction fit best
 xtable(comm_mod_noint)
 xtable(pop_mod_noint)
 
 # modelling the effect of nitrogen and disk on the mean and standard deviation of total biomass
 biomass_all_cont_minus9$Nitrogen <- as.factor(biomass_all_cont_minus9$Nitrogen)
-mean_mod <- lm(mean_biomass~Nitrogen*disk + field, data = biomass_all_cont_minus9)
-std_mod <- lm(stdev_biomass~Nitrogen*disk + field, data = biomass_all_cont_minus9)
+
+# create unique grid variable
+biomass_all_cont_minus9 <-biomass_all_cont_minus9 %>%
+  mutate(
+    grid = factor(paste0(field, exp)))
+
+mean_mod <- nlme::lme(mean_biomass~Nitrogen*disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
+std_mod <- nlme::lme(stdev_biomass~Nitrogen*disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
 summary(mean_mod)
 summary(std_mod)
-xtable(std_mod)
-stab_mod <- lm(hand_stab~Nitrogen*disk+field, data = biomass_all_cont_minus9)
+
+# modelling effect of nitrogen and disk on stability with Nitrogen as a factor
+stab_mod <- nlme::lme(hand_stab~Nitrogen*disk+field, random = (~1|grid), data = biomass_all_cont_minus9)
 summary(stab_mod)
-xtable(mean_mod)

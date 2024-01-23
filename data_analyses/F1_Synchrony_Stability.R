@@ -44,35 +44,6 @@ VR_all_cont_minus9 <- VR_all_cont_minus9 %>%
 # soil disturbance treatment, disk, as a factor
 VR_all_cont_minus9$disk <- as.factor(VR_all_cont_minus9$disk)
 
-# # calculate confidence intervals for synchrony
-# # subset each experiment
-# VR_all_cont_minus9_E001<-subset(VR_all_cont_minus9, exp==1)
-# VR_all_cont_minus9_E002<-subset(VR_all_cont_minus9, exp==2)
-
-# run same linear model for N effect on stability
-# synchE001lm<-lm(VR~Nitrogen, data = VR_all_cont_minus9_E001)
-# synchE002lm<-lm(VR~Nitrogen, data = VR_all_cont_minus9_E002)
-# 
-# # create a dataframe of continous N between 0 - 30 'g'
-# NitrogenX <- data.frame(Nitrogen= seq(0, 30))
-# 
-# # calculate confidence intervals 
-# predE001VR<-as.data.frame(investr::predFit(synchE001lm, 
-#                                   newdata = NitrogenX, 
-#                                   interval = "confidence",
-#                                   level=0.95))
-# predE002VR<-as.data.frame(investr::predFit(synchE002lm, 
-#                                   newdata = NitrogenX, 
-#                                   interval = "confidence", 
-#                                   level=0.95))
-# 
-# # combine results into full dataframe 
-# predE001VR_1<-cbind(NitrogenX, predE001VR)
-# predE001VR_1$disk<-0
-# predE002VR_2<-cbind(NitrogenX, predE002VR)
-# predE002VR_2$disk<-1
-# confdfVR<-rbind(predE001VR_1, predE002VR_2)
-
 #### Calculate Stability ####
 # calculate stability for each plot using year as the time variable
 st_all <- codyn::community_stability(unique_ID_long, 
@@ -105,49 +76,27 @@ st_all_cont_minus9 <- st_all_cont_minus9 %>%
 # soil disturbance treatment, disk, as a factor
 st_all_cont_minus9$disk <- as.factor(st_all_cont_minus9$disk)
 
-# # calculate confidence intervals for stability
-# # subset each experiment
-# st_all_cont_minus9_E001<-subset(st_all_cont_minus9, exp==1)
-# st_all_cont_minus9_E002<-subset(st_all_cont_minus9, exp==2)
-# 
-# # run same linear model for N effect on stability
-# stabilityE001lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E001)
-# stabilityE002lm<-lm(stability~Nitrogen, data = st_all_cont_minus9_E002)
-# 
-# # create a dataframe of continous N between 0 - 30 'g'
-# NitrogenX <- data.frame(Nitrogen= seq(0, 30))
-# 
-# # calculate confidence intervals 
-# predE001Stability<-as.data.frame(investr::predFit(stabilityE001lm, newdata = NitrogenX, 
-#                                          interval = "confidence", level=0.95))
-# predE002Stability<-as.data.frame(investr::predFit(stabilityE002lm, newdata = NitrogenX, 
-#                                          interval = "confidence", level=0.95))
-# # combine results into full dataframe 
-# predE001Stability_1<-cbind(NitrogenX, predE001Stability)
-# predE001Stability_1$disk<-0
-# predE002Stability_1<-cbind(NitrogenX, predE002Stability)
-# predE002Stability_1$disk<-1
-# confdfStability<-rbind(predE001Stability_1, predE002Stability_1)
-
-
+#### ISSUE WITH MODEL PREDICTION ----------------------------------------------
 #### Fig 1A. The effect of global change drivers on synchrony ####
-
 # compare a linear model to a quadratic model to best describe the relationship 
 # between synchrony and global change drivers
 
-
+# create unique grid variable
+VR_all_cont_minus9 <- VR_all_cont_minus9 %>%
+  mutate(
+    grid = factor(paste0(field, exp)))
 
 # linear model 
-mVRl <- lm(VR ~ disk * Nitrogen + field, 
-          data= VR_all_cont_minus9)
+mVRl_lme <- nlme::lme(VR ~  Nitrogen * disk + field,
+                     random = (~ 1 | grid), data = VR_all_cont_minus9)
 # quadratic model
-mVRq <-  lm(VR ~ disk * poly(Nitrogen,2,raw=TRUE) + field, 
-            data = VR_all_cont_minus9)
+mVRq_lme <- nlme::lme(VR ~  disk * poly(Nitrogen,2,raw=TRUE) + field, 
+                      random = (~ 1 | grid), data= VR_all_cont_minus9)
 
 # test model fit using AIC function
-rawaic <- AIC(mVRl, mVRq)
+rawaic <- AIC(mVRl_lme, mVRq_lme)
 nR <- dim(VR_all_cont_minus9)[1]
-aictable(rawaic, nR) # quadratic model fit best
+aictable(rawaic, nR) # linear model fit best
 
 # refit the model with contrast / sum / deviations coding for field
 # so that the plot will show the curve for the "average field"
@@ -155,41 +104,40 @@ VR_all_cont_minus9$field_contr <- as.factor(VR_all_cont_minus9$field)
 contrasts(VR_all_cont_minus9$field_contr) <- contr.sum(
   length(levels(VR_all_cont_minus9$field_contr)))
 
-m2q_contr <- lm(VR ~ disk * poly(Nitrogen, 2, raw = T) + 
-                  field_contr, data = VR_all_cont_minus9)
-
+mVRl_contr <- nlme::lme(VR ~  Nitrogen * disk + field,
+                        random = (~ 1 | grid), data = VR_all_cont_minus9)
+        
 # create new model matrix for plotting fitted line
 n_per_disk <- 100
 Xmm_pred <- data_frame(
-  Intercept = rep(1, n_per_disk * 2),
-  disk1 = rep(c(0, 1), each = n_per_disk),
-  N1 = rep(seq(0, 30, length.out = n_per_disk), 2),
-  N2 = N1^2,
-  field1 = rep(0, n_per_disk * 2),
-  field2 = field1,
-  disk_N1 = disk1 * N1,
-  disk_N2 = disk1 * N2)
+Intercept = rep(1, n_per_disk * 2),
+disk1 = rep(c(0, 1), each = n_per_disk),
+N1 = rep(seq(0, 30, length.out = n_per_disk), 2),
+field1 = rep(0, n_per_disk * 2),
+field2 = field1,
+disk_N1 = disk1 * N1)
 
 Xmm_pred <- as.matrix(Xmm_pred)
-V_m2q_contr <- vcov(m2q_contr)
-beta_hat <- m2q_contr$coefficients
-t_star <- qt(0.975, df = 208)
+V_mVRl_contr <- vcov(mVRl_contr)
+ 
+beta_hat_vr <- mVRl_contr$coefficients
+beta_hat_vr <- beta_hat_vr$fixed
+t_star_vr <- qt(0.975, df = 208)
 
-df_pred <- tibble(
-  y_pred = as.double(Xmm_pred %*% beta_hat),
-  se_y = as.double(
-    sqrt(diag(Xmm_pred %*% V_m2q_contr %*% t(Xmm_pred)))),
-  low = y_pred - t_star * se_y,
-  high = y_pred + t_star * se_y,
-  Nitrogen = Xmm_pred[, "N1"],
-  disk = as.factor(Xmm_pred[, "disk1"]))
+df_pred_vr <- tibble(
+y_pred = as.double(Xmm_pred %*% beta_hat_vr),
+se_y = as.double(sqrt(diag(Xmm_pred %*% V_mVRl_contr %*% t(Xmm_pred)))),
+low = y_pred - t_star_vr * se_y,
+high = y_pred + t_star_vr * se_y,
+Nitrogen = Xmm_pred[, "N1"],
+disk = as.factor(Xmm_pred[, "disk1"]))
 
 # find the minimum
-VR_predict_min <- df_pred %>%
-  dplyr::group_by(disk) %>%
-  slice(which.min(y_pred))
+VR_predict_min <- df_pred_vr %>%
+ dplyr::group_by(disk) %>%
+ slice(which.min(y_pred))
 
-# plot new predicted lines to smooth the quadratic
+# # plot new predicted lines to smooth the quadratic
 Fig1A_newmod<- ggplot() +
   geom_point(data = VR_all_cont_minus9, aes(x=Nitrogen, y=VR, group = disk, 
                                             col = disk), shape = 21) +
@@ -232,20 +180,25 @@ Fig1A_newmod<- ggplot() +
         panel.grid.major.x=element_blank()) + labs(tag = "A")
 
 
-
+# ---------------------------------------------------------------------------
 #### Fig 1B. The effect of global change drivers on stability ####
 
 # compare a linear model to a quadratic model to best describe the relationship 
 # between stability and global change drivers
 
+st_all_cont_minus9 <- st_all_cont_minus9 %>%
+  mutate(
+    grid = factor(paste0(field, exp))
+  )
+
 # linear model
-mSTl <-
-  lm(stability ~ disk * Nitrogen + field,data= st_all_cont_minus9)
+mSTl_lme <-
+  nlme::lme(stability ~ disk * Nitrogen + field, random = (~1 | grid), data= st_all_cont_minus9)
 # quadratic model
-mSTq <-  lm(stability ~ disk * poly(Nitrogen,2,raw=TRUE) + field, data = st_all_cont_minus9)
+mSTq_lme <-  nlme::lme(stability ~ disk * poly(Nitrogen,2,raw=TRUE) + field,random = (~1 | grid), data = st_all_cont_minus9)
 
 # test model fit using AIC function
-rawaic <- AIC(mSTl, mSTq)
+rawaic <- AIC(mSTl_lme, mSTq_lme)
 nR <- dim(st_all_cont_minus9)[1]
 aictable(rawaic, nR) # linear model fit best
 
@@ -255,8 +208,7 @@ st_all_cont_minus9$field_contr <- as.factor(st_all_cont_minus9$field)
 contrasts(st_all_cont_minus9$field_contr) <- contr.sum(
   length(levels(st_all_cont_minus9$field_contr)))
 
-ml_contr <- lm(stability ~ disk * Nitrogen  
-                 + field_contr, data = st_all_cont_minus9)
+mSTl_contr <- nlme::lme(stability ~ disk * Nitrogen + field, random = (~1 | grid), data= st_all_cont_minus9)
 
 n_per_disk <- 100
 Xmm_pred <- data_frame(
@@ -268,21 +220,22 @@ Xmm_pred <- data_frame(
   disk_N1 = disk1 * N1)
 
 Xmm_pred <- as.matrix(Xmm_pred)
-V_ml_contr <- vcov(ml_contr)
-beta_hat <- ml_contr$coefficients
-t_star <- qt(0.975, df = 210)
+V_mSTl_contr <- vcov(mSTl_contr)
+beta_hat_st <- mSTl_contr$coefficients
+beta_hat_st <- beta_hat_st$fixed
+t_star_st <- qt(0.975, df = 210)
 
-df_pred <- tibble(
-  y_pred = as.double(Xmm_pred %*% beta_hat),
+df_pred_st <- tibble(
+  y_pred = as.double(Xmm_pred %*% beta_hat_st),
   se_y = as.double(
-    sqrt(diag(Xmm_pred %*% V_ml_contr %*% t(Xmm_pred)))),
-  low = y_pred - t_star * se_y,
-  high = y_pred + t_star * se_y,
+    sqrt(diag(Xmm_pred %*% V_mSTl_contr %*% t(Xmm_pred)))),
+  low = y_pred - t_star_st * se_y,
+  high = y_pred + t_star_st * se_y,
   Nitrogen = Xmm_pred[, "N1"],
   disk = as.factor(Xmm_pred[, "disk1"]))
 
 # find the minimum
-st_predict_min <- df_pred %>%
+st_predict_min <- df_pred_st %>%
   dplyr::group_by(disk) %>%
   slice(which.min(y_pred))
 
@@ -291,9 +244,9 @@ Fig1B_newmod<- ggplot() +
   geom_point(data = st_all_cont_minus9, aes(x=Nitrogen, y=stability, 
                                             group = disk, 
                                             col = disk), shape = 21) +
-  geom_line(data = df_pred, aes(x = Nitrogen, y = y_pred, 
+  geom_line(data = df_pred_st, aes(x = Nitrogen, y = y_pred, 
                                 group = disk, color = disk),linewidth = 1) +
-  geom_ribbon(data = df_pred, aes(
+  geom_ribbon(data = df_pred_st, aes(
     x = Nitrogen,
     y = y_pred,
     group= disk,

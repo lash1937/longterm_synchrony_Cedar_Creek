@@ -142,12 +142,21 @@ control_plots / as_ggplot(legend_controlfig) + plot_layout(heights=c(2,2,2))
 dev.off()
 
 #Linear model comparing micronutrient effect on synchrony
-VR_control_model <- lm(VR ~  ntrt*disk + field, data=VR_all_cont_control)
+# create unique grid variable
+VR_all_cont_control <- VR_all_cont_control %>%
+  mutate(
+    grid = factor(paste0(field, exp)))
+
+VR_control_model <- nlme::lme(VR ~  ntrt*disk + field, random = (~1|grid), data=VR_all_cont_control)
 summary(VR_control_model)
 plot(VR_control_model)
 
 #Linear model comparing micronutrient effect on stability
-stability_control_model <- lm(stability ~  ntrt*disk + field, 
-                              data=st_all_cont_control)
+# create unique grid variable
+st_all_cont_control <- st_all_cont_control %>%
+  mutate(
+    grid = factor(paste0(field, exp)))
+
+stability_control_model <- nlme::lme(stability ~  ntrt*disk + field, random = (~1|grid), data=st_all_cont_control)
 summary(stability_control_model)
 plot(stability_control_model)
