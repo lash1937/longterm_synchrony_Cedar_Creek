@@ -60,8 +60,10 @@ SEM.df <- dplyr::left_join(Richness.df, Evenness.df)%>%
   dplyr::left_join(stab_all)%>%
   dplyr::select(uniqueID, Richness, Evenness, VR, stability)%>%
   tidyr::separate(uniqueID, into = c("field", "exp", "plot", "disk", "ntrt"), sep="_", remove = FALSE)%>%
-  dplyr::select(-c(exp, plot)) %>% 
-  dplyr::rename(Disturbance = disk, Nutrients = ntrt, Stability = stability)
+  dplyr::select(-c(plot)) %>% 
+  dplyr::rename(Disturbance = disk, Nutrients = ntrt, Stability = stability) %>% 
+  mutate(grid = factor(paste0(field, exp))) %>% 
+  dplyr::relocate(grid, .after = exp)
 
 #Convert Nutrients to Continuous Values-----
 SEM.df <- SEM.df %>% dplyr::mutate(Micronut=Nutrients, Nitrogen=Nutrients)
@@ -159,8 +161,18 @@ SEM.b.df <- left_join(Richness.b.df, Evenness.b.df) %>%
   dplyr::select(uniqueID, Richness, Evenness, VR, stability, mean_biomass, stdev_biomass,
                 comm, pop)%>%
   tidyr::separate(uniqueID, into = c("field", "exp", "plot", "disk", "ntrt"), sep="_", remove = FALSE)%>%
-  dplyr::select(-c(exp, plot)) %>% 
-  dplyr::rename(Disturbance = disk, Nutrients = ntrt, Stability = stability)
+  dplyr::select(-c(plot)) %>% 
+  dplyr::rename(Disturbance = disk, Nutrients = ntrt, Stability = stability) %>% 
+  mutate(grid = factor(paste0(field, exp))) %>% 
+  dplyr::relocate(grid, .after = exp)
+  
+#Add in dummy variables for Field effects
+field <- as.data.frame(model.matrix(~ field, data = SEM.b.df)) %>% 
+  dplyr::rename(fieldA = `(Intercept)`) %>% 
+  dplyr::mutate(uniqueID = SEM.b.df$uniqueID)
+
+SEM.b.df <- left_join(SEM.b.df, field, by = "uniqueID")
+  
 
 #Convert Nutrients to Continuous Values-----
 SEM.b.df <- SEM.b.df %>% dplyr::mutate(Micronut=Nutrients, Nitrogen=Nutrients)
@@ -172,6 +184,7 @@ SEM.b.df$Nitrogen<-mapvalues(SEM.b.df$Nitrogen, from=c( "1", "2", "3" ,"4", "5",
 SEM.b.df$Nitrogen <- as.numeric(as.character(SEM.b.df$Nitrogen))
 SEM.b.df$pop <- as.numeric(SEM.b.df$pop)
 SEM.b.df$comm <- as.numeric(SEM.b.df$comm)
+SEM.b.df$Disturbance <- as.numeric(SEM.b.df$Disturbance)
 
 #Remove Nutrient Control (Micronut = 0)
 SEM.b.df <- SEM.b.df %>%
@@ -262,8 +275,17 @@ SEM.a.df <- left_join(Richness.a.df, Evenness.a.df) %>%
   dplyr::select(uniqueID, Richness, Evenness, VR, stability, mean_biomass, stdev_biomass,
                 comm, pop)%>%
   tidyr::separate(uniqueID, into = c("field", "exp", "plot", "disk", "ntrt"), sep="_", remove = FALSE)%>%
-  dplyr::select(-c(exp, plot)) %>% 
-  dplyr::rename(Disturbance = disk, Nutrients = ntrt, Stability = stability)
+  dplyr::select(-c(plot)) %>% 
+  dplyr::rename(Disturbance = disk, Nutrients = ntrt, Stability = stability) %>% 
+  mutate(grid = factor(paste0(field, exp))) %>% 
+  dplyr::relocate(grid, .after = exp)
+
+#Add in dummy variables for Field effects
+field.a <- as.data.frame(model.matrix(~ field, data = SEM.a.df)) %>% 
+  dplyr::rename(fieldA = `(Intercept)`) %>% 
+  dplyr::mutate(uniqueID = SEM.a.df$uniqueID)
+
+SEM.a.df <- left_join(SEM.a.df, field.a, by = "uniqueID")
 
 #Convert Nutrients to Continuous Values-----
 SEM.a.df<-SEM.a.df %>% dplyr::mutate(Micronut=Nutrients, Nitrogen=Nutrients)
@@ -275,6 +297,7 @@ SEM.a.df$Nitrogen<-mapvalues(SEM.a.df$Nitrogen, from=c( "1", "2", "3" ,"4", "5",
 SEM.a.df$Nitrogen<-as.numeric(as.character(SEM.a.df$Nitrogen))
 SEM.a.df$pop <- as.numeric(SEM.a.df$pop)
 SEM.a.df$comm <- as.numeric(SEM.a.df$comm)
+SEM.a.df$Disturbance <- as.numeric(SEM.a.df$Disturbance)
 
 #Remove Nutrient Control (Micronut = 0)
 SEM.a.df <- SEM.a.df %>%
