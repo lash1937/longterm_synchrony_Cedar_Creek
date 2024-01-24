@@ -6,7 +6,9 @@
 # of nitrogen addition and soil disturbance on synchrony and stability.
 #####################################
 
+# Load libraries
 library(ggeffects)
+library(patchwork)
 
 # Read in data and functions from source code
 source(here::here("data_cleaning/subsetting_CC.R"))
@@ -212,11 +214,9 @@ Fig1B_newmod<- ggplot() +
   theme(legend.position="top") + labs(tag = "B")
 
 # produce final figure as a pdf
-
 legend_fig1 <- get_legend(Fig1B_newmod)
 
 quartz(width = 10, height = 5)
-library(patchwork)
 
 Figure1ab<- Fig1A_newmod / Fig1B_newmod + 
   plot_layout(ncol=1, widths = c(3,3)) & 
