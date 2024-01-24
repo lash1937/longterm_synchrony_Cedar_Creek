@@ -28,8 +28,8 @@ and table (/Tables) files.
     *e002-aboveground-mass-2019-09-13.csv* -contains data from long-term
     nitrogen addition experiment to disturbed plots
 
-    *NEW.sp.decisions* - final dataframe used after cleaning the raw
-    datasets above and removing species for our specific analyses
+    *final_aboveground_data_for_analyses* - final dataframe used after cleaning the raw
+    datasets above and removing certain species for our specific analyses
 
     **Data listed but not used:**
 
@@ -48,7 +48,7 @@ and table (/Tables) files.
     *sp.decisions.csv -* found in /cleaning_CC.R used to test
     sensitivity of removing woody species
 
-    *spaabundance.csv -* found in /cleaning_CC.R and used to plot
+    *spaabundance.csv -* found in /cleaning_CC.R and used to plot species abundance through time
 
 2.  **Data Cleaning**
 
@@ -59,7 +59,6 @@ and table (/Tables) files.
     *subsetting_CC.R* - script contains data subsetting methods
     intotransient and post-tranisent phases
 
-<!-- -->
 
 3.  **Data Analyses**
 
