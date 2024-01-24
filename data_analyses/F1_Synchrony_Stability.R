@@ -9,6 +9,7 @@
 # Load libraries
 library(ggeffects)
 library(patchwork)
+library(emmeans)
 
 # Read in data and functions from source code
 source(here::here("data_cleaning/subsetting_CC.R"))
@@ -103,7 +104,14 @@ aictable(rawaic, nR) # linear model fit best
 # determine the average trend across fields for plotting purposes
 cfa_VR <- ggeffects::ggemmeans(mVRl_lme, terms=c("Nitrogen", "disk"))
 
-# # plot new predicted lines to smooth the quadratic
+# determine effect of disturbance with no N addition and high N addition
+EM_controlN <- emmeans::emmeans(mVRl_lme, ~disk |Nitrogen, at = list(Nitrogen = c(0)))
+pairs(EM_controlN)
+
+EM_highN <- emmeans::emmeans(mVRl_lme, ~disk|Nitrogen, at = list(Nitrogen = c(27)))
+pairs(EM_highN)
+
+# plot new predicted lines to smooth the quadratic
 Fig1A_newmod<- ggplot() +
   geom_point(data = VR_all_cont_minus9, aes(x=Nitrogen, y=VR, group = disk, 
                                             col = disk), shape = 21) +
@@ -227,7 +235,4 @@ Figure1ab / as_ggplot(legend_fig1) + plot_layout(heights=c(4,4,2))
 dev.off()
 
 
-# produce final summary tables for both models 
-xtable(summary(mVRq_contr))
-xtable(summary(mSTl_contr))
 

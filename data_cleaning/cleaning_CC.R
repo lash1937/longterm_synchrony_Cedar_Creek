@@ -22,7 +22,7 @@ library(here)
 
 #Read in e001 data## Plot data for the unplowed fields##
 
-d1s <- read.csv(here::here("data/e001-soil-cn-2019-09-13.csv"), header=T, strip.white=T, skip=1, , fileEncoding = "UTF-8-BOM")
+d1s <- read.csv(here::here("data/e001-soil-cn-2019-09-13.csv"), header=T, strip.white=T, skip=1, fileEncoding = "UTF-8-BOM")
 
 # Delete some extra variables and add dummies to stack exp1 & exp2 data
 d1s$natm.nadd <- NULL
@@ -408,7 +408,7 @@ d3 <- d2 %>% mutate(expfieldplot=paste(exp,field,plot, sep = '_') , expntrtfield
 
 
 # remove woody species, species repeats, and seedling entries using new data file###
-cleaned.d3woody <- read.csv(here::here("data/NEW.sp.decisions.csv"),header=T, fileEncoding = "UTF-8-BOM")
+cleaned.d3woody <- read.csv(here::here("data/final_aboveground_data_for_analyses.csv"),header=T, fileEncoding = "UTF-8-BOM")
 cleaned.d3woody <- cleaned.d3woody %>%
   filter(keep != "NO")
 
@@ -545,3 +545,4 @@ plotcountchecksych.woody<-da.widesynch.woody%>%group_by(exp, field, year) %>%  t
 
 plotcountchecksynch2<-da.widesynch%>%group_by(exp, year) %>%  tally()  ## matches exactly w/ excel file##
 plotcountchecksynch2.woody<-da.widesynch.woody%>%group_by(exp, year) %>%  tally()
+
