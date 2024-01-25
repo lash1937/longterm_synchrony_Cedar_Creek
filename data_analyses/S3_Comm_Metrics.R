@@ -1,4 +1,13 @@
-#### Fig S3. Comparison of community metrics across succession ####
+#####################################
+# This script produces supplemental figure 3 used to compare how N addition and
+# disturbance effect different community metrics across succession
+########################
+
+# load necessary packages
+library(patchwork)
+# Read in data and functions from source code
+source(here::here("data_cleaning/subsetting_CC.R"))
+
 #prep dataframe for figure S3 creation
 sem.a.df <- SEM.a.df  
 sem.a.df$transience <- c("transient")
@@ -7,6 +16,7 @@ sem.b.df$transience <- c("post-transient")
 all_bothtime <- rbind(sem.a.df, sem.b.df)
 all_bothtime$transience <- as.factor(all_bothtime$transience)
 levels(all_bothtime$transience) <- c("Transient", "Post-Transient")
+all_bothtime$Disturbance <- as.factor(all_bothtime$Disturbance)
 
 ## Richness
 #Filter dataset for richness
@@ -146,3 +156,4 @@ FigS3Stability_bothtime<- ggplot() +
 pdf(file = "Figures/SupFigureS3_ABCD_bothtime.pdf",width = 10, height = 10)
 FigS3Richness_bothtime / FigS3Evenness_bothtime / FigS3Synchrony_bothtime / FigS3Stability_bothtime
 dev.off()
+
