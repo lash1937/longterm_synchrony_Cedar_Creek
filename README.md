@@ -1,8 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
 
 # longterm_synchrony_Cedar_Creek
 
@@ -14,8 +9,7 @@ Contains: 1. Raw community data (/data), 2. Cleaned data and subsetted
 dataframes (/data_cleaning), 3. Models and analyses (/data_analyses),
 and, Supplemental analyses(/data_analyses). See below for additional
 detail. Additionally contains functions for calculating the Evar metric
-and Box-Cox transformations (/Functions) and exported figure (/Figures)
-and table (/Tables) files.
+and Box-Cox transformations (/Functions) and exported figure (/Figures) files.
 
 1.  **Data used:**
 
@@ -62,24 +56,24 @@ and table (/Tables) files.
 
 3.  **Data Analyses**
 
-    *Clean_figure_1.R* - analyses for global change driver effects on
+    *F1_Synchrony_Stability.R* - analyses for global change driver effects on
     synchrony and stability
 
-    *Clean_figure_2.R - analyses for total biomass through time across
+    *F2_biomass.R - analyses for total biomass through time across
     dominant species*
 
-    *Clean_figure_3.R - analyses for synchrony and stability metric
+    *F3_Sync_Stab_Breakdowns.R - analyses for synchrony and stability metric
     breakdown comparisons*
 
-    *Clean_figure_4\_S2.R - analyses for synchrony - stability
+    *F4_S2_Sync_Stab_Relationship.R - analyses for synchrony - stability
     relationship across successional timescales*
 
-    *5_SEM_Figures_and_Effects.R - analyses for SEM*
+    *F5_SEM_Figures_and_Effects.R - analyses for SEM*
 
-    *Control_treatment_comparison_figS1.R - analyses for comparing two
+    *S1_Control_Treatment_Comparison.R - analyses for comparing two
     control treatments*
 
-    *Clean_supp_figS3.R - analyses for community metrics across
+    *S3_Comm_Metrics.R - analyses for community metrics across
     successional timescales*
 
     *S4_SEM_Figures_and_Effects_supp.R - analyses for supplemental SEM*
