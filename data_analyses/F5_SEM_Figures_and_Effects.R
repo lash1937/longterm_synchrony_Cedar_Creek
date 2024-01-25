@@ -77,7 +77,6 @@ SEM.a.df <- SEM.a.df %>%
 ############################
 
 ###Piecewise model, transient phase
-
 #Model structure
 m1psem <- psem(
   nlme::lme(TStability ~ TVR + TRichness + TEvenness + Nitrogen + Disturbance + fieldB + 
@@ -91,24 +90,41 @@ m1psem <- psem(
   data = SEM.b.df
 )
 
-#Report path coefficients for transient phase data
+#Report path coefficients, standard errors, and p-values
+#for transient phase data
 coefs(m1psem)
 
+#Calculate Confidence Intervals, sub-models 1-4
+intervals(m1psem[[1]], which = "fixed") #Effects of variables on Stability
+intervals(m1psem[[2]], which = "fixed") #Effects of variables on Synchrony
+intervals(m1psem[[3]], which = "fixed") #Effects of variables on Richness
+intervals(m1psem[[4]], which = "fixed") #Effects of variables on Richness
 
-###Lavaan model, post-transient phase
-#Add in field to dataframe
-field.cat.a <- as.data.frame(model.matrix(~ field, data = SEM.a.df)) %>% 
-  dplyr::rename(fieldA = `(Intercept)`) %>% 
-  dplyr::mutate(uniqueID = SEM.a.df$uniqueID)
-SEM.a.df.cat <- left_join(SEM.a.df, field.cat.a, by = "uniqueID")
-SEM.a.df.cat$Disturbance <- as.factor(SEM.b.df.cat$Disturbance)
 
-#Fit model to post-transient phase data
-m2.fit <- sem(m1, data=SEM.a.df.cat, se="bootstrap", test="bootstrap")
-standardizedSolution(m2.fit, type="std.all")
-#Save data summary output
-saveRDS(standardizedSolution(m2.fit, type="std.all"), 
-        file = here::here("data/SEM_posttransient.rds")) 
+###Piecewise model, post-transient phase
+#Model structure
+m2psem <- psem(
+  nlme::lme(TStability ~ TVR + TRichness + TEvenness + Nitrogen + Disturbance + fieldB + 
+              fieldC, random = (~1|grid), data = SEM.a.df, method = "ML"),
+  nlme::lme(TVR ~ TRichness + TEvenness + Nitrogen + Disturbance + fieldB + fieldC,
+            random = (~1|grid), data = SEM.a.df, method = "ML"),
+  nlme::lme(TRichness ~  Nitrogen + Disturbance + fieldB + fieldC, random = (~1|grid), 
+            data = SEM.a.df, method = "ML"),
+  nlme::lme(TEvenness ~  TRichness + Nitrogen + Disturbance + fieldB + fieldC,
+            random = (~1|grid), data = SEM.a.df, method = "ML"),
+  data = SEM.a.df
+)
+
+#Report path coefficients, standard errors, and p-values
+#for post-transient phase data
+coefs(m2psem)
+
+#Calculate Confidence Intervals, sub-models 1-4
+intervals(m2psem[[1]], which = "fixed") #Effects of variables on Stability
+intervals(m2psem[[2]], which = "fixed") #Effects of variables on Synchrony
+intervals(m2psem[[3]], which = "fixed") #Effects of variables on Richness
+intervals(m2psem[[4]], which = "fixed") #Effects of variables on Richness
+
 
 ############################
 ###(In)Direct Effects and Mediation###
