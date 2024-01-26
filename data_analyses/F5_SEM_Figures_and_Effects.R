@@ -147,10 +147,10 @@ NSyS_est.b <- c(
 )
 #Construct covariance matrix
 NSyS_cov.b <- matrix(0, 2, 2)
-NSyS_cov.b[1, 1] <- vcov(m1psem[[2]])["Nitrogen", "Nitrogen"] #Synchrony ~ Nitrogen submodel
-NSyS_cov.b[2, 2] <- vcov(m1psem[[1]])["TVR", "TVR"]           #Stability ~ Synchrony submodel
+NSyS_cov.b[1, 1] <- path.b.coefs[10, 4]^2         #Synchrony ~ Nitrogen submodel
+NSyS_cov.b[2, 2] <- path.b.coefs[1, 4]^2           #Stability ~ Synchrony submodel
 #Calculate maximum possible variance
-NSyS_cov.b[1, 2] <- sqrt(NSyS_cov.b[1,1]) * sqrt(NSyS_cov.b[2,2])
+NSyS_cov.b[1, 2] <- path.b.coefs[10, 4] * path.b.coefs[1, 4]
 NSyS_cov.b[2,1] <- NSyS_cov.b[1, 2]
 #Calculate SE using the delta method
 seNSyS.b <- msm::deltamethod(~ x1 * x2, NSyS_est.b, cov = NSyS_cov.b)
@@ -169,10 +169,10 @@ DSyS_est.b <- c(
 )
 #Construct covariance matrix
 DSyS_cov.b <- matrix(0, 2, 2)
-DSyS_cov.b[1, 1] <- vcov(m1psem[[2]])["Disturbance", "Disturbance"] #Synchrony ~ Dist submodel
-DSyS_cov.b[2, 2] <- vcov(m1psem[[1]])["TVR", "TVR"]           #Stability ~ Synchrony submodel
+DSyS_cov.b[1, 1] <- path.b.coefs[11, 4]^2          #Synchrony ~ Dist submodel
+DSyS_cov.b[2, 2] <- path.b.coefs[1, 4]^2           #Stability ~ Synchrony submodel
 #Calculate maximum possible variance
-DSyS_cov.b[1, 2] <- sqrt(DSyS_cov.b[1,1]) * sqrt(DSyS_cov.b[2,2])
+DSyS_cov.b[1, 2] <- path.b.coefs[11, 4] * path.b.coefs[1, 4]
 DSyS_cov.b[2,1] <- DSyS_cov.b[1, 2]
 #Calculate SE using the delta method
 seDSyS.b <- msm::deltamethod(~ x1 * x2, DSyS_est.b, cov = DSyS_cov.b)
@@ -191,10 +191,10 @@ NRS_est.b <- c(
 )
 #Construct covariance matrix
 NRS_cov.b <- matrix(0, 2, 2)
-NRS_cov.b[1, 1] <- vcov(m1psem[[3]])["Nitrogen", "Nitrogen"] #Richness ~ Nitrogen submodel
-NRS_cov.b[2, 2] <- vcov(m1psem[[1]])["TRichness", "TRichness"] #Stability ~ Richness submodel
+NRS_cov.b[1, 1] <- path.b.coefs[14, 4]^2 #Richness ~ Nitrogen submodel
+NRS_cov.b[2, 2] <- path.b.coefs[2, 4]^2  #Stability ~ Richness submodel
 #Calculate maximum possible variance
-NRS_cov.b[1, 2] <- sqrt(NRS_cov.b[1,1]) * sqrt(NRS_cov.b[2,2])
+NRS_cov.b[1, 2] <- -path.b.coefs[14, 4] * path.b.coefs[2, 4]
 NRS_cov.b[2,1] <- NRS_cov.b[1, 2]
 #Calculate SE using the delta method
 seNRS.b <- msm::deltamethod(~ x1 * x2, NRS_est.b, cov = NRS_cov.b)
@@ -213,10 +213,10 @@ DRS_est.b <- c(
 )
 #Construct covariance matrix
 DRS_cov.b <- matrix(0, 2, 2)
-DRS_cov.b[1, 1] <- vcov(m1psem[[3]])["Disturbance", "Disturbance"] #Richness ~ Dist submodel
-DRS_cov.b[2, 2] <- vcov(m1psem[[1]])["TRichness", "TRichness"] #Stability ~ Richness submodel
+DRS_cov.b[1, 1] <- path.b.coefs[15, 4]^2 #Richness ~ Dist submodel
+DRS_cov.b[2, 2] <- path.b.coefs[2, 4]^2 #Stability ~ Richness submodel
 #Calculate maximum possible variance
-DRS_cov.b[1, 2] <- sqrt(DRS_cov.b[1,1]) * sqrt(DRS_cov.b[2,2])
+DRS_cov.b[1, 2] <- -path.b.coefs[15, 4] * path.b.coefs[2, 4]
 DRS_cov.b[2,1] <- DRS_cov.b[1, 2]
 #Calculate SE using the delta method
 seDRS.b <- msm::deltamethod(~ x1 * x2, DRS_est.b, cov = DRS_cov.b)
@@ -226,19 +226,15 @@ pDRS.b <- pnorm(abs(ind_eff_DRS.b / seDRS.b), lower.tail = F)
 DRS.b <- c("DRS", ind_eff_DRS.b, seDRS.b, pDRS.b)
 
 #Compile results into single dataframe
-ind.eff.b <- matrix(nrow = 4, ncol = 4, 0)
+ind.eff.b <- rbind(NSyS.b, DSyS.b, NRS.b, DRS.b)
 colnames(ind.eff.b) <- c("Path", "Effect", "SE", "Pvalue")  
-ind.eff.b[1,] <- NSyS.b
-ind.eff.b[2,] <- DSyS.b
-ind.eff.b[3,] <- NRS.b
-ind.eff.b[4,] <- DRS.b
 
 
 
 #####Post-transient Phase#####
 #Nitrogen -> Synchrony -> Stability
 #Calculate indirect effect
-ind_eff_NSyS.a <- path.a.coefs[10,3] * path.a.coefs[1,3]
+ind_eff_NSyS.a <- path.a.coefs[10, 3] * path.a.coefs[1, 3]
 #Create vector of direct paths
 NSyS_est.a <- c(
   path.a.coefs[10, 3], #Nitrogen -> Synchrony direct path
@@ -246,10 +242,10 @@ NSyS_est.a <- c(
 )
 #Construct covariance matrix
 NSyS_cov.a <- matrix(0, 2, 2)
-NSyS_cov.a[1, 1] <- vcov(m2psem[[2]])["Nitrogen", "Nitrogen"] #Synchrony ~ Nitrogen submodel
-NSyS_cov.a[2, 2] <- vcov(m2psem[[1]])["TVR", "TVR"]           #Stability ~ Synchrony submodel
+NSyS_cov.a[1, 1] <- path.a.coefs[10, 4]^2          #Synchrony ~ Nitrogen submodel
+NSyS_cov.a[2, 2] <- path.a.coefs[1, 4]^2           #Stability ~ Synchrony submodel
 #Calculate maximum possible variance
-NSyS_cov.a[1, 2] <- sqrt(NSyS_cov.a[1,1]) * sqrt(NSyS_cov.a[2,2])
+NSyS_cov.a[1, 2] <- -path.a.coefs[10, 4] * path.a.coefs[1, 4]
 NSyS_cov.a[2,1] <- NSyS_cov.a[1, 2]
 #Calculate SE using the delta method
 seNSyS.a <- msm::deltamethod(~ x1 * x2, NSyS_est.a, cov = NSyS_cov.a)
@@ -260,7 +256,7 @@ NSyS.a <- c("NSyS", ind_eff_NSyS.a, seNSyS.a, pNSyS.a)
 
 #Disturbance -> Synchrony -> Stability
 #Calculate indirect effect
-ind_eff_DSyS.a <- path.a.coefs[11,3] * path.a.coefs[1,3]
+ind_eff_DSyS.a <- path.a.coefs[11, 3] * path.a.coefs[1, 3]
 #Create vector of direct paths
 DSyS_est.a <- c(
   path.a.coefs[11, 3], #Dist -> Synchrony direct path
@@ -268,10 +264,10 @@ DSyS_est.a <- c(
 )
 #Construct covariance matrix
 DSyS_cov.a <- matrix(0, 2, 2)
-DSyS_cov.a[1, 1] <- vcov(m2psem[[2]])["Disturbance", "Disturbance"] #Synchrony ~ Dist submodel
-DSyS_cov.a[2, 2] <- vcov(m2psem[[1]])["TVR", "TVR"]           #Stability ~ Synchrony submodel
+DSyS_cov.a[1, 1] <- path.a.coefs[11, 4]^2 #Synchrony ~ Dist submodel
+DSyS_cov.a[2, 2] <- path.a.coefs[1, 4]^2          #Stability ~ Synchrony submodel
 #Calculate maximum possible variance
-DSyS_cov.a[1, 2] <- sqrt(DSyS_cov.a[1,1]) * sqrt(DSyS_cov.a[2,2])
+DSyS_cov.a[1, 2] <- path.a.coefs[11, 4] * path.a.coefs[1, 4]
 DSyS_cov.a[2,1] <- DSyS_cov.a[1, 2]
 #Calculate SE using the delta method
 seDSyS.a <- msm::deltamethod(~ x1 * x2, DSyS_est.a, cov = DSyS_cov.a)
@@ -282,7 +278,7 @@ DSyS.a <- c("DSyS", ind_eff_DSyS.a, seDSyS.a, pDSyS.a)
 
 #Nitrogen -> Richness -> Stability
 #Calculate indirect effect
-ind_eff_NRS.a <- path.a.coefs[14,3] * path.a.coefs[2,3]
+ind_eff_NRS.a <- path.a.coefs[14, 3] * path.a.coefs[2, 3]
 #Create vector of direct paths
 NRS_est.a <- c(
   path.a.coefs[14, 3], #Nitrogen -> Richness direct path
@@ -290,10 +286,10 @@ NRS_est.a <- c(
 )
 #Construct covariance matrix
 NRS_cov.a <- matrix(0, 2, 2)
-NRS_cov.a[1, 1] <- vcov(m2psem[[3]])["Nitrogen", "Nitrogen"] #Richness ~ Nitrogen submodel
-NRS_cov.a[2, 2] <- vcov(m2psem[[1]])["TRichness", "TRichness"] #Stability ~ Richness submodel
+NRS_cov.a[1, 1] <- path.a.coefs[14, 4]^2 #Richness ~ Nitrogen submodel
+NRS_cov.a[2, 2] <- path.a.coefs[2, 4]^2 #Stability ~ Richness submodel
 #Calculate maximum possible variance
-NRS_cov.a[1, 2] <- sqrt(NRS_cov.a[1,1]) * sqrt(NRS_cov.a[2,2])
+NRS_cov.a[1, 2] <- -path.a.coefs[14, 4] * path.a.coefs[2, 4]
 NRS_cov.a[2,1] <- NRS_cov.a[1, 2]
 #Calculate SE using the delta method
 seNRS.a <- msm::deltamethod(~ x1 * x2, NRS_est.a, cov = NRS_cov.a)
@@ -312,10 +308,10 @@ DRS_est.a <- c(
 )
 #Construct covariance matrix
 DRS_cov.a <- matrix(0, 2, 2)
-DRS_cov.a[1, 1] <- vcov(m2psem[[3]])["Disturbance", "Disturbance"] #Richness ~ Dist submodel
-DRS_cov.a[2, 2] <- vcov(m2psem[[1]])["TRichness", "TRichness"] #Stability ~ Richness submodel
+DRS_cov.a[1, 1] <- path.a.coefs[15, 4]^2 #Richness ~ Dist submodel
+DRS_cov.a[2, 2] <- path.a.coefs[2, 4]^2 #Stability ~ Richness submodel
 #Calculate maximum possible variance
-DRS_cov.a[1, 2] <- sqrt(DRS_cov.a[1,1]) * sqrt(DRS_cov.a[2,2])
+DRS_cov.a[1, 2] <- -path.a.coefs[15, 4] * path.a.coefs[2, 4]
 DRS_cov.a[2,1] <- DRS_cov.a[1, 2]
 #Calculate SE using the delta method
 seDRS.a <- msm::deltamethod(~ x1 * x2, DRS_est.a, cov = DRS_cov.a)
