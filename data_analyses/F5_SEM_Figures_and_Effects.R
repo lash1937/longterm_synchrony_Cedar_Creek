@@ -321,12 +321,8 @@ pDRS.a <- pnorm(abs(ind_eff_DRS.a / seDRS.a), lower.tail = F)
 DRS.a <- c("DRS", ind_eff_DRS.a, seDRS.a, pDRS.a)
 
 #Compile results into single dataframe
-ind.eff.a <- matrix(nrow = 4, ncol = 4, 0)
+ind.eff.a <- rbind(NSyS.a, DSyS.a, NRS.a, DRS.a)
 colnames(ind.eff.a) <- c("Path", "Effect", "SE", "Pvalue")  
-ind.eff.a[1,] <- NSyS.a
-ind.eff.a[2,] <- DSyS.a
-ind.eff.a[3,] <- NRS.a
-ind.eff.a[4,] <- DRS.a
 
 #Reported indirect effects and errors
 ind.eff.b
