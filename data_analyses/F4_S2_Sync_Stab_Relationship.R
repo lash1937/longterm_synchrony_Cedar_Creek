@@ -4,6 +4,11 @@
 # slopes and intercepts of this relationship
 ########################
 
+# Load libraries
+library(ggeffects)
+library(patchwork)
+library(nlme)
+
 # Read in data and functions from source code
 source(here::here("data_cleaning/subsetting_CC.R"))
 
@@ -21,11 +26,14 @@ vr_st_df_bothtime$Nitrogen <- as.factor(vr_st_df_bothtime$Nitrogen)
 vr_st_df_bothtime$Disturbance <- as.factor(vr_st_df_bothtime$Disturbance)
 vr_st_df_bothtime$field <- as.factor(vr_st_df_bothtime$field)
 
+# create unique grid variable
+vr_st_df_bothtime <- vr_st_df_bothtime %>%
+  mutate(grid = factor(paste0(field, Disturbance)))
+
 # Slopes and intercepts for stability v synchrony
 # Loop to find linear models fits of each treatment, for synchrony against stability
-vr_st_df_bothtime <- as.data.frame(vr_st_df_bothtime)
-library(lme4)
-library(ggeffects)
+#vr_st_df_bothtime <- as.data.frame(vr_st_df_bothtime)
+
 
 dist <- c(levels(vr_st_df_bothtime$Disturbance))
 N <- c(levels(vr_st_df_bothtime$Nitrogen))
@@ -38,12 +46,14 @@ for(d in dist) {
   for(t in trans) {
     for(n in N){
       temp <- dplyr::filter(vr_st_df_bothtime, 
-                            Disturbance %in% d &
+                            #Disturbance %in% d &
                               transience %in% t &
                               Nitrogen %in% n)
-      mod = lm(Stability ~ VR + field, data = temp) 
-      em.mod = emtrends(mod, "field", var = "VR")
-      em.field = ggemmeans(mod, terms = "VR[0]") # find field intercepts
+      mod_temp = lm(Stability ~ VR + field, data = temp) 
+      mod <- nlme::lme(Stability ~  VR*Disturbance + field,
+                       random = (~ 1 | grid), data = temp)
+      em.mod <- emtrends(mod, "field", var = "VR")
+      em.field <- ggeffects::ggemmeans(mod, terms = "VR[0]") # find field intercepts
       lm_results_bothtime[k,] <- c(
         d,t,n,
         as.data.frame(em.mod)[1,2], # Slope
@@ -271,7 +281,7 @@ fig2_bothtime_int <- ggplot(data = lm_results_bothtime) +
              aes(xintercept=baseline_ints), color = 'black', linetype = 'dashed')
 fig2_bothtime_int
 
-# Full Figure 3 figure for collaborators
+# Full Figure for collaborators
 library(patchwork)
 pdf(file = "Figures/SupFigure2_slopes_int.pdf",width = 10, height = 5)
 (fig2_bothtime_slopes | fig2_bothtime_int)
