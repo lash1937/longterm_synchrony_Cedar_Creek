@@ -138,8 +138,9 @@ path.a.coefs <- coefs(m2psem)
 
 #####Transient Phase#####
 #Nitrogen -> Synchrony -> Stability
-ind_eff_NSyS <- coefs(m1psem)[10,3] * coefs(m1psem)[1,3] #Indirect effect
-
+#Calculate indirect effect
+ind_eff_NSyS <- path.b.coefs[10,3] * path.b.coefs[1,3]
+#Create vector of direct paths
 NSyS_est <- c(
   path.b.coefs[10, 3], #Nitrogen -> Synchrony direct path
   path.b.coefs[1, 3]   #Synchrony -> Stability direct path
@@ -148,62 +149,190 @@ NSyS_est <- c(
 NSyS_cov <- matrix(0, 2, 2)
 NSyS_cov[1, 1] <- vcov(m1psem[[2]])["Nitrogen", "Nitrogen"] #Synchrony ~ Nitrogen submodel
 NSyS_cov[2, 2] <- vcov(m1psem[[1]])["TVR", "TVR"]           #Stability ~ Synchrony submodel
-
 #Calculate maximum possible variance
 NSyS_cov[1, 2] <- sqrt(NSyS_cov[1,1]) * sqrt(NSyS_cov[2,2])
 NSyS_cov[2,1] <- NSyS_cov[1, 2]
-
 #Calculate SE using the delta method
 seNSyS <- msm::deltamethod(~ x1 * x2, NSyS_est, cov = NSyS_cov)
-
-# the z-stat is just the estimate divided by its SE
-# when the null hypothesis is that the effect is zero
-# the z-stat can be compared to a standard normal to get the p-value
-# for the test
+#Calculte p-value
 pNSyS <- pnorm(abs(ind_eff_NSyS / seNSyS), lower.tail = F)
-
 #Collect calculated effect, standard error, and p-value together
 NSyS <- c("NSyS", ind_eff_NSyS, seNSyS, pNSyS)
 
 #Disturbance -> Synchrony -> Stability
+#Calculate indirect effect
+ind_eff_DSyS <- path.b.coefs[11,3] * path.b.coefs[1,3]
+#Create vector of direct paths
+DSyS_est <- c(
+  path.b.coefs[11, 3], #Dist -> Synchrony direct path
+  path.b.coefs[1, 3]   #Synchrony -> Stability direct path
+)
+#Construct covariance matrix
+DSyS_cov <- matrix(0, 2, 2)
+DSyS_cov[1, 1] <- vcov(m1psem[[2]])["Disturbance", "Disturbance"] #Synchrony ~ Dist submodel
+DSyS_cov[2, 2] <- vcov(m1psem[[1]])["TVR", "TVR"]           #Stability ~ Synchrony submodel
+#Calculate maximum possible variance
+DSyS_cov[1, 2] <- sqrt(DSyS_cov[1,1]) * sqrt(DSyS_cov[2,2])
+DSyS_cov[2,1] <- DSyS_cov[1, 2]
+#Calculate SE using the delta method
+seDSyS <- msm::deltamethod(~ x1 * x2, DSyS_est, cov = DSyS_cov)
+#Calculate p-value
+pDSyS <- pnorm(abs(ind_eff_DSyS / seDSyS), lower.tail = F)
+#Collect calculated effect, standard error, and p-value together
+DSyS <- c("DSyS", ind_eff_DSyS, seDSyS, pDSyS)
 
 #Nitrogen -> Richness -> Stability
+#Calculate indirect effect
+ind_eff_NRS <- path.b.coefs[14,3] * path.b.coefs[2,3]
+#Create vector of direct paths
+NRS_est <- c(
+  path.b.coefs[14, 3], #Nitrogen -> Richness direct path
+  path.b.coefs[2, 3]   #Richness -> Stability direct path
+)
+#Construct covariance matrix
+NRS_cov <- matrix(0, 2, 2)
+NRS_cov[1, 1] <- vcov(m1psem[[3]])["Nitrogen", "Nitrogen"] #Richness ~ Nitrogen submodel
+NRS_cov[2, 2] <- vcov(m1psem[[1]])["TRichness", "TRichness"] #Stability ~ Richness submodel
+#Calculate maximum possible variance
+NRS_cov[1, 2] <- sqrt(NRS_cov[1,1]) * sqrt(NRS_cov[2,2])
+NRS_cov[2,1] <- NRS_cov[1, 2]
+#Calculate SE using the delta method
+seNRS <- msm::deltamethod(~ x1 * x2, NRS_est, cov = NRS_cov)
+#Calculate p-value
+pNRS <- pnorm(abs(ind_eff_NRS / seNRS), lower.tail = F)
+#Collect calculated effect, standard error, and p-value together
+NRS <- c("NRS", ind_eff_NRS, seNRS, pNRS)
 
 #Disturbance -> Richness -> Stability
+#Calculate indirect effect
+ind_eff_DRS <- path.b.coefs[15,3] * path.b.coefs[2,3]
+#Create vector of direct paths
+DRS_est <- c(
+  path.b.coefs[15, 3], #Disturbance -> Richness direct path
+  path.b.coefs[2, 3]   #Richness -> Stability direct path
+)
+#Construct covariance matrix
+DRS_cov <- matrix(0, 2, 2)
+DRS_cov[1, 1] <- vcov(m1psem[[3]])["Disturbance", "Disturbance"] #Richness ~ Dist submodel
+DRS_cov[2, 2] <- vcov(m1psem[[1]])["TRichness", "TRichness"] #Stability ~ Richness submodel
+#Calculate maximum possible variance
+DRS_cov[1, 2] <- sqrt(DRS_cov[1,1]) * sqrt(DRS_cov[2,2])
+DRS_cov[2,1] <- DRS_cov[1, 2]
+#Calculate SE using the delta method
+seDRS <- msm::deltamethod(~ x1 * x2, DRS_est, cov = DRS_cov)
+#Calculate p-value
+pDRS <- pnorm(abs(ind_eff_NRS / seDRS), lower.tail = F)
+#Collect calculated effect, standard error, and p-value together
+DRS <- c("DRS", ind_eff_DRS, seDRS, pDRS)
+
+#Compile results into single dataframe
+ind.eff.b <- matrix(nrow = 4, ncol = 4, 0)
+colnames(ind.eff.b) <- c("Path", "Effect", "SE", "Pvalue")  
+ind.eff.b[1,] <- NSyS
+ind.eff.b[2,] <- DSyS
+ind.eff.b[3,] <- NRS
+ind.eff.b[4,] <- DRS
+
+
 
 #####Post-transient Phase#####
 #Nitrogen -> Synchrony -> Stability
+#Calculate indirect effect
+ind_eff_NSyS <- path.a.coefs[10,3] * path.a.coefs[1,3]
+#Create vector of direct paths
+NSyS_est <- c(
+  path.a.coefs[10, 3], #Nitrogen -> Synchrony direct path
+  path.a.coefs[1, 3]   #Synchrony -> Stability direct path
+)
+#Construct covariance matrix
+NSyS_cov <- matrix(0, 2, 2)
+NSyS_cov[1, 1] <- vcov(m2psem[[2]])["Nitrogen", "Nitrogen"] #Synchrony ~ Nitrogen submodel
+NSyS_cov[2, 2] <- vcov(m2psem[[1]])["TVR", "TVR"]           #Stability ~ Synchrony submodel
+#Calculate maximum possible variance
+NSyS_cov[1, 2] <- sqrt(NSyS_cov[1,1]) * sqrt(NSyS_cov[2,2])
+NSyS_cov[2,1] <- NSyS_cov[1, 2]
+#Calculate SE using the delta method
+seNSyS <- msm::deltamethod(~ x1 * x2, NSyS_est, cov = NSyS_cov)
+#Calculte p-value
+pNSyS <- pnorm(abs(ind_eff_NSyS / seNSyS), lower.tail = F)
+#Collect calculated effect, standard error, and p-value together
+NSyS <- c("NSyS", ind_eff_NSyS, seNSyS, pNSyS)
 
 #Disturbance -> Synchrony -> Stability
+#Calculate indirect effect
+ind_eff_DSyS <- path.a.coefs[11,3] * path.a.coefs[1,3]
+#Create vector of direct paths
+DSyS_est <- c(
+  path.a.coefs[11, 3], #Dist -> Synchrony direct path
+  path.a.coefs[1, 3]   #Synchrony -> Stability direct path
+)
+#Construct covariance matrix
+DSyS_cov <- matrix(0, 2, 2)
+DSyS_cov[1, 1] <- vcov(m2psem[[2]])["Disturbance", "Disturbance"] #Synchrony ~ Dist submodel
+DSyS_cov[2, 2] <- vcov(m2psem[[1]])["TVR", "TVR"]           #Stability ~ Synchrony submodel
+#Calculate maximum possible variance
+DSyS_cov[1, 2] <- sqrt(DSyS_cov[1,1]) * sqrt(DSyS_cov[2,2])
+DSyS_cov[2,1] <- DSyS_cov[1, 2]
+#Calculate SE using the delta method
+seDSyS <- msm::deltamethod(~ x1 * x2, DSyS_est, cov = DSyS_cov)
+#Calculate p-value
+pDSyS <- pnorm(abs(ind_eff_DSyS / seDSyS), lower.tail = F)
+#Collect calculated effect, standard error, and p-value together
+DSyS <- c("DSyS", ind_eff_DSyS, seDSyS, pDSyS)
 
 #Nitrogen -> Richness -> Stability
+#Calculate indirect effect
+ind_eff_NRS <- path.a.coefs[14,3] * path.a.coefs[2,3]
+#Create vector of direct paths
+NRS_est <- c(
+  path.a.coefs[14, 3], #Nitrogen -> Richness direct path
+  path.a.coefs[2, 3]   #Richness -> Stability direct path
+)
+#Construct covariance matrix
+NRS_cov <- matrix(0, 2, 2)
+NRS_cov[1, 1] <- vcov(m2psem[[3]])["Nitrogen", "Nitrogen"] #Richness ~ Nitrogen submodel
+NRS_cov[2, 2] <- vcov(m2psem[[1]])["TRichness", "TRichness"] #Stability ~ Richness submodel
+#Calculate maximum possible variance
+NRS_cov[1, 2] <- sqrt(NRS_cov[1,1]) * sqrt(NRS_cov[2,2])
+NRS_cov[2,1] <- NRS_cov[1, 2]
+#Calculate SE using the delta method
+seNRS <- msm::deltamethod(~ x1 * x2, NRS_est, cov = NRS_cov)
+#Calculate p-value
+pNRS <- pnorm(abs(ind_eff_NRS / seNRS), lower.tail = F)
+#Collect calculated effect, standard error, and p-value together
+NRS <- c("NRS", ind_eff_NRS, seNRS, pNRS)
 
 #Disturbance -> Richness -> Stability
+#Calculate indirect effect
+ind_eff_DRS <- path.a.coefs[15,3] * path.a.coefs[2,3]
+#Create vector of direct paths
+DRS_est <- c(
+  path.a.coefs[15, 3], #Disturbance -> Richness direct path
+  path.a.coefs[2, 3]   #Richness -> Stability direct path
+)
+#Construct covariance matrix
+DRS_cov <- matrix(0, 2, 2)
+DRS_cov[1, 1] <- vcov(m2psem[[3]])["Disturbance", "Disturbance"] #Richness ~ Dist submodel
+DRS_cov[2, 2] <- vcov(m2psem[[1]])["TRichness", "TRichness"] #Stability ~ Richness submodel
+#Calculate maximum possible variance
+DRS_cov[1, 2] <- sqrt(DRS_cov[1,1]) * sqrt(DRS_cov[2,2])
+DRS_cov[2,1] <- DRS_cov[1, 2]
+#Calculate SE using the delta method
+seDRS <- msm::deltamethod(~ x1 * x2, DRS_est, cov = DRS_cov)
+#Calculate p-value
+pDRS <- pnorm(abs(ind_eff_NRS / seDRS), lower.tail = F)
+#Collect calculated effect, standard error, and p-value together
+DRS <- c("DRS", ind_eff_DRS, seDRS, pDRS)
 
-#Compile into single dataframe
-ind.eff.m <- matrix(nrow = 4, ncol = 4, 0)
-colnames(ind.eff.m) <- c("Path", "Effect", "SE", "Pvalue")  
-ind.eff.m[1,] <- NSyS
-ind.eff.m[2,] <- DSyS
-ind.eff.m[3,] <- NRS
-ind.eff.m[4,] <- DRS
+#Compile results into single dataframe
+ind.eff.a <- matrix(nrow = 4, ncol = 4, 0)
+colnames(ind.eff.a) <- c("Path", "Effect", "SE", "Pvalue")  
+ind.eff.a[1,] <- NSyS
+ind.eff.a[2,] <- DSyS
+ind.eff.a[3,] <- NRS
+ind.eff.a[4,] <- DRS
 
-m.indirect <- '#Direct effects on Stability
-                TStability ~ c1*Nitrogen + c2*Disturbance+ b2*TEvenness + b4*TRichness + 
-                              d1*TVR
-               #Direct effects on Mediators
-                TVR ~ a3*Nitrogen + a6*Disturbance + b3*TRichness + b1*TEvenness
-                TRichness ~ a2*Nitrogen + a5*Disturbance
-                TEvenness ~ e1*TRichness + a1*Nitrogen + a4*Disturbance
-               #Extra variables
-                TStability ~ fieldB + fieldC
-                TVR ~ fieldB + fieldC
-                TRichness ~ fieldB + fieldC
-                TEvenness ~ fieldB + fieldC
-               #Indirect effects
-                ind_eff_NSyS := a3 * d1
-                ind_eff_DSyS := a6 * d1
-                ind_eff_NRS := a2 * b4
-                ind_eff_DRS := a5 * b4
-'
+#Reported indirect effects and errors
+ind.eff.b
+ind.eff.a
 
