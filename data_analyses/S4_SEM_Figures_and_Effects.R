@@ -10,14 +10,17 @@ library(tidyverse)
 library(tidyr)
 library(plyr)
 library(dplyr)
+library(ggpubr)
 library(vegan)
 
-library(lavaan)
+library(piecewiseSEM)
+library(nlme)
+library(msm)
 library(psych)
 library(here)
 
 #Read in data and functions
-source(here("data_cleaning/subsetting_CC.R"))
+source(here::here("data_cleaning/subsetting_CC.R"))
 
 ###Transformations###----
 #Stability
@@ -61,34 +64,40 @@ shapiro.test(SEM.a.df$TEvenness)
 MASS::boxcox(lm(SEM.b.df$mean_biomass ~ 1))
 SEM.b.df$Tmean_biomass <- boxcox_transform(SEM.b.df$mean_biomass, 0.2)
 shapiro.test(SEM.b.df$Tmean_biomass)
-hist(SEM.b.df$Tmean_biomass)
 
 MASS::boxcox(lm(SEM.a.df$mean_biomass ~ 1))
 SEM.a.df$Tmean_biomass <- boxcox_transform(SEM.a.df$mean_biomass, 0.1)
 shapiro.test(SEM.a.df$Tmean_biomass)
-hist(SEM.a.df$Tmean_biomass)
 
 #Community Variance
 MASS::boxcox(lm(SEM.b.df$comm ~ 1))
 SEM.b.df$Tcomm <- boxcox_transform(SEM.b.df$comm, 0.25)
 shapiro.test(SEM.b.df$Tcomm)
-hist(SEM.b.df$Tcomm)
 
 MASS::boxcox(lm(SEM.a.df$comm ~ 1))
 SEM.a.df$Tcomm <- boxcox_transform(SEM.a.df$comm, 0)
 shapiro.test(SEM.a.df$Tcomm)
-hist(SEM.a.df$Tcomm)
 
 #Population Variance
 MASS::boxcox(lm(SEM.b.df$pop ~ 1))
 SEM.b.df$Tpop <- boxcox_transform(SEM.b.df$pop, 0.25)
 shapiro.test(SEM.b.df$Tpop)
-hist(SEM.b.df$Tpop)
 
 MASS::boxcox(lm(SEM.a.df$pop ~ 1))
 SEM.a.df$Tpop <- boxcox_transform(SEM.a.df$pop, -0.15)
 shapiro.test(SEM.a.df$Tpop)
-hist(SEM.a.df$Tpop)
+
+
+##Scale all non-categorical variables
+SEM.b.df <- SEM.b.df %>% 
+  mutate_at(c('Nitrogen', 'TStability', 'TVR', 'TRichness', 'TEvenness',
+              'Tmean_biomass', 'Tcomm', 'Tpop'), ~(scale(.)
+                                                  %>% as.vector))
+
+SEM.a.df <- SEM.a.df %>% 
+  mutate_at(c('Nitrogen', 'TStability', 'TVR', 'TRichness', 'TEvenness',
+              'Tmean_biomass', 'Tcomm', 'Tpop'), ~(scale(.)
+                                                  %>% as.vector))
 
 
 ############################
@@ -107,31 +116,49 @@ m1 <- 'Tmean_biomass ~ TRichness + TEvenness + Disturbance + Nitrogen + fieldB +
        Tmean_biomass ~~ Tcomm
        Tpop ~~ Tcomm'
 
-###Lavaan model, transient phase
-#Add in field to dataframe
-field.cat <- as.data.frame(model.matrix(~ field, data = SEM.b.df)) %>% 
-  dplyr::rename(fieldA = `(Intercept)`) %>% 
-  dplyr::mutate(uniqueID = SEM.b.df$uniqueID)
-SEM.b.df.cat <- left_join(SEM.b.df, field.cat, by = "uniqueID")
-SEM.b.df.cat$Disturbance <- as.factor(SEM.b.df.cat$Disturbance)
+###Piecewise model, transient phase
+#Model structure
+m1psem <- psem(
+  nlme::lme(Tmean_biomass ~ Nitrogen + Disturbance + TRichness + TEvenness + fieldB + 
+              fieldC, random = (~1|grid), data = SEM.b.df, method = "ML"),
+  nlme::lme(Tcomm ~ Nitrogen + Disturbance + TRichness + TEvenness + fieldB + fieldC,
+            random = (~1|grid), data = SEM.b.df, method = "ML"),
+  nlme::lme(Tpop ~ Nitrogen + Disturbance + TRichness + TEvenness + fieldB + fieldC, 
+            random = (~1|grid), data = SEM.b.df, method = "ML"),
+  nlme::lme(TRichness ~ Nitrogen + Disturbance + fieldB + fieldC, 
+            random = (~1|grid), data = SEM.b.df, method = "ML"),
+  nlme::lme(TEvenness ~  Nitrogen + Disturbance + TRichness + fieldB + fieldC,
+            random = (~1|grid), data = SEM.b.df, method = "ML"),
+  data = SEM.b.df
+)
+#Add in partial correlations between decomposed synchrony and stability components 
+m1psem <- update(m1psem, Tmean_biomass %~~% Tpop, Tmean_biomass %~~% Tcomm,
+                           Tcomm %~~% Tpop)
 
-#Fit model to transient phase data
-m1.fit <- sem(m1, data=SEM.b.df.cat, se="bootstrap", test="bootstrap")
-standardizedSolution(m1.fit, type="std.all")
-#Save data
-saveRDS(standardizedSolution(m1.fit, type="std.all"), 
-        file = here::here("data/SEM_supp_transient.rds")) 
+#Report path coefficients, standard errors, and p-values
+#for transient phase data
+coefs(m1psem)
 
-#Add in field to dataframe
-field.cat.a <- as.data.frame(model.matrix(~ field, data = SEM.a.df)) %>% 
-  dplyr::rename(fieldA = `(Intercept)`) %>% 
-  dplyr::mutate(uniqueID = SEM.a.df$uniqueID)
-SEM.a.df.cat <- left_join(SEM.a.df, field.cat.a, by = "uniqueID")
-SEM.a.df.cat$Disturbance <- as.factor(SEM.b.df.cat$Disturbance)
 
-#Fit model to post-transient phase data
-m2.fit <- sem(m1, data=SEM.a.df.cat, se="bootstrap", test="bootstrap")
-standardizedSolution(m2.fit, type="std.all")
-#Save data
-saveRDS(standardizedSolution(m2.fit, type="std.all"), 
-        file = here::here("data/SEM_supp_posttransient.rds"))
+###Piecewise model, post-transient phase
+#Model structure
+m2psem <- psem(
+  nlme::lme(Tmean_biomass ~ Nitrogen + Disturbance + TRichness + TEvenness + fieldB + 
+              fieldC, random = (~1|grid), data = SEM.a.df, method = "ML"),
+  nlme::lme(Tcomm ~ Nitrogen + Disturbance + TRichness + TEvenness + fieldB + fieldC,
+            random = (~1|grid), data = SEM.a.df, method = "ML"),
+  nlme::lme(Tpop ~ Nitrogen + Disturbance + TRichness + TEvenness + fieldB + fieldC, 
+            random = (~1|grid), data = SEM.a.df, method = "ML"),
+  nlme::lme(TRichness ~ Nitrogen + Disturbance + fieldB + fieldC, 
+            random = (~1|grid), data = SEM.a.df, method = "ML"),
+  nlme::lme(TEvenness ~  Nitrogen + Disturbance + TRichness + fieldB + fieldC,
+            random = (~1|grid), data = SEM.a.df, method = "ML"),
+  data = SEM.a.df
+)
+#Add in partial correlations between decomposed synchrony and stability components 
+m2psem <- update(m2psem, Tmean_biomass %~~% Tpop, Tmean_biomass %~~% Tcomm,
+                 Tcomm %~~% Tpop)
+
+#Report path coefficients, standard errors, and p-values
+#for post-transient phase data
+coefs(m2psem)
