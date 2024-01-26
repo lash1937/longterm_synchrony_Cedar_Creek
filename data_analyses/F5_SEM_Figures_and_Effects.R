@@ -132,6 +132,62 @@ intervals(m2psem[[4]], which = "fixed") #Effects of variables on Richness
 # of exogenous factors on community properties
 ############################
 
+#Save path coefficients for calculation of indirect effects
+path.b.coefs <- coefs(m1psem)
+path.a.coefs <- coefs(m2psem)
+
+#####Transient Phase#####
+#Nitrogen -> Synchrony -> Stability
+ind_eff_NSyS <- coefs(m1psem)[10,3] * coefs(m1psem)[1,3] #Indirect effect
+
+NSyS_est <- c(
+  path.b.coefs[10, 3], #Nitrogen -> Synchrony direct path
+  path.b.coefs[1, 3]   #Synchrony -> Stability direct path
+)
+#Construct covariance matrix
+NSyS_cov <- matrix(0, 2, 2)
+NSyS_cov[1, 1] <- vcov(m1psem[[2]])["Nitrogen", "Nitrogen"] #Synchrony ~ Nitrogen submodel
+NSyS_cov[2, 2] <- vcov(m1psem[[1]])["TVR", "TVR"]           #Stability ~ Synchrony submodel
+
+#Calculate maximum possible variance
+NSyS_cov[1, 2] <- sqrt(NSyS_cov[1,1]) * sqrt(NSyS_cov[2,2])
+NSyS_cov[2,1] <- NSyS_cov[1, 2]
+
+#Calculate SE using the delta method
+seNSyS <- msm::deltamethod(~ x1 * x2, NSyS_est, cov = NSyS_cov)
+
+# the z-stat is just the estimate divided by its SE
+# when the null hypothesis is that the effect is zero
+# the z-stat can be compared to a standard normal to get the p-value
+# for the test
+pNSyS <- pnorm(abs(ind_eff_NSyS / seNSyS), lower.tail = F)
+
+#Collect calculated effect, standard error, and p-value together
+NSyS <- c("NSyS", ind_eff_NSyS, seNSyS, pNSyS)
+
+#Disturbance -> Synchrony -> Stability
+
+#Nitrogen -> Richness -> Stability
+
+#Disturbance -> Richness -> Stability
+
+#####Post-transient Phase#####
+#Nitrogen -> Synchrony -> Stability
+
+#Disturbance -> Synchrony -> Stability
+
+#Nitrogen -> Richness -> Stability
+
+#Disturbance -> Richness -> Stability
+
+#Compile into single dataframe
+ind.eff.m <- matrix(nrow = 4, ncol = 4, 0)
+colnames(ind.eff.m) <- c("Path", "Effect", "SE", "Pvalue")  
+ind.eff.m[1,] <- NSyS
+ind.eff.m[2,] <- DSyS
+ind.eff.m[3,] <- NRS
+ind.eff.m[4,] <- DRS
+
 m.indirect <- '#Direct effects on Stability
                 TStability ~ c1*Nitrogen + c2*Disturbance+ b2*TEvenness + b4*TRichness + 
                               d1*TVR
@@ -149,26 +205,5 @@ m.indirect <- '#Direct effects on Stability
                 ind_eff_DSyS := a6 * d1
                 ind_eff_NRS := a2 * b4
                 ind_eff_DRS := a5 * b4
-               #Total effects
-                total_eff_N := c1 + a1*b1*d1 + a1*b2+ a2*e1*b1*d1 + a2*e1*b2 + a2*b3*d1 + 
-                           a2*b4 + a3*d1 
-                total_eff_D := c2 + a5*b3*d1 + a5*b4 + a4*b1*d1 + a5*e1*b1*d1 + a5*b3*d1 +
-                           a4*b2 + a6*d1
-                total_eff := c1 + a1*b1*d1 + a1*b2+ a2*e1*b1*d1 + a2*e1*b2 + a2*b3*d1 + 
-                           a2*b4 + a3*d1 + c2 + a5*b3*d1 + a5*b4 + a4*b1*d1 + a5*e1*b1*d1 + 
-                           a5*b3*d1 + a4*b2 + a6*d1
 '
 
-#Fit model to transient phase data
-m.indirect.fit.b <- sem(m.indirect, data=SEM.b.df.cat, se="bootstrap", test="bootstrap")
-standardizedSolution(m.indirect.fit.b, type="std.all")
-#Save data
-saveRDS(standardizedSolution(m.indirect.fit.b, type="std.all"), 
-        file = here::here("data/SEM_indirect_transient.rds")) 
-
-#Fit model to post-transient phase data
-m.indirect.fit.a <- sem(m.indirect, data=SEM.a.df.cat, se="bootstrap", test="bootstrap")
-standardizedSolution(m.indirect.fit.a, type="std.all")
-#Save data
-saveRDS(standardizedSolution(m.indirect.fit.a, type="std.all"), 
-        file = here::here("data/SEM_indirect_posttransient.rds")) 
