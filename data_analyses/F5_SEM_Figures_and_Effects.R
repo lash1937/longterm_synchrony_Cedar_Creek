@@ -221,7 +221,7 @@ DRS_cov[2,1] <- DRS_cov[1, 2]
 #Calculate SE using the delta method
 seDRS <- msm::deltamethod(~ x1 * x2, DRS_est, cov = DRS_cov)
 #Calculate p-value
-pDRS <- pnorm(abs(ind_eff_NRS / seDRS), lower.tail = F)
+pDRS <- pnorm(abs(ind_eff_DRS / seDRS), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
 DRS <- c("DRS", ind_eff_DRS, seDRS, pDRS)
 
@@ -320,7 +320,7 @@ DRS_cov[2,1] <- DRS_cov[1, 2]
 #Calculate SE using the delta method
 seDRS <- msm::deltamethod(~ x1 * x2, DRS_est, cov = DRS_cov)
 #Calculate p-value
-pDRS <- pnorm(abs(ind_eff_NRS / seDRS), lower.tail = F)
+pDRS <- pnorm(abs(ind_eff_DRS / seDRS), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
 DRS <- c("DRS", ind_eff_DRS, seDRS, pDRS)
 
