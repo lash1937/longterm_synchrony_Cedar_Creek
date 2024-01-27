@@ -98,7 +98,7 @@ coefs(m1psem)
 intervals(m1psem[[1]], which = "fixed") #Effects of variables on Stability
 intervals(m1psem[[2]], which = "fixed") #Effects of variables on Synchrony
 intervals(m1psem[[3]], which = "fixed") #Effects of variables on Richness
-intervals(m1psem[[4]], which = "fixed") #Effects of variables on Richness
+intervals(m1psem[[4]], which = "fixed") #Effects of variables on Evenness
 
 
 ###Piecewise model, post-transient phase
@@ -123,7 +123,7 @@ coefs(m2psem)
 intervals(m2psem[[1]], which = "fixed") #Effects of variables on Stability
 intervals(m2psem[[2]], which = "fixed") #Effects of variables on Synchrony
 intervals(m2psem[[3]], which = "fixed") #Effects of variables on Richness
-intervals(m2psem[[4]], which = "fixed") #Effects of variables on Richness
+intervals(m2psem[[4]], which = "fixed") #Effects of variables on Evenness
 
 
 ############################
@@ -157,7 +157,7 @@ seNSyS.b <- msm::deltamethod(~ x1 * x2, NSyS_est.b, cov = NSyS_cov.b)
 #Calculte p-value
 pNSyS.b <- pnorm(abs(ind_eff_NSyS.b / seNSyS.b), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
-NSyS.b <- c("NSyS", ind_eff_NSyS.b, seNSyS.b, pNSyS.b)
+NSyS.b <- c(ind_eff_NSyS.b, seNSyS.b, pNSyS.b)
 
 #Disturbance -> Synchrony -> Stability
 #Calculate indirect effect
@@ -179,7 +179,7 @@ seDSyS.b <- msm::deltamethod(~ x1 * x2, DSyS_est.b, cov = DSyS_cov.b)
 #Calculate p-value
 pDSyS.b <- pnorm(abs(ind_eff_DSyS.b / seDSyS.b), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
-DSyS.b <- c("DSyS", ind_eff_DSyS.b, seDSyS.b, pDSyS.b)
+DSyS.b <- c(ind_eff_DSyS.b, seDSyS.b, pDSyS.b)
 
 #Nitrogen -> Richness -> Stability
 #Calculate indirect effect
@@ -201,7 +201,7 @@ seNRS.b <- msm::deltamethod(~ x1 * x2, NRS_est.b, cov = NRS_cov.b)
 #Calculate p-value
 pNRS.b <- pnorm(abs(ind_eff_NRS.b / seNRS.b), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
-NRS.b <- c("NRS", ind_eff_NRS.b, seNRS.b, pNRS.b)
+NRS.b <- c(ind_eff_NRS.b, seNRS.b, pNRS.b)
 
 #Disturbance -> Richness -> Stability
 #Calculate indirect effect
@@ -223,11 +223,11 @@ seDRS.b <- msm::deltamethod(~ x1 * x2, DRS_est.b, cov = DRS_cov.b)
 #Calculate p-value
 pDRS.b <- pnorm(abs(ind_eff_DRS.b / seDRS.b), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
-DRS.b <- c("DRS", ind_eff_DRS.b, seDRS.b, pDRS.b)
+DRS.b <- c(ind_eff_DRS.b, seDRS.b, pDRS.b)
 
 #Compile results into single dataframe
 ind.eff.b <- rbind(NSyS.b, DSyS.b, NRS.b, DRS.b)
-colnames(ind.eff.b) <- c("Path", "Effect", "SE", "Pvalue")  
+colnames(ind.eff.b) <- c("Effect", "SE", "Pvalue")  
 
 
 
@@ -252,7 +252,7 @@ seNSyS.a <- msm::deltamethod(~ x1 * x2, NSyS_est.a, cov = NSyS_cov.a)
 #Calculte p-value
 pNSyS.a <- pnorm(abs(ind_eff_NSyS.a / seNSyS.a), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
-NSyS.a <- c("NSyS", ind_eff_NSyS.a, seNSyS.a, pNSyS.a)
+NSyS.a <- c(ind_eff_NSyS.a, seNSyS.a, pNSyS.a)
 
 #Disturbance -> Synchrony -> Stability
 #Calculate indirect effect
@@ -274,7 +274,7 @@ seDSyS.a <- msm::deltamethod(~ x1 * x2, DSyS_est.a, cov = DSyS_cov.a)
 #Calculate p-value
 pDSyS.a <- pnorm(abs(ind_eff_DSyS.a / seDSyS.a), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
-DSyS.a <- c("DSyS", ind_eff_DSyS.a, seDSyS.a, pDSyS.a)
+DSyS.a <- c(ind_eff_DSyS.a, seDSyS.a, pDSyS.a)
 
 #Nitrogen -> Richness -> Stability
 #Calculate indirect effect
@@ -296,7 +296,7 @@ seNRS.a <- msm::deltamethod(~ x1 * x2, NRS_est.a, cov = NRS_cov.a)
 #Calculate p-value
 pNRS.a <- pnorm(abs(ind_eff_NRS.a / seNRS.a), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
-NRS.a <- c("NRS", ind_eff_NRS.a, seNRS.a, pNRS.a)
+NRS.a <- c(ind_eff_NRS.a, seNRS.a, pNRS.a)
 
 #Disturbance -> Richness -> Stability
 #Calculate indirect effect
@@ -318,11 +318,11 @@ seDRS.a <- msm::deltamethod(~ x1 * x2, DRS_est.a, cov = DRS_cov.a)
 #Calculate p-value
 pDRS.a <- pnorm(abs(ind_eff_DRS.a / seDRS.a), lower.tail = F)
 #Collect calculated effect, standard error, and p-value together
-DRS.a <- c("DRS", ind_eff_DRS.a, seDRS.a, pDRS.a)
+DRS.a <- c(ind_eff_DRS.a, seDRS.a, pDRS.a)
 
 #Compile results into single dataframe
 ind.eff.a <- rbind(NSyS.a, DSyS.a, NRS.a, DRS.a)
-colnames(ind.eff.a) <- c("Path", "Effect", "SE", "Pvalue")  
+colnames(ind.eff.a) <- c("Effect", "SE", "Pvalue")  
 
 #Reported indirect effects and errors
 ind.eff.b
