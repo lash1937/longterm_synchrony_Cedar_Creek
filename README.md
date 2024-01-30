@@ -1,16 +1,16 @@
 # longterm_synchrony_Cedar_Creek
 
 Code for the paper "Short-term versus multi-decadal responses of
-community synchrony, stability, and biodiversity to multiple global
-change drivers"
+community synchrony, biodiversity, and stability to multiple global
+change drivers."
 
 Contains: 1. Raw community data (/data), 2. Cleaned data and subsetted
-dataframes (/data_cleaning), and 3. Main text models and analyses,
-and supplemental analyses(/data_analyses). See below for additional
+dataframes (/data_cleaning), and 3. All models, analyses, and visualization
+code for the main text and supplemental analyses (/data_analyses). See below for additional
 detail. Additionally contains functions for calculating the Evar metric
 and Box-Cox transformations (/Functions) and exported figure files (/Figures).
 
-1.  **Data used:**
+1.  **Data:**
 
     *Cedar_Creek_Plant_Taxon_List.csv* - contains data about species
     found at Cedar Creek including fuctional group
@@ -41,7 +41,7 @@ and Box-Cox transformations (/Functions) and exported figure files (/Figures).
     cleaning protocols follow those found in Seabloom et al. 2020 and
     DeSiervo et al. 2023 (see references for citations).
 
-3.  **Data Cleaning**
+2.  **Data Cleaning**
 
     *cleaning_CC.R* - script contains data cleaning protocols following
     those found in Seabloom et al. 2020 and DeSiervo et al. 2023 (see
@@ -51,7 +51,7 @@ and Box-Cox transformations (/Functions) and exported figure files (/Figures).
     to create dataframes for all data analyses.
 
 
-4.  **Data Analyses**
+3.  **Data Analyses**
 
     *F1_Synchrony_Stability.R* - analyses for global change driver effects on
     synchrony and stability.
@@ -71,8 +71,17 @@ and Box-Cox transformations (/Functions) and exported figure files (/Figures).
     *S1_Control_Treatment_Comparison.R* - analyses for comparing two
     control treatments.
 
-    *S3_Comm_Metrics.R* - analyses for community metrics across
+    *S3_Comm_Metrics.R* - visualizing community metrics across
     successional timescales.
 
     *S4_SEM_Figures_and_Effects_supp.R* - analyses for calculating
     supplemental direct and indirect SEM effects.
+    
+4.  **Functions:**
+
+    *functions.R* - supporting script with functions for Evar metric,
+    Box-Cox transformations, and AIC comparisons.
+    
+5.  **Figures:**
+
+    Folder to render all figures from the manuscript

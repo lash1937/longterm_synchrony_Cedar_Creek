@@ -297,23 +297,17 @@ overflow-y: auto;
 border: 1px solid #ddd;
 border-radius: 4px;
 }
-.tabset-dropdown > .nav-tabs > li.active:before {
-content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+content: "\e259";
 font-family: 'Glyphicons Halflings';
 display: inline-block;
 padding: 10px;
 border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-content: "";
-border: none;
-}
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-content: "";
+content: "\e258";
 font-family: 'Glyphicons Halflings';
-display: inline-block;
-padding: 10px;
-border-right: 1px solid #ddd;
+border: none;
 }
 .tabset-dropdown > .nav-tabs > li.active {
 display: block;
@@ -361,64 +355,66 @@ display: none;
 <div id="longterm_synchrony_cedar_creek" class="section level1">
 <h1>longterm_synchrony_Cedar_Creek</h1>
 <p>Code for the paper “Short-term versus multi-decadal responses of
-community synchrony, stability, and biodiversity to multiple global
-change drivers”</p>
+community synchrony, biodiversity, and stability to multiple global
+change drivers.”</p>
 <p>Contains: 1. Raw community data (/data), 2. Cleaned data and
-subsetted dataframes (/data_cleaning), 3. Models and analyses
-(/data_analyses), and, Supplemental analyses(/data_analyses). See below
-for additional detail. Additionally contains functions for calculating
-the Evar metric and Box-Cox transformations (/Functions) and exported
-figure (/Figures) and table (/Tables) files.</p>
+subsetted dataframes (/data_cleaning), and 3. All models, analyses, and
+visualization code for the main text and supplemental analyses
+(/data_analyses). See below for additional detail. Additionally contains
+functions for calculating the Evar metric and Box-Cox transformations
+(/Functions) and exported figure files (/Figures).</p>
 <ol style="list-style-type: decimal">
-<li><p><strong>Data used:</strong></p>
+<li><p><strong>Data:</strong></p>
 <p><em>Cedar_Creek_Plant_Taxon_List.csv</em> - contains data about
 species found at Cedar Creek including fuctional group</p>
 <p><em>e001-aboveground-mass-2019-09-13.csv</em> - contains data from
 long-term nitrogen addition experiment to undisturbed plots</p>
 <p><em>e002-aboveground-mass-2019-09-13.csv</em> -contains data from
 long-term nitrogen addition experiment to disturbed plots</p>
-<p><em>NEW.sp.decisions</em> - final dataframe used after cleaning the
-raw datasets above and removing species for our specific analyses</p>
+<p><em>sp.decisions.csv</em> - contains taxonomic removal decisions used
+to test data robustness when removing woody species.</p>
+<p><em>final_aboveground_data_for_analyses.csv</em> - final dataframe
+used after cleaning the raw datasets above and removing certain species
+for our specific analyses.</p>
 <p><strong>Data listed but not used:</strong></p>
-<p><em>e001-belowground-mass-2019-09-13.csv -</em> found in
-/cleaning_CC.R where data cleaning protocols follow those found in
+<p><em>e001-belowground-mass-2019-09-13.csv</em> - found in
+cleaning_CC.R, where data cleaning protocols follow those found in
 Seabloom et al. 2020 and DeSiervo et al. 2023 (see references for
 citations).</p>
-<p><em>E001-E002-Soil-CN-2018 -</em> ound in /cleaning_CC.R where data
-cleaning protocols follow those found in Seabloom et al. 2020 and
-DeSiervo et al. 2023 (see references for citations).</p>
-<p><em>e001-soil-cn-2019-09-13.csv - f</em>ound in /cleaning_CC.R where
+<p><em>E001-E002-Soil-CN-2018.csv</em> - found in cleaning_CC.R, where
 data cleaning protocols follow those found in Seabloom et al. 2020 and
 DeSiervo et al. 2023 (see references for citations).</p>
-<p><em>sp.decisions.csv -</em> found in /cleaning_CC.R and used to test
-sensitivity of removing woody species</p>
-<p><em>spaabundance.csv -</em> found in /cleaning_CC.R and used to
-plot</p></li>
+<p><em>e001-soil-cn-2019-09-13.csv</em> - found in cleaning_CC.R, where
+data cleaning protocols follow those found in Seabloom et al. 2020 and
+DeSiervo et al. 2023 (see references for citations).</p></li>
 <li><p><strong>Data Cleaning</strong></p>
 <p><em>cleaning_CC.R</em> - script contains data cleaning protocols
 following those found in Seabloom et al. 2020 and DeSiervo et al. 2023
 (see references for citations).</p>
-<p><em>subsetting_CC.R</em> - script contains data subsetting methods
-intotransient and post-tranisent phases</p></li>
-</ol>
-<!-- -->
-<ol start="3" style="list-style-type: decimal">
+<p><em>subsetting_CC.R</em> - script contains data subsetting methods to
+create dataframes for all data analyses.</p></li>
 <li><p><strong>Data Analyses</strong></p>
-<p><em>Clean_figure_1.R</em> - analyses for global change driver effects
-on synchrony and stability</p>
-<p><em>Clean_figure_2.R - analyses for total biomass through time across
-dominant species</em></p>
-<p><em>Clean_figure_3.R - analyses for synchrony and stability metric
-breakdown comparisons</em></p>
-<p><em>Clean_figure_4_S2.R - analyses for synchrony - stability
-relationship across successional timescales</em></p>
-<p><em>5_SEM_Figures_and_Effects.R - analyses for SEM</em></p>
-<p><em>Control_treatment_comparison_figS1.R - analyses for comparing two
-control treatments</em></p>
-<p><em>Clean_supp_figS3.R - analyses for community metrics across
-successional timescales</em></p>
-<p><em>S4_SEM_Figures_and_Effects_supp.R - analyses for supplemental
-SEM</em></p></li>
+<p><em>F1_Synchrony_Stability.R</em> - analyses for global change driver
+effects on synchrony and stability.</p>
+<p><em>F2_biomass.R</em> - analyses for total biomass through time
+across dominant species.</p>
+<p><em>F3_Sync_Stab_Breakdowns.R</em> - analyses for synchrony and
+stability metric breakdown comparisons.</p>
+<p><em>F4_S2_Sync_Stab_Relationship.R</em> - analyses for
+synchrony-stability relationship across successional timescales.</p>
+<p><em>F5_SEM_Figures_and_Effects.R</em> - analyses for calculating
+direct and indirect SEM effects.</p>
+<p><em>S1_Control_Treatment_Comparison.R</em> - analyses for comparing
+two control treatments.</p>
+<p><em>S3_Comm_Metrics.R</em> - visualizing community metrics across
+successional timescales.</p>
+<p><em>S4_SEM_Figures_and_Effects_supp.R</em> - analyses for calculating
+supplemental direct and indirect SEM effects.</p></li>
+<li><p><strong>Functions:</strong></p>
+<p><em>functions.R</em> - supporting script with functions for Evar
+metric, Box-Cox transformations, and AIC comparisons.</p></li>
+<li><p><strong>Figures:</strong></p>
+<p>Folder to render all figures from the manuscript</p></li>
 </ol>
 </div>
 

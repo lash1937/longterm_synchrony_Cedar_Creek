@@ -7,7 +7,7 @@
 # Load libraries
 library(ggeffects)
 library(patchwork)
-library(nlme)
+library(emmeans)
 
 # Read in data and functions from source code
 source(here::here("data_cleaning/subsetting_CC.R"))
@@ -21,20 +21,13 @@ all_bothtime$transience<-factor(all_bothtime$transience, levels=c("Transient", "
 all_bothtime$Disturbance<-factor(all_bothtime$Disturbance)
 
 vr_st_df_bothtime <- all_bothtime
-
 vr_st_df_bothtime$Nitrogen <- as.factor(vr_st_df_bothtime$Nitrogen)
 vr_st_df_bothtime$Disturbance <- as.factor(vr_st_df_bothtime$Disturbance)
 vr_st_df_bothtime$field <- as.factor(vr_st_df_bothtime$field)
 
-# create unique grid variable
-vr_st_df_bothtime <- vr_st_df_bothtime %>%
-  mutate(grid = factor(paste0(field, Disturbance)))
+# Slopes and intercepts for stability vs synchrony
 
-# Slopes and intercepts for stability v synchrony
-# Loop to find linear models fits of each treatment, for synchrony against stability
-#vr_st_df_bothtime <- as.data.frame(vr_st_df_bothtime)
-
-
+# Set up matrix to hold results for each disturbance x nitrogen x time period subset
 dist <- c(levels(vr_st_df_bothtime$Disturbance))
 N <- c(levels(vr_st_df_bothtime$Nitrogen))
 trans <- c(levels(vr_st_df_bothtime$transience))
@@ -42,16 +35,15 @@ lm_results_bothtime <- matrix(ncol = 9, nrow = 32)
 colnames(lm_results_bothtime) <-  c("Disturbance", "transience", "Nitrogen","Slope","CI_lwr_slope","CI_upper_slope", "Intercept", "CI_lwr_int", "CI_upper_int")
 k <- 1
 
+# Loop to find linear models fits of each treatment, for synchrony against stability
 for(d in dist) {
   for(t in trans) {
     for(n in N){
       temp <- dplyr::filter(vr_st_df_bothtime, 
-                            #Disturbance %in% d &
+                            Disturbance %in% d &
                               transience %in% t &
                               Nitrogen %in% n)
-      mod_temp = lm(Stability ~ VR + field, data = temp) 
-      mod <- nlme::lme(Stability ~  VR*Disturbance + field,
-                       random = (~ 1 | grid), data = temp)
+      mod <- lm(Stability ~ VR + field, data = temp) 
       em.mod <- emtrends(mod, "field", var = "VR")
       em.field <- ggeffects::ggemmeans(mod, terms = "VR[0]") # find field intercepts
       lm_results_bothtime[k,] <- c(
@@ -69,6 +61,7 @@ for(d in dist) {
 }
 
 
+# format model output for plotting
 lm_results_bothtime <- as.data.frame(lm_results_bothtime)
 lm_results_bothtime$Disturbance <- as.factor(lm_results_bothtime$Disturbance)
 lm_results_bothtime$transience <- as.factor(lm_results_bothtime$transience)
@@ -107,7 +100,7 @@ base_int_dist_trans <- as.numeric(baseline[3,7])
 base_slope_dist_post <- as.numeric(baseline[4,4])
 base_int_dist_post <- as.numeric(baseline[4,7])
 
-# rearrange so I can put in dataframe for plotting
+# rearrange to put in dataframe for plotting
 baseline_slopes <- c(rep(base_slope_intact_trans, times = 8),
                      rep(base_slope_intact_post, times = 8),
                      rep(base_slope_dist_trans, times = 8),
@@ -187,10 +180,6 @@ labels <- c("0" = "Intact in 1982", "1"= "Disturbed in 1982")
 fig4_bothtime <- ggplot(data = vr_st_df_bothtime, aes(x=VR,y=Stability, col=Nitrogen))+
   geom_point(shape = 21, alpha = 0.4)+
   facet_grid(transience~ Disturbance, labeller=labeller(Disturbance = labels))+
-  # geom_smooth(data = vr_st_df_bothtime, aes(x=VR, y=Stability,col=Nitrogen), method = 'lm', 
-  #             se=FALSE, 
-  #             fullrange = TRUE, 
-  #             alpha = 0.8) +
   geom_line(data = model_response, aes(x = VR, y = predicted, col = Nitrogen),
             linewidth = 1.2) + # INSERT LINES FROM INTERCEPTS AND SLOPES IN THIS DATAFRAME
   geom_vline(aes(xintercept=1), linetype = "dashed")+
