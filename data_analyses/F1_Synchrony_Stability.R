@@ -82,7 +82,7 @@ st_all_cont_minus9 <- st_all_cont_minus9 %>%
 st_all_cont_minus9$disk <- as.factor(st_all_cont_minus9$disk)
 
 #### Fig 1A. The effect of global change drivers on synchrony ####
-# compare a linear model to a quadratic model to best describe the relationship 
+# compare a linear model to a quadratic model (N and log(N)) to best describe the relationship 
 # between synchrony and global change drivers
 
 # create unique grid variable
@@ -95,20 +95,33 @@ mVRl_lme <- nlme::lme(VR ~  Nitrogen * disk + field,
 # quadratic model
 mVRq_lme <- nlme::lme(VR ~  disk * poly(Nitrogen,2,raw=TRUE) + field, 
                       random = (~ 1 | grid), data= VR_all_cont_minus9)
+VR_all_cont_minus9 <- VR_all_cont_minus9 %>%
+  mutate(log_N = log(Nitrogen+1))
 
-# test model fit using AIC function
-rawaic <- AIC(mVRl_lme, mVRq_lme)
+# log linear model 
+mVRl_lme_log <- nlme::lme(VR ~  log_N * disk + field,
+                      random = (~ 1 | grid), data = VR_all_cont_minus9)
+# log quadratic model
+mVRq_lme_log <- nlme::lme(VR ~  disk * poly(log_N,2,raw=TRUE) + field, 
+                      random = (~ 1 | grid), data= VR_all_cont_minus9)
+
+# test  model fits using AIC function
+rawaic <- AIC(mVRl_lme, mVRq_lme, mVRl_lme_log, mVRq_lme_log)
 nR <- dim(VR_all_cont_minus9)[1]
-aictable(rawaic, nR) # linear model fit best
+aictable(rawaic, nR) # log linear model fit best
+
+MuMIn::r.squaredGLMM(mVRl_lme_log)
+an.mVRl_log <- anova(mVRl_lme_log)
 
 # determine the average trend across fields for plotting purposes
 cfa_VR <- ggeffects::ggemmeans(mVRl_lme, terms=c("Nitrogen", "disk"))
 
+#### need to update figure 1 with new model and back transform x axis ####
 # determine effect of disturbance with no N addition and high N addition
-EM_controlN <- emmeans::emmeans(mVRl_lme, ~disk |Nitrogen, at = list(Nitrogen = c(0)))
+EM_controlN <- emmeans::emmeans(mVRl_lme, ~disk |Nitrogen, at = list(N = c(0)))
 pairs(EM_controlN)
 
-EM_highN <- emmeans::emmeans(mVRl_lme, ~disk|Nitrogen, at = list(Nitrogen = c(27)))
+EM_highN <- emmeans::emmeans(mVRl_lme, ~disk|Nitrogen, at = list(N = c(3.3393220)))
 pairs(EM_highN)
 
 # plot new predicted lines to smooth the quadratic
@@ -133,7 +146,7 @@ Fig1A_newmod<- ggplot() +
   scale_y_continuous(breaks = c(0.0,0.5,1.0,1.5,2.0))+
   scale_x_continuous(breaks = c(0, 10, 20, 30), labels=c("", "", "", ""))+
   ylab("Synchrony")+
-  xlab("")+
+  xlab(" ")+
   geom_hline(yintercept=1, color="darkgrey", linetype = "dashed") +
   theme_bw()+
   theme(axis.text.x = element_text(color = "grey20", size = 12,
@@ -170,11 +183,22 @@ mSTl_lme <-
 mSTq_lme <-  nlme::lme(stability ~ disk * poly(Nitrogen,2,raw=TRUE) + field,random = (~1 | grid), 
                        data = st_all_cont_minus9)
 
-# test model fit using AIC function
-rawaic <- AIC(mSTl_lme, mSTq_lme)
-nR <- dim(st_all_cont_minus9)[1]
-aictable(rawaic, nR) # linear model fit best
+st_all_cont_minus9 <- st_all_cont_minus9 %>%
+  mutate(log_N = log(Nitrogen+1))
+# log linear model 
+mSTl_lme_log <- nlme::lme(stability ~  log_N * disk + field,
+                          random = (~ 1 | grid), data = st_all_cont_minus9)
+# log quadratic model
+mSTq_lme_log <- nlme::lme(stability ~  disk * poly(log_N,2,raw=TRUE) + field, 
+                          random = (~ 1 | grid), data= st_all_cont_minus9)
 
+# test model fit using AIC function
+rawaic <- AIC(mSTl_lme, mSTq_lme, mSTl_lme_log, mSTq_lme_log)
+nR <- dim(st_all_cont_minus9)[1]
+aictable(rawaic, nR) #  log linear model fit best
+
+MuMIn::r.squaredGLMM(mSTl_lme_log)
+an.mSTl_log <- anova(mSTl_lme_log)
 # determine the average trend across fields for plotting purposes
 cfa_ST <- ggeffects::ggemmeans(mSTl_lme, terms=c("Nitrogen", "disk"))
 
