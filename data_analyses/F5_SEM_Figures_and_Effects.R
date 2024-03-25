@@ -67,11 +67,11 @@ shapiro.test(SEM.a.df$TEvenness)
 
 ##Scale all non-categorical variables
 SEM.b.df <- SEM.b.df %>% 
-  mutate_at(c('Nitrogen', 'TStability', 'TVR', 'TRichness', 'TEvenness'), ~(scale(.)
+  mutate_at(c('logN', 'TStability', 'TVR', 'TRichness', 'TEvenness'), ~(scale(.)
                                                                             %>% as.vector))
 
 SEM.a.df <- SEM.a.df %>% 
-  mutate_at(c('Nitrogen', 'TStability', 'TVR', 'TRichness', 'TEvenness'), ~(scale(.)
+  mutate_at(c('logN', 'TStability', 'TVR', 'TRichness', 'TEvenness'), ~(scale(.)
                                                                             %>% as.vector))
 
 ############################
@@ -83,13 +83,13 @@ SEM.a.df <- SEM.a.df %>%
 ###Piecewise model, transient phase
 #Model structure
 m1psem <- psem(
-  nlme::lme(TStability ~ TVR + TRichness + TEvenness + Nitrogen + Disturbance + fieldB + 
+  nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN + Disturbance + fieldB + 
               fieldC, random = (~1|grid), data = SEM.b.df, method = "ML"),
-  nlme::lme(TVR ~ TRichness + TEvenness + Nitrogen + Disturbance + fieldB + fieldC,
+  nlme::lme(TVR ~ TRichness + TEvenness + logN + Disturbance + fieldB + fieldC,
             random = (~1|grid), data = SEM.b.df, method = "ML"),
-  nlme::lme(TRichness ~  Nitrogen + Disturbance + fieldB + fieldC, random = (~1|grid), 
+  nlme::lme(TRichness ~  logN + Disturbance + fieldB + fieldC, random = (~1|grid), 
             data = SEM.b.df, method = "ML"),
-  nlme::lme(TEvenness ~  TRichness + Nitrogen + Disturbance + fieldB + fieldC,
+  nlme::lme(TEvenness ~  TRichness + logN + Disturbance + fieldB + fieldC,
             random = (~1|grid), data = SEM.b.df, method = "ML"),
   data = SEM.b.df
 )
@@ -108,13 +108,13 @@ intervals(m1psem[[4]], which = "fixed") #Effects of variables on Evenness
 ###Piecewise model, post-transient phase
 #Model structure
 m2psem <- psem(
-  nlme::lme(TStability ~ TVR + TRichness + TEvenness + Nitrogen + Disturbance + fieldB + 
+  nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN + Disturbance + fieldB + 
               fieldC, random = (~1|grid), data = SEM.a.df, method = "ML"),
-  nlme::lme(TVR ~ TRichness + TEvenness + Nitrogen + Disturbance + fieldB + fieldC,
+  nlme::lme(TVR ~ TRichness + TEvenness + logN + Disturbance + fieldB + fieldC,
             random = (~1|grid), data = SEM.a.df, method = "ML"),
-  nlme::lme(TRichness ~  Nitrogen + Disturbance + fieldB + fieldC, random = (~1|grid), 
+  nlme::lme(TRichness ~  logN + Disturbance + fieldB + fieldC, random = (~1|grid), 
             data = SEM.a.df, method = "ML"),
-  nlme::lme(TEvenness ~  TRichness + Nitrogen + Disturbance + fieldB + fieldC,
+  nlme::lme(TEvenness ~  TRichness + logN + Disturbance + fieldB + fieldC,
             random = (~1|grid), data = SEM.a.df, method = "ML"),
   data = SEM.a.df
 )
