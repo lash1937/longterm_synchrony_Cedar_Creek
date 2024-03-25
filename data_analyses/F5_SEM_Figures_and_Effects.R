@@ -27,6 +27,7 @@ source(here::here("data_cleaning/subsetting_CC.R"))
 #Nitrogen
 SEM.b.df$logN <- log(SEM.b.df$Nitrogen + 1)
 SEM.a.df$logN <- log(SEM.a.df$Nitrogen + 1)
+SEM.df$logN <- log(SEM.df$Nitrogen + 1)
 
 #Stability
 MASS::boxcox(lm(SEM.b.df$Stability ~ 1)) #Determine ideal lambda
@@ -37,6 +38,10 @@ MASS::boxcox(lm(SEM.a.df$Stability ~ 1))
 SEM.a.df$TStability <- boxcox_transform(SEM.a.df$Stability, 0.05)
 shapiro.test(SEM.a.df$TStability)
 
+MASS::boxcox(lm(SEM.df$Stability ~ 1)) #Determine ideal lambda
+SEM.df$TStability <- boxcox_transform(SEM.df$Stability, -0.2) #Transform variable
+shapiro.test(SEM.df$TStability) #Test for Normality
+
 #VR
 MASS::boxcox(lm(SEM.b.df$VR ~ 1))
 SEM.b.df$TVR <- boxcox_transform(SEM.b.df$VR, 0.5)
@@ -45,6 +50,10 @@ shapiro.test(SEM.b.df$TVR)
 MASS::boxcox(lm(SEM.a.df$VR ~ 1))
 SEM.a.df$TVR <- boxcox_transform(SEM.a.df$VR, 0.4)
 shapiro.test(SEM.a.df$TVR)
+
+MASS::boxcox(lm(SEM.df$VR ~ 1))
+SEM.df$TVR <- boxcox_transform(SEM.df$VR, 0.3)
+shapiro.test(SEM.df$TVR)
 
 #Richness
 MASS::boxcox(lm(SEM.b.df$Richness ~ 1))
@@ -55,6 +64,10 @@ MASS::boxcox(lm(SEM.a.df$Richness ~ 1))
 SEM.a.df$TRichness <- boxcox_transform(SEM.a.df$Richness, -0.05)
 shapiro.test(SEM.a.df$TRichness)
 
+MASS::boxcox(lm(SEM.df$Richness ~ 1))
+SEM.df$TRichness <- boxcox_transform(SEM.df$Richness, -0.05)
+shapiro.test(SEM.df$TRichness)
+
 #Evenness
 MASS::boxcox(lm(SEM.b.df$Evenness ~ 1))
 SEM.b.df$TEvenness <- log(SEM.b.df$Evenness)
@@ -62,6 +75,10 @@ SEM.b.df$TEvenness <- log(SEM.b.df$Evenness)
 MASS::boxcox(lm(SEM.a.df$Evenness ~ 1))
 SEM.a.df$TEvenness <- boxcox_transform(SEM.a.df$Evenness, 0)
 shapiro.test(SEM.a.df$TEvenness)
+
+MASS::boxcox(lm(SEM.df$Evenness ~ 1))
+SEM.df$TEvenness <- boxcox_transform(SEM.df$Evenness, -0.4)
+shapiro.test(SEM.df$TEvenness)
 
 
 
@@ -73,6 +90,10 @@ SEM.b.df <- SEM.b.df %>%
 SEM.a.df <- SEM.a.df %>% 
   mutate_at(c('logN', 'TStability', 'TVR', 'TRichness', 'TEvenness'), ~(scale(.)
                                                                             %>% as.vector))
+
+SEM.df <- SEM.df %>% 
+  mutate_at(c('logN', 'TStability', 'TVR', 'TRichness', 'TEvenness'), ~(scale(.)
+                                                                        %>% as.vector))
 
 ############################
 ###SEM model building###
