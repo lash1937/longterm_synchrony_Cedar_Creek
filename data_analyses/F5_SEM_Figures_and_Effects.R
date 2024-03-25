@@ -24,6 +24,10 @@ library(here)
 source(here::here("data_cleaning/subsetting_CC.R"))
 
 ###Data Transformations###----
+#Nitrogen
+SEM.b.df$logN <- log(SEM.b.df$Nitrogen + 1)
+SEM.a.df$logN <- log(SEM.a.df$Nitrogen + 1)
+
 #Stability
 MASS::boxcox(lm(SEM.b.df$Stability ~ 1)) #Determine ideal lambda
 SEM.b.df$TStability <- boxcox_transform(SEM.b.df$Stability, -0.3) #Transform variable
