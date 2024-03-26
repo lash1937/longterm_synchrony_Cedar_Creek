@@ -308,39 +308,55 @@ dev.off()
 
 
 # modelling the effect of nitrogen and disk on population variability and community variability
-popcomvar_exp12_2$Nitrogen <- as.numeric(popcomvar_exp12_2$Nitrogen)
+popcomvar_exp12_2$Nitrogen <- as.numeric(as.character(popcomvar_exp12_2$Nitrogen))
 
 # create unique grid variable
 popcomvar_exp12_2 <- popcomvar_exp12_2 %>%
   mutate(
     grid = factor(paste0(field, exp)))
 
-pop_mod_int <- nlme::lme(pop ~ Nitrogen*disk + field, random = (~1|grid), data=popcomvar_exp12_2)
-pop_mod_noint <- nlme::lme(pop ~ Nitrogen+disk + field, random = (~1|grid), data=popcomvar_exp12_2)
-comm_mod_int <- nlme::lme(comm ~ Nitrogen*disk + field, random = (~1|grid), data=popcomvar_exp12_2)
-comm_mod_noint <- nlme::lme(comm ~ Nitrogen+disk + field, random = (~1|grid), data=popcomvar_exp12_2)
-summary(pop_mod_int)
-summary(pop_mod_noint)
-summary(comm_mod_int)
-summary(comm_mod_noint)
+# log nitrogen for linear fit
+popcomvar_exp12_2 <- popcomvar_exp12_2 %>%
+  mutate(log_N = log(Nitrogen+1))
+
+# test model with and without an interaction
+pop_mod_int <- nlme::lme(pop ~ log_N*disk + field, random = (~1|grid), data=popcomvar_exp12_2)
+pop_mod_noint <- nlme::lme(pop ~ log_N+disk + field, random = (~1|grid), data=popcomvar_exp12_2)
 AIC(pop_mod_int, pop_mod_noint) # no interaction fit best
+
+MuMIn::r.squaredGLMM(pop_mod_noint)
+an.popmodnoint <- anova(pop_mod_noint)
+summary(pop_mod_noint)
+
+
+
+comm_mod_int <- nlme::lme(comm ~ log_N*disk + field, random = (~1|grid), data=popcomvar_exp12_2)
+comm_mod_noint <- nlme::lme(comm ~ log_N+disk + field, random = (~1|grid), data=popcomvar_exp12_2)
 AIC(comm_mod_int,comm_mod_noint) # no interaction fit best
-xtable(comm_mod_noint)
-xtable(pop_mod_noint)
+MuMIn::r.squaredGLMM(comm_mod_noint)
+an.commmodnoint <- anova(comm_mod_noint)
+summary(comm_mod_noint)
 
 # modelling the effect of nitrogen and disk on the mean and standard deviation of total biomass
-biomass_all_cont_minus9$Nitrogen <- as.factor(biomass_all_cont_minus9$Nitrogen)
 
 # create unique grid variable
 biomass_all_cont_minus9 <-biomass_all_cont_minus9 %>%
   mutate(
     grid = factor(paste0(field, exp)))
 
-mean_mod <- nlme::lme(mean_biomass~Nitrogen*disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
-std_mod <- nlme::lme(stdev_biomass~Nitrogen*disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
-summary(mean_mod)
-summary(std_mod)
+biomass_all_cont_minus9 <- biomass_all_cont_minus9 %>%
+  mutate(log_N = log(Nitrogen+1))
 
-# modelling effect of nitrogen and disk on stability with Nitrogen as a factor
-stab_mod <- nlme::lme(hand_stab~Nitrogen*disk+field, random = (~1|grid), data = biomass_all_cont_minus9)
-summary(stab_mod)
+mean_mod_int <- nlme::lme(mean_biomass~log_N*disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
+mean_mod_noint <- nlme::lme(mean_biomass~log_N + disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
+AIC(mean_mod_int,mean_mod_noint) # interaction fit best
+MuMIn::r.squaredGLMM(mean_mod_int)
+an.meanmodint <- anova(mean_mod_int)
+
+
+std_mod_int <- nlme::lme(stdev_biomass~log_N*disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
+std_mod_noint <- nlme::lme(stdev_biomass~log_N+disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
+AIC(std_mod_int,std_mod_noint) # interaction fit best
+MuMIn::r.squaredGLMM(std_mod_int)
+an.stdmodint <- anova(std_mod_int)
+

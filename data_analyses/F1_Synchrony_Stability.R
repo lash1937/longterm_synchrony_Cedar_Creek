@@ -199,6 +199,8 @@ aictable(rawaic, nR) #  log linear model fit best
 
 MuMIn::r.squaredGLMM(mSTl_lme_log)
 an.mSTl_log <- anova(mSTl_lme_log)
+
+#### need to update figure 1 with new model and back transfrom x-axis ####
 # determine the average trend across fields for plotting purposes
 cfa_ST <- ggeffects::ggemmeans(mSTl_lme, terms=c("Nitrogen", "disk"))
 
