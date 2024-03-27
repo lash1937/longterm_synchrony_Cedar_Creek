@@ -150,6 +150,7 @@ VR_all_cont_control <- VR_all_cont_control %>%
 VR_control_model <- nlme::lme(VR ~  ntrt*disk + field, random = (~1|grid), data=VR_all_cont_control)
 summary(VR_control_model)
 plot(VR_control_model)
+an.vrcontrolmod <- anova(VR_control_model)
 
 #Linear model comparing micronutrient effect on stability
 # create unique grid variable
@@ -160,3 +161,4 @@ st_all_cont_control <- st_all_cont_control %>%
 stability_control_model <- nlme::lme(stability ~  ntrt*disk + field, random = (~1|grid), data=st_all_cont_control)
 summary(stability_control_model)
 plot(stability_control_model)
+an.stcontrolmod <- anova(stability_control_model)
