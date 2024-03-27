@@ -114,24 +114,25 @@ MuMIn::r.squaredGLMM(mVRl_lme_log)
 an.mVRl_log <- anova(mVRl_lme_log)
 
 # determine the average trend across fields for plotting purposes
-cfa_VR <- ggeffects::ggemmeans(mVRl_lme, terms=c("Nitrogen", "disk"))
+cfa_VR <- ggeffects::ggemmeans(mVRl_lme_log, terms=c("log_N", "disk")) %>% 
+  as_tibble() %>%
+  mutate(xo = expm1(x))
 
-#### need to update figure 1 with new model and back transform x axis ####
 # determine effect of disturbance with no N addition and high N addition
-EM_controlN <- emmeans::emmeans(mVRl_lme, ~disk |Nitrogen, at = list(N = c(0)))
+EM_controlN <- emmeans::emmeans(mVRl_lme_log, ~disk |log_N, at = list(log_N = c(0.0))) #control = log(0+1)=0.0
 pairs(EM_controlN)
 
-EM_highN <- emmeans::emmeans(mVRl_lme, ~disk|Nitrogen, at = list(N = c(3.3393220)))
+EM_highN <- emmeans::emmeans(mVRl_lme_log, ~disk|log_N, at = list(log_N = c(3.3393220)))#highN = log(27.2 +1)=3.3393220
 pairs(EM_highN)
 
 # plot new predicted lines to smooth the quadratic
 Fig1A_newmod<- ggplot() +
   geom_point(data = VR_all_cont_minus9, aes(x=Nitrogen, y=VR, group = disk, 
                                             col = disk), shape = 21) +
-  geom_line(data = cfa_VR, aes(x = x, y = predicted, 
+  geom_line(data = cfa_VR, aes(x = xo, y = predicted, 
                                group = group, color = group),linewidth = 1) +
   geom_ribbon(data = cfa_VR, aes(
-    x = x,
+    x = xo,
     y = predicted,
     group= group,
     fill = group,
@@ -144,14 +145,14 @@ Fig1A_newmod<- ggplot() +
                       breaks=c("0", "1"),
                       labels=c("Intact in 1982", "Disturbed in 1982"))+
   scale_y_continuous(breaks = c(0.0,0.5,1.0,1.5,2.0))+
-  scale_x_continuous(breaks = c(0, 10, 20, 30), labels=c("", "", "", ""))+
+  scale_x_continuous(breaks = c(0, 1, 2, 3.4, 5.4, 9.5, 17.0, 27.2), labels = c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2")) +
   ylab("Synchrony")+
   xlab(" ")+
   geom_hline(yintercept=1, color="darkgrey", linetype = "dashed") +
   theme_bw()+
-  theme(axis.text.x = element_text(color = "grey20", size = 12,
-                                   angle = 0, hjust = .5, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 12, 
+  theme(axis.text.x = element_text(color = "grey20", size = 11,
+                                   angle = 45, hjust = 1.0, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 11, 
                                    angle = 0, hjust = .5, vjust = 0, 
                                    face = "plain"),
         axis.title.x = element_text(color = "black", size = 14,
@@ -159,12 +160,12 @@ Fig1A_newmod<- ggplot() +
         axis.title.y = element_text(color = "black", size = 14, 
                                     angle = 90, hjust = .5, face = "plain"),
         legend.title = element_blank(),
-        legend.text = element_text(color = "grey20", size = 12,
-                                   angle = 0, hjust = 0, face = "plain"),
+        legend.text = element_blank(),
         panel.grid.minor.y=element_blank(),
         panel.grid.major.y=element_blank(),
         panel.grid.minor.x=element_blank(),
         panel.grid.major.x=element_blank()) + labs(tag = "A")
+# back transform x axis
 
 
 # ---------------------------------------------------------------------------
@@ -200,19 +201,20 @@ aictable(rawaic, nR) #  log linear model fit best
 MuMIn::r.squaredGLMM(mSTl_lme_log)
 an.mSTl_log <- anova(mSTl_lme_log)
 
-#### need to update figure 1 with new model and back transfrom x-axis ####
 # determine the average trend across fields for plotting purposes
-cfa_ST <- ggeffects::ggemmeans(mSTl_lme, terms=c("Nitrogen", "disk"))
+cfa_ST <- ggeffects::ggemmeans(mSTl_lme_log, terms=c("log_N", "disk")) %>%
+  as_tibble() %>%
+  mutate(xo = expm1(x))
 
 # plot new predicted lines
 Fig1B_newmod<- ggplot() +
   geom_point(data = st_all_cont_minus9, aes(x=Nitrogen, y=stability, 
                                             group = disk, 
                                             col = disk), shape = 21) +
-  geom_line(data = cfa_ST, aes(x = x, y = predicted, 
+  geom_line(data = cfa_ST, aes(x = xo, y = predicted, 
                                    group = group, color = group),linewidth = 1) +
   geom_ribbon(data = cfa_ST, aes(
-    x = x,
+    x = xo,
     y = predicted,
     group= group,
     fill = group,
@@ -226,12 +228,13 @@ Fig1B_newmod<- ggplot() +
                       labels=c("Intact in 1982", "Disturbed in 1982"))+
   ylab("Stability")+
   xlab(expression(paste("Nitrogen (g/",m^2,"/year)")))+
+  scale_x_continuous(breaks = c(0, 1, 2, 3.4, 5.4, 9.5, 17.0, 27.2), labels = c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2")) +
   lims(y=c(.5,4.25))+
   labs(legend="Disturbance")+
   theme_bw()+
-  theme(axis.text.x = element_text(color = "grey20", size = 12, 
-                                   angle = 0, hjust = .5, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 12, 
+  theme(axis.text.x = element_text(color = "grey20", size = 11, 
+                                   angle = 45, hjust = 1.0, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 11, 
                                    angle = 0, hjust = .5, vjust = 0, 
                                    face = "plain"),
         axis.title.x = element_text(color = "black", size = 14, 
@@ -244,7 +247,7 @@ Fig1B_newmod<- ggplot() +
         panel.grid.minor.y=element_blank(),
         panel.grid.major.y=element_blank(),
         panel.grid.minor.x=element_blank(),
-        panel.grid.major.x=element_blank()) +
+        panel.grid.major.x=element_blank())+
   theme(legend.position="top") + labs(tag = "B")
 
 # produce final figure as a pdf
@@ -253,10 +256,10 @@ legend_fig1 <- get_legend(Fig1B_newmod)
 quartz(width = 10, height = 5)
 
 Figure1ab<- Fig1A_newmod / Fig1B_newmod + 
-  plot_layout(ncol=1, widths = c(3,3)) & 
+  plot_layout(ncol=1, widths = c(8,8)) & 
   theme(legend.position = "none")
 
-pdf(file = "Figures/Figure1_AB.pdf",width = 4, height = 6)
+pdf(file = "Figures/Figure1_AB.pdf",width = 6, height = 6)
 Figure1ab / as_ggplot(legend_fig1) + plot_layout(heights=c(4,4,2))
 dev.off()
 
