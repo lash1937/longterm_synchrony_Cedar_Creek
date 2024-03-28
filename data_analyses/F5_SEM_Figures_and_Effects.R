@@ -101,96 +101,126 @@ SEM.df <- SEM.df %>%
 # on community properties
 ############################
 
-###Piecewise model, transient phase
-#Model structure
-SEM.b.df.nodist <- subset(SEM.b.df, Disturbance == 0)
-SEM.b.df.dist <- subset(SEM.b.df, Disturbance == 1)
+# ###Piecewise model, transient phase
+# #Model structure
+# 
+# #New piecewise code, that calculates pathways with or without Disturbance as a factor
+# m1psem <- SEM.b.df %>% 
+#   group_by(Disturbance) %>% 
+#   group_map( ~ psem(
+#     nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN  + fieldB + 
+#                 fieldC, random = (~1|grid), data = .x, method = "ML"),
+#     nlme::lme(TVR ~ TRichness + TEvenness + logN  + fieldB + fieldC,
+#               random = (~1|grid), data = .x, method = "ML"),
+#     nlme::lme(TRichness ~  logN  + fieldB + fieldC, random = (~1|grid), 
+#               data = .x, method = "ML"),
+#     nlme::lme(TEvenness ~  TRichness + logN  + fieldB + fieldC,
+#               random = (~1|grid), data = .x, method = "ML"),
+#     data = .x
+#   ))
+#   
+# #Old piecewise code, that include Disturbance directly in model
+# m1psem <- psem(
+#   nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN + Disturbance + fieldB + 
+#               fieldC, random = (~1|grid), data = .x, method = "ML"),
+#   nlme::lme(TVR ~ TRichness + TEvenness + logN + Disturbance + fieldB + fieldC,
+#             random = (~1|grid), data = .x, method = "ML"),
+#   nlme::lme(TRichness ~  logN + Disturbance + fieldB + fieldC, random = (~1|grid), 
+#             data = .x, method = "ML"),
+#   nlme::lme(TEvenness ~  TRichness + logN + Disturbance + fieldB + fieldC,
+#             random = (~1|grid), data = .x, method = "ML"),
+#   data = .x
+# )
+# 
+# #Report path coefficients, standard errors, and p-values
+# #for transient phase data
+# coefs(m1psem)
+# 
+# #Calculate Confidence Intervals, sub-models 1-4
+# intervals(m1psem[[1]], which = "fixed") #Effects of variables on Stability
+# intervals(m1psem[[2]], which = "fixed") #Effects of variables on Synchrony
+# intervals(m1psem[[3]], which = "fixed") #Effects of variables on Richness
+# intervals(m1psem[[4]], which = "fixed") #Effects of variables on Evenness
+# 
+# 
+# ###Piecewise model, post-transient phase
+# #Model structure
+# m2psem <- psem(
+#   nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN + Disturbance + fieldB + 
+#               fieldC, random = (~1|grid), data = SEM.a.df, method = "ML"),
+#   nlme::lme(TVR ~ TRichness + TEvenness + logN + Disturbance + fieldB + fieldC,
+#             random = (~1|grid), data = SEM.a.df, method = "ML"),
+#   nlme::lme(TRichness ~  logN + Disturbance + fieldB + fieldC, random = (~1|grid), 
+#             data = SEM.a.df, method = "ML"),
+#   nlme::lme(TEvenness ~  TRichness + logN + Disturbance + fieldB + fieldC,
+#             random = (~1|grid), data = SEM.a.df, method = "ML"),
+#   data = SEM.a.df
+# )
+# 
+# #Report path coefficients, standard errors, and p-values
+# #for post-transient phase data
+# coefs(m2psem)
+# 
+# #Calculate Confidence Intervals, sub-models 1-4
+# intervals(m2psem[[1]], which = "fixed") #Effects of variables on Stability
+# intervals(m2psem[[2]], which = "fixed") #Effects of variables on Synchrony
+# intervals(m2psem[[3]], which = "fixed") #Effects of variables on Richness
+# intervals(m2psem[[4]], which = "fixed") #Effects of variables on Evenness
+# 
+# ###Piecewise model, full time series phase
+# #Model structure
+# m1psem <- psem(
+#   nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN + Disturbance + fieldB + 
+#               fieldC, random = (~1|grid), data = SEM.b.df, method = "ML"),
+#   nlme::lme(TVR ~ TRichness + TEvenness + logN + Disturbance + fieldB + fieldC,
+#             random = (~1|grid), data = SEM.b.df, method = "ML"),
+#   nlme::lme(TRichness ~  logN + Disturbance + fieldB + fieldC, random = (~1|grid), 
+#             data = SEM.b.df, method = "ML"),
+#   nlme::lme(TEvenness ~  TRichness + logN + Disturbance + fieldB + fieldC,
+#             random = (~1|grid), data = SEM.b.df, method = "ML"),
+#   data = SEM.b.df
+# )
+# 
+# #Report path coefficients, standard errors, and p-values
+# #for transient phase data
+# coefs(m1psem)
+# 
+# #Calculate Confidence Intervals, sub-models 1-4
+# intervals(m1psem[[1]], which = "fixed") #Effects of variables on Stability
+# intervals(m1psem[[2]], which = "fixed") #Effects of variables on Synchrony
+# intervals(m1psem[[3]], which = "fixed") #Effects of variables on Richness
+# intervals(m1psem[[4]], which = "fixed") #Effects of variables on Evenness
 
-m1psem <- SEM.b.df %>% 
-  group_by(Disturbance) %>% 
-  group_map( ~ psem(
-    nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN  + fieldB + 
-                fieldC, random = (~1|grid), data = .x, method = "ML"),
-    nlme::lme(TVR ~ TRichness + TEvenness + logN  + fieldB + fieldC,
-              random = (~1|grid), data = .x, method = "ML"),
-    nlme::lme(TRichness ~  logN  + fieldB + fieldC, random = (~1|grid), 
-              data = .x, method = "ML"),
-    nlme::lme(TEvenness ~  TRichness + logN  + fieldB + fieldC,
-              random = (~1|grid), data = .x, method = "ML"),
-    data = .x
-  ))
-  
+###########
+#New lavaan code
+###########
+#This lavaan code does not include "Disturbance" directly in the model, because we will later
+  #call for it to be the grouping variable in the sem function. In this way, we will create
+  #path coefficients for a model that ONLY utilizes no-disturbance plots (144), and another
+  #set of path coefficients for a model that ONLY utilizes disturbance plots (72). We may 
+  #compare the pathways of one set of transient/post-transient models with the other set,
+  #and this will tell us the interaction between nitrogen and disturbance treatments
 
-m1psem <- psem(
-  nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN + Disturbance + fieldB + 
-              fieldC, random = (~1|grid), data = .x, method = "ML"),
-  nlme::lme(TVR ~ TRichness + TEvenness + logN + Disturbance + fieldB + fieldC,
-            random = (~1|grid), data = .x, method = "ML"),
-  nlme::lme(TRichness ~  logN + Disturbance + fieldB + fieldC, random = (~1|grid), 
-            data = .x, method = "ML"),
-  nlme::lme(TEvenness ~  TRichness + logN + Disturbance + fieldB + fieldC,
-            random = (~1|grid), data = .x, method = "ML"),
-  data = .x
-)
+#However, this will result in not being able to calculate indirect effects that include 
+  #disturbance as the exogenous factor; instead, we will make the point that SEMs are 
+  #important to use because...
 
-#Report path coefficients, standard errors, and p-values
-#for transient phase data
-coefs(m1psem)
+#lavaan model
+m1 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen  + fieldB + fieldC
+       TVR ~ TRichness + TEvenness + Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
+#
+#Fit before years model
+m1.fit <- sem(m1, data=SEM.b.df, group = "Disturbance")
+  #add in bootstrapping when model is determined to be fine se="bootstrap", test="bootstrap"
+summary(m1.fit, stand=TRUE, rsq=TRUE)
+standardizedSolution(m1.fit, type="std.all")
 
-#Calculate Confidence Intervals, sub-models 1-4
-intervals(m1psem[[1]], which = "fixed") #Effects of variables on Stability
-intervals(m1psem[[2]], which = "fixed") #Effects of variables on Synchrony
-intervals(m1psem[[3]], which = "fixed") #Effects of variables on Richness
-intervals(m1psem[[4]], which = "fixed") #Effects of variables on Evenness
-
-
-###Piecewise model, post-transient phase
-#Model structure
-m2psem <- psem(
-  nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN + Disturbance + fieldB + 
-              fieldC, random = (~1|grid), data = SEM.a.df, method = "ML"),
-  nlme::lme(TVR ~ TRichness + TEvenness + logN + Disturbance + fieldB + fieldC,
-            random = (~1|grid), data = SEM.a.df, method = "ML"),
-  nlme::lme(TRichness ~  logN + Disturbance + fieldB + fieldC, random = (~1|grid), 
-            data = SEM.a.df, method = "ML"),
-  nlme::lme(TEvenness ~  TRichness + logN + Disturbance + fieldB + fieldC,
-            random = (~1|grid), data = SEM.a.df, method = "ML"),
-  data = SEM.a.df
-)
-
-#Report path coefficients, standard errors, and p-values
-#for post-transient phase data
-coefs(m2psem)
-
-#Calculate Confidence Intervals, sub-models 1-4
-intervals(m2psem[[1]], which = "fixed") #Effects of variables on Stability
-intervals(m2psem[[2]], which = "fixed") #Effects of variables on Synchrony
-intervals(m2psem[[3]], which = "fixed") #Effects of variables on Richness
-intervals(m2psem[[4]], which = "fixed") #Effects of variables on Evenness
-
-###Piecewise model, full time series phase
-#Model structure
-m1psem <- psem(
-  nlme::lme(TStability ~ TVR + TRichness + TEvenness + logN + Disturbance + fieldB + 
-              fieldC, random = (~1|grid), data = SEM.b.df, method = "ML"),
-  nlme::lme(TVR ~ TRichness + TEvenness + logN + Disturbance + fieldB + fieldC,
-            random = (~1|grid), data = SEM.b.df, method = "ML"),
-  nlme::lme(TRichness ~  logN + Disturbance + fieldB + fieldC, random = (~1|grid), 
-            data = SEM.b.df, method = "ML"),
-  nlme::lme(TEvenness ~  TRichness + logN + Disturbance + fieldB + fieldC,
-            random = (~1|grid), data = SEM.b.df, method = "ML"),
-  data = SEM.b.df
-)
-
-#Report path coefficients, standard errors, and p-values
-#for transient phase data
-coefs(m1psem)
-
-#Calculate Confidence Intervals, sub-models 1-4
-intervals(m1psem[[1]], which = "fixed") #Effects of variables on Stability
-intervals(m1psem[[2]], which = "fixed") #Effects of variables on Synchrony
-intervals(m1psem[[3]], which = "fixed") #Effects of variables on Richness
-intervals(m1psem[[4]], which = "fixed") #Effects of variables on Evenness
+# #Save data
+# saveRDS(standardizedSolution(m1.fit, type="std.all"),
+#         file = here::here("data/SEM_transient.rds"))
+# object <- readRDS(here("data/SEM_transient.rds"))
 
 
 ############################
