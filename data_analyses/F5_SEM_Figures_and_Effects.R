@@ -455,26 +455,48 @@ standardizedSolution(m3.fit, type="std.all")
   #stability. Eliminate pathways that went through Disturbance, as we no longer have the 
   #path coefficients necessary to calculate those
 
-#Set vectors, so that each model (2 total) has it's own independent indirect effect
-a1 <- c('a1.d', 'a1.nod')
-a2 <- c('a2.d', 'a2.nod')
-a3 <- c('a3.d', 'a3.nod')
+#Set vectors, so that each model (2 total) has it's own independent indirect effect#####
 
 m.indirect <- '#Direct effects on Stab
-                TStability ~ c1*Nitrogen + b2*TEvenness + b4*TRichness + d1*TVR
+                TStability ~ c(c1.g1, c1.g2)*Nitrogen + c(b2.g1, b2.g2)*TEvenness + 
+                c(b4.g1, b4.g2)*TRichness + c(d1.g1, d1.g2)*TVR
                #Mediators
-                TVR ~ a2*Nitrogen + b3*TRichness + b1*TEvenness
-                TRichness ~ a3*Nitrogen  
-                TEvenness ~ e1*TRichness + a1*Nitrogen 
+                TVR ~ c(a2.g1, a2.g2)*Nitrogen + c(b3.g1, b3.g2)*TRichness + 
+                c(b1.g1, b1.g2)*TEvenness
+                TRichness ~ c(a3.g1, a3.g2)*Nitrogen  
+                TEvenness ~ c(e1.g1, e1.g2)*TRichness + c(a1.g1, a1.g2)*Nitrogen 
                #Extra variables
                 TStability ~ fieldB + fieldC
                 TVR ~ fieldB + fieldC
                 TRichness ~ fieldB + fieldC
                 TEvenness ~ fieldB + fieldC
-               #Indirect effects
-                ind_eff_NSyS := a2 * d1
-                ind_eff_NRS := a3 * b4
-                ind_eff_NES := a1 * b2
+                
+               #Indirect effects Group 1
+                g1ind_eff_NSyS := a2.g1 * d1.g1
+                g1ind_eff_NRS := a3.g1 * b4.g1
+                g1ind_eff_NES := a1.g1 * b2.g1
+                
+                #Indirect effects Group 2
+                g2ind_eff_NSyS := a2.g2 * d1.g2
+                g2ind_eff_NRS := a3.g2 * b4.g2
+                g2ind_eff_NES := a1.g2 * b2.g2
 '
 
+#Fit before years model
+m.indirect.fit.b <- sem(m.indirect, data=SEM.b.df, group = "Disturbance")
+summary(m.indirect.fit.b, stand=TRUE, rsq=TRUE) #look at rsq values
+standardizedSolution(m.indirect.fit.b, type="std.all")
+
+#Save data
+saveRDS(standardizedSolution(m.indirect.fit.b, type="std.all"), 
+        file = here::here("data/SEM_indirect_transient.rds")) 
+
+#Fit after years model
+m.indirect.fit.a <- sem(m.indirect, data=SEM.a.df, se="bootstrap", test="bootstrap")
+summary(m.indirect.fit.a, stand=TRUE, rsq=TRUE)
+standardizedSolution(m.indirect.fit.a, type="std.all")
+
+#Save data
+saveRDS(standardizedSolution(m.indirect.fit.a, type="std.all"), 
+        file = here::here("data/SEM_indirect_posttransient.rds")) 
 
