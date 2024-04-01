@@ -59,12 +59,11 @@ m1 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
        TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
 
 #Fit ALL years model 
-m3.fit <- sem(m1, data=SEM.df, group = "Disturbance")
-#add in bootstrapping when model is determined to be fine se="bootstrap", test="bootstrap"
-summary(m3.fit, stand=TRUE, rsq=TRUE)
-standardizedSolution(m3.fit, type="std.all")
+msupp.fit <- sem(m1, data=SEM.df, group = "Disturbance", se="bootstrap", test="bootstrap")
+summary(msupp.fit, stand=TRUE, rsq=TRUE)
+standardizedSolution(msupp.fit, type="std.all")
 
 #Save data
-saveRDS(standardizedSolution(m3.fit, type="std.all"),
+saveRDS(standardizedSolution(msupp.fit, type="std.all"),
         file = here::here("data/SEM_allyears.rds"))
-object <- readRDS(here("data/SEM_allyears.rds"))
+#object <- readRDS(here("data/SEM_allyears.rds"))

@@ -81,7 +81,7 @@ m1 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
 
 
 ###Lavaan model, transient phase
-m1.fit <- sem(m1, data=SEM.b.df, group = "Disturbance")
+m1.fit <- sem(m1, data=SEM.b.df, group = "Disturbance", se="bootstrap", test="bootstrap")
 summary(m1.fit, stand=TRUE, rsq=TRUE)
 standardizedSolution(m1.fit, type="std.all")
 
@@ -93,7 +93,7 @@ saveRDS(standardizedSolution(m1.fit, type="std.all"),
 
 
 ###Lavaan model, post-transient phase
-m2.fit <- sem(m1, data=SEM.a.df, group = "Disturbance")
+m2.fit <- sem(m1, data=SEM.a.df, group = "Disturbance", se="bootstrap", test="bootstrap")
 summary(m2.fit, stand=TRUE, rsq=TRUE)
 standardizedSolution(m2.fit, type="std.all")
 
@@ -139,7 +139,8 @@ m.indirect <- '#Direct effects on Stab
 '
 
 #Fit before years model
-m.indirect.fit.b <- sem(m.indirect, data=SEM.b.df, group = "Disturbance")
+m.indirect.fit.b <- sem(m.indirect, data=SEM.b.df, group = "Disturbance", 
+                        se="bootstrap", test="bootstrap")
 summary(m.indirect.fit.b, stand=TRUE, rsq=TRUE) #look at rsq values
 standardizedSolution(m.indirect.fit.b, type="std.all")
 
@@ -148,7 +149,8 @@ saveRDS(standardizedSolution(m.indirect.fit.b, type="std.all"),
         file = here::here("data/SEM_indirect_transient.rds")) 
 
 #Fit after years model
-m.indirect.fit.a <- sem(m.indirect, data=SEM.a.df, se="bootstrap", test="bootstrap")
+m.indirect.fit.a <- sem(m.indirect, data=SEM.a.df, se="bootstrap", test="bootstrap", 
+                        se="bootstrap", test="bootstrap")
 summary(m.indirect.fit.a, stand=TRUE, rsq=TRUE)
 standardizedSolution(m.indirect.fit.a, type="std.all")
 
@@ -205,7 +207,7 @@ shapiro.test(SEM.10a.df$TEvenness)
 
 
 ###Lavaan model, 10 year transient phase
-m4.fit <- sem(m1, data=SEM.10b.df, group = "Disturbance")
+m4.fit <- sem(m1, data=SEM.10b.df, group = "Disturbance", se="bootstrap", test="bootstrap")
 summary(m4.fit, stand=TRUE, rsq=TRUE)
 standardizedSolution(m4.fit, type="std.all")
 
@@ -215,7 +217,7 @@ saveRDS(standardizedSolution(m4.fit, type="std.all"),
 #object <- readRDS(here("data/SEM_10yr_transient.rds"))
 
 ###Lavaan model, 10 year post-transient phase
-m5.fit <- sem(m1, data=SEM.10a.df, group = "Disturbance")
+m5.fit <- sem(m1, data=SEM.10a.df, group = "Disturbance", se="bootstrap", test="bootstrap")
 summary(m5.fit, stand=TRUE, rsq=TRUE)
 standardizedSolution(m5.fit, type="std.all")
 
