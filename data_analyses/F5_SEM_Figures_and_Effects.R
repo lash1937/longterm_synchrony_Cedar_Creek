@@ -79,20 +79,6 @@ SEM.df$TEvenness <- boxcox_transform(SEM.df$Evenness, -0.4)
 shapiro.test(SEM.df$TEvenness)
 
 
-
-##Scale all non-categorical variables
-SEM.b.df <- SEM.b.df %>% 
-  mutate_at(c('logN', 'TStability', 'TVR', 'TRichness', 'TEvenness'), ~(scale(.)
-                                                                            %>% as.vector))
-
-SEM.a.df <- SEM.a.df %>% 
-  mutate_at(c('logN', 'TStability', 'TVR', 'TRichness', 'TEvenness'), ~(scale(.)
-                                                                            %>% as.vector))
-
-SEM.df <- SEM.df %>% 
-  mutate_at(c('logN', 'TStability', 'TVR', 'TRichness', 'TEvenness'), ~(scale(.)
-                                                                        %>% as.vector))
-
 ############################
 ###SEM model building###
 # Produce summary outputs of direct effects of exogenous factors
@@ -111,7 +97,6 @@ m1 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
 
 ###Lavaan model, transient phase
 m1.fit <- sem(m1, data=SEM.b.df, group = "Disturbance")
-  #add in bootstrapping when model is determined to be fine se="bootstrap", test="bootstrap"
 summary(m1.fit, stand=TRUE, rsq=TRUE)
 standardizedSolution(m1.fit, type="std.all")
 
@@ -136,10 +121,10 @@ m3.fit <- sem(m1, data=SEM.df, group = "Disturbance")
 summary(m3.fit, stand=TRUE, rsq=TRUE)
 standardizedSolution(m3.fit, type="std.all")
 
-# #Save data
-# saveRDS(standardizedSolution(m1.fit, type="std.all"),
-#         file = here::here("data/SEM_allyears.rds"))
-# object <- readRDS(here("data/SEM_allyears.rds"))
+#Save data
+saveRDS(standardizedSolution(m3.fit, type="std.all"),
+        file = here::here("data/SEM_allyears.rds"))
+object <- readRDS(here("data/SEM_allyears.rds"))
 
 
 ############################

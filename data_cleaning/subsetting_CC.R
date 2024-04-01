@@ -65,6 +65,14 @@ SEM.df <- dplyr::left_join(Richness.df, Evenness.df)%>%
   mutate(grid = factor(paste0(field, exp))) %>% 
   dplyr::relocate(grid, .after = exp)
 
+#Add in dummy variables for Field effects
+field <- as.data.frame(model.matrix(~ field, data = SEM.df)) %>% 
+  dplyr::rename(fieldA = `(Intercept)`) %>% 
+  dplyr::mutate(uniqueID = SEM.df$uniqueID)
+
+SEM.df <- left_join(SEM.df, field, by = "uniqueID")
+
+
 #Convert Nutrients to Continuous Values-----
 SEM.df <- SEM.df %>% dplyr::mutate(Micronut=Nutrients, Nitrogen=Nutrients)
 SEM.df$Micronut<-mapvalues(SEM.df$Micronut, from=c( "1", "2", "3" ,"4", "5", "6", "7", "8", "9"), 
