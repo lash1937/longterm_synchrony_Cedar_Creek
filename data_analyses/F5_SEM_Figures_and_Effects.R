@@ -35,7 +35,6 @@ MASS::boxcox(lm(SEM.a.df$Stability ~ 1))
 SEM.a.df$TStability <- boxcox_transform(SEM.a.df$Stability, 0.05)
 shapiro.test(SEM.a.df$TStability)
 
-
 #VR
 MASS::boxcox(lm(SEM.b.df$VR ~ 1))
 SEM.b.df$TVR <- boxcox_transform(SEM.b.df$VR, 0.5)
@@ -45,7 +44,6 @@ MASS::boxcox(lm(SEM.a.df$VR ~ 1))
 SEM.a.df$TVR <- boxcox_transform(SEM.a.df$VR, 0.4)
 shapiro.test(SEM.a.df$TVR)
 
-
 #Richness
 MASS::boxcox(lm(SEM.b.df$Richness ~ 1))
 SEM.b.df$TRichness <- boxcox_transform(SEM.b.df$Richness, 0.85)
@@ -54,7 +52,6 @@ shapiro.test(SEM.b.df$TRichness)
 MASS::boxcox(lm(SEM.a.df$Richness ~ 1))
 SEM.a.df$TRichness <- boxcox_transform(SEM.a.df$Richness, -0.05)
 shapiro.test(SEM.a.df$TRichness)
-
 
 #Evenness
 MASS::boxcox(lm(SEM.b.df$Evenness ~ 1))
@@ -91,7 +88,7 @@ standardizedSolution(m1.fit, type="std.all")
 #Save data
 saveRDS(standardizedSolution(m1.fit, type="std.all"),
         file = here::here("data/SEM_transient.rds"))
-object <- readRDS(here("data/SEM_transient.rds"))
+#object <- readRDS(here("data/SEM_transient.rds"))
 
 
 
@@ -103,7 +100,7 @@ standardizedSolution(m2.fit, type="std.all")
 #Save data
 saveRDS(standardizedSolution(m2.fit, type="std.all"),
         file = here::here("data/SEM_posttransient.rds"))
-object <- readRDS(here("data/SEM_posttransient.rds"))
+#object <- readRDS(here("data/SEM_posttransient.rds"))
 
 
 ############################
@@ -112,205 +109,6 @@ object <- readRDS(here("data/SEM_posttransient.rds"))
 # of exogenous factors on community properties
 ############################
 
-# #Save path coefficients for calculation of indirect effects
-# path.b.coefs <- coefs(m1psem)
-# path.a.coefs <- coefs(m2psem)
-# 
-# #####Transient Phase#####
-# #Nitrogen -> Synchrony -> Stability
-# #Calculate indirect effect
-# ind_eff_NSyS.b <- path.b.coefs[10,3] * path.b.coefs[1,3]
-# #Create vector of direct paths
-# NSyS_est.b <- c(
-#   path.b.coefs[10, 3], #Nitrogen -> Synchrony direct path
-#   path.b.coefs[1, 3]   #Synchrony -> Stability direct path
-# )
-# #Construct covariance matrix
-# NSyS_cov.b <- matrix(0, 2, 2)
-# NSyS_cov.b[1, 1] <- path.b.coefs[10, 4]^2         #Synchrony ~ Nitrogen submodel
-# NSyS_cov.b[2, 2] <- path.b.coefs[1, 4]^2           #Stability ~ Synchrony submodel
-# #Calculate maximum possible variance
-# NSyS_cov.b[1, 2] <- path.b.coefs[10, 4] * path.b.coefs[1, 4]
-# NSyS_cov.b[2,1] <- NSyS_cov.b[1, 2]
-# #Calculate SE using the delta method
-# seNSyS.b <- msm::deltamethod(~ x1 * x2, NSyS_est.b, cov = NSyS_cov.b)
-# #Calculte p-value
-# pNSyS.b <- pnorm(abs(ind_eff_NSyS.b / seNSyS.b), lower.tail = F)
-# #Collect calculated effect, standard error, and p-value together
-# NSyS.b <- c(ind_eff_NSyS.b, seNSyS.b, pNSyS.b)
-# 
-# #Disturbance -> Synchrony -> Stability
-# #Calculate indirect effect
-# ind_eff_DSyS.b <- path.b.coefs[11,3] * path.b.coefs[1,3]
-# #Create vector of direct paths
-# DSyS_est.b <- c(
-#   path.b.coefs[11, 3], #Dist -> Synchrony direct path
-#   path.b.coefs[1, 3]   #Synchrony -> Stability direct path
-# )
-# #Construct covariance matrix
-# DSyS_cov.b <- matrix(0, 2, 2)
-# DSyS_cov.b[1, 1] <- path.b.coefs[11, 4]^2          #Synchrony ~ Dist submodel
-# DSyS_cov.b[2, 2] <- path.b.coefs[1, 4]^2           #Stability ~ Synchrony submodel
-# #Calculate maximum possible variance
-# DSyS_cov.b[1, 2] <- path.b.coefs[11, 4] * path.b.coefs[1, 4]
-# DSyS_cov.b[2,1] <- DSyS_cov.b[1, 2]
-# #Calculate SE using the delta method
-# seDSyS.b <- msm::deltamethod(~ x1 * x2, DSyS_est.b, cov = DSyS_cov.b)
-# #Calculate p-value
-# pDSyS.b <- pnorm(abs(ind_eff_DSyS.b / seDSyS.b), lower.tail = F)
-# #Collect calculated effect, standard error, and p-value together
-# DSyS.b <- c(ind_eff_DSyS.b, seDSyS.b, pDSyS.b)
-# 
-# #Nitrogen -> Richness -> Stability
-# #Calculate indirect effect
-# ind_eff_NRS.b <- path.b.coefs[14,3] * path.b.coefs[2,3]
-# #Create vector of direct paths
-# NRS_est.b <- c(
-#   path.b.coefs[14, 3], #Nitrogen -> Richness direct path
-#   path.b.coefs[2, 3]   #Richness -> Stability direct path
-# )
-# #Construct covariance matrix
-# NRS_cov.b <- matrix(0, 2, 2)
-# NRS_cov.b[1, 1] <- path.b.coefs[14, 4]^2 #Richness ~ Nitrogen submodel
-# NRS_cov.b[2, 2] <- path.b.coefs[2, 4]^2  #Stability ~ Richness submodel
-# #Calculate maximum possible variance
-# NRS_cov.b[1, 2] <- -path.b.coefs[14, 4] * path.b.coefs[2, 4]
-# NRS_cov.b[2,1] <- NRS_cov.b[1, 2]
-# #Calculate SE using the delta method
-# seNRS.b <- msm::deltamethod(~ x1 * x2, NRS_est.b, cov = NRS_cov.b)
-# #Calculate p-value
-# pNRS.b <- pnorm(abs(ind_eff_NRS.b / seNRS.b), lower.tail = F)
-# #Collect calculated effect, standard error, and p-value together
-# NRS.b <- c(ind_eff_NRS.b, seNRS.b, pNRS.b)
-# 
-# #Disturbance -> Richness -> Stability
-# #Calculate indirect effect
-# ind_eff_DRS.b <- path.b.coefs[15,3] * path.b.coefs[2,3]
-# #Create vector of direct paths
-# DRS_est.b <- c(
-#   path.b.coefs[15, 3], #Disturbance -> Richness direct path
-#   path.b.coefs[2, 3]   #Richness -> Stability direct path
-# )
-# #Construct covariance matrix
-# DRS_cov.b <- matrix(0, 2, 2)
-# DRS_cov.b[1, 1] <- path.b.coefs[15, 4]^2 #Richness ~ Dist submodel
-# DRS_cov.b[2, 2] <- path.b.coefs[2, 4]^2 #Stability ~ Richness submodel
-# #Calculate maximum possible variance
-# DRS_cov.b[1, 2] <- -path.b.coefs[15, 4] * path.b.coefs[2, 4]
-# DRS_cov.b[2,1] <- DRS_cov.b[1, 2]
-# #Calculate SE using the delta method
-# seDRS.b <- msm::deltamethod(~ x1 * x2, DRS_est.b, cov = DRS_cov.b)
-# #Calculate p-value
-# pDRS.b <- pnorm(abs(ind_eff_DRS.b / seDRS.b), lower.tail = F)
-# #Collect calculated effect, standard error, and p-value together
-# DRS.b <- c(ind_eff_DRS.b, seDRS.b, pDRS.b)
-# 
-# #Compile results into single dataframe
-# ind.eff.b <- rbind(NSyS.b, DSyS.b, NRS.b, DRS.b)
-# colnames(ind.eff.b) <- c("Effect", "SE", "Pvalue")  
-# 
-# 
-# 
-# #####Post-transient Phase#####
-# #Nitrogen -> Synchrony -> Stability
-# #Calculate indirect effect
-# ind_eff_NSyS.a <- path.a.coefs[10, 3] * path.a.coefs[1, 3]
-# #Create vector of direct paths
-# NSyS_est.a <- c(
-#   path.a.coefs[10, 3], #Nitrogen -> Synchrony direct path
-#   path.a.coefs[1, 3]   #Synchrony -> Stability direct path
-# )
-# #Construct covariance matrix
-# NSyS_cov.a <- matrix(0, 2, 2)
-# NSyS_cov.a[1, 1] <- path.a.coefs[10, 4]^2          #Synchrony ~ Nitrogen submodel
-# NSyS_cov.a[2, 2] <- path.a.coefs[1, 4]^2           #Stability ~ Synchrony submodel
-# #Calculate maximum possible variance
-# NSyS_cov.a[1, 2] <- -path.a.coefs[10, 4] * path.a.coefs[1, 4]
-# NSyS_cov.a[2,1] <- NSyS_cov.a[1, 2]
-# #Calculate SE using the delta method
-# seNSyS.a <- msm::deltamethod(~ x1 * x2, NSyS_est.a, cov = NSyS_cov.a)
-# #Calculte p-value
-# pNSyS.a <- pnorm(abs(ind_eff_NSyS.a / seNSyS.a), lower.tail = F)
-# #Collect calculated effect, standard error, and p-value together
-# NSyS.a <- c(ind_eff_NSyS.a, seNSyS.a, pNSyS.a)
-# 
-# #Disturbance -> Synchrony -> Stability
-# #Calculate indirect effect
-# ind_eff_DSyS.a <- path.a.coefs[11, 3] * path.a.coefs[1, 3]
-# #Create vector of direct paths
-# DSyS_est.a <- c(
-#   path.a.coefs[11, 3], #Dist -> Synchrony direct path
-#   path.a.coefs[1, 3]   #Synchrony -> Stability direct path
-# )
-# #Construct covariance matrix
-# DSyS_cov.a <- matrix(0, 2, 2)
-# DSyS_cov.a[1, 1] <- path.a.coefs[11, 4]^2 #Synchrony ~ Dist submodel
-# DSyS_cov.a[2, 2] <- path.a.coefs[1, 4]^2          #Stability ~ Synchrony submodel
-# #Calculate maximum possible variance
-# DSyS_cov.a[1, 2] <- path.a.coefs[11, 4] * path.a.coefs[1, 4]
-# DSyS_cov.a[2,1] <- DSyS_cov.a[1, 2]
-# #Calculate SE using the delta method
-# seDSyS.a <- msm::deltamethod(~ x1 * x2, DSyS_est.a, cov = DSyS_cov.a)
-# #Calculate p-value
-# pDSyS.a <- pnorm(abs(ind_eff_DSyS.a / seDSyS.a), lower.tail = F)
-# #Collect calculated effect, standard error, and p-value together
-# DSyS.a <- c(ind_eff_DSyS.a, seDSyS.a, pDSyS.a)
-# 
-# #Nitrogen -> Richness -> Stability
-# #Calculate indirect effect
-# ind_eff_NRS.a <- path.a.coefs[14, 3] * path.a.coefs[2, 3]
-# #Create vector of direct paths
-# NRS_est.a <- c(
-#   path.a.coefs[14, 3], #Nitrogen -> Richness direct path
-#   path.a.coefs[2, 3]   #Richness -> Stability direct path
-# )
-# #Construct covariance matrix
-# NRS_cov.a <- matrix(0, 2, 2)
-# NRS_cov.a[1, 1] <- path.a.coefs[14, 4]^2 #Richness ~ Nitrogen submodel
-# NRS_cov.a[2, 2] <- path.a.coefs[2, 4]^2 #Stability ~ Richness submodel
-# #Calculate maximum possible variance
-# NRS_cov.a[1, 2] <- -path.a.coefs[14, 4] * path.a.coefs[2, 4]
-# NRS_cov.a[2,1] <- NRS_cov.a[1, 2]
-# #Calculate SE using the delta method
-# seNRS.a <- msm::deltamethod(~ x1 * x2, NRS_est.a, cov = NRS_cov.a)
-# #Calculate p-value
-# pNRS.a <- pnorm(abs(ind_eff_NRS.a / seNRS.a), lower.tail = F)
-# #Collect calculated effect, standard error, and p-value together
-# NRS.a <- c(ind_eff_NRS.a, seNRS.a, pNRS.a)
-# 
-# #Disturbance -> Richness -> Stability
-# #Calculate indirect effect
-# ind_eff_DRS.a <- path.a.coefs[15,3] * path.a.coefs[2,3]
-# #Create vector of direct paths
-# DRS_est.a <- c(
-#   path.a.coefs[15, 3], #Disturbance -> Richness direct path
-#   path.a.coefs[2, 3]   #Richness -> Stability direct path
-# )
-# #Construct covariance matrix
-# DRS_cov.a <- matrix(0, 2, 2)
-# DRS_cov.a[1, 1] <- path.a.coefs[15, 4]^2 #Richness ~ Dist submodel
-# DRS_cov.a[2, 2] <- path.a.coefs[2, 4]^2 #Stability ~ Richness submodel
-# #Calculate maximum possible variance
-# DRS_cov.a[1, 2] <- -path.a.coefs[15, 4] * path.a.coefs[2, 4]
-# DRS_cov.a[2,1] <- DRS_cov.a[1, 2]
-# #Calculate SE using the delta method
-# seDRS.a <- msm::deltamethod(~ x1 * x2, DRS_est.a, cov = DRS_cov.a)
-# #Calculate p-value
-# pDRS.a <- pnorm(abs(ind_eff_DRS.a / seDRS.a), lower.tail = F)
-# #Collect calculated effect, standard error, and p-value together
-# DRS.a <- c(ind_eff_DRS.a, seDRS.a, pDRS.a)
-# 
-# #Compile results into single dataframe
-# ind.eff.a <- rbind(NSyS.a, DSyS.a, NRS.a, DRS.a)
-# colnames(ind.eff.a) <- c("Effect", "SE", "Pvalue")  
-# 
-# #Reported indirect effects and errors
-# ind.eff.b
-# ind.eff.a
-
-###############
-#Indirect effects using lavaan
-###############
 #Calculate indirect effects of nitrogen through richness and nitrogen through synchrony on 
   #stability. Eliminate pathways that went through Disturbance, as we no longer have the 
   #path coefficients necessary to calculate those
@@ -357,4 +155,72 @@ standardizedSolution(m.indirect.fit.a, type="std.all")
 #Save data
 saveRDS(standardizedSolution(m.indirect.fit.a, type="std.all"), 
         file = here::here("data/SEM_indirect_posttransient.rds")) 
+
+
+
+######################
+# Compare SEM pathway outputs when using a 10 year window
+# instead of a 7 year window
+
+###Data Transformations###----
+#Nitrogen
+SEM.10b.df$logN <- log(SEM.10b.df$Nitrogen + 1)
+SEM.10a.df$logN <- log(SEM.10a.df$Nitrogen + 1)
+
+#Stability
+MASS::boxcox(lm(SEM.10b.df$Stability ~ 1)) #Determine ideal lambda
+SEM.10b.df$TStability <- boxcox_transform(SEM.10b.df$Stability, -0.4) #Transform variable
+shapiro.test(SEM.10b.df$TStability) #Test for Normality
+
+MASS::boxcox(lm(SEM.10a.df$Stability ~ 1))
+SEM.10a.df$TStability <- boxcox_transform(SEM.10a.df$Stability, 0.05)
+shapiro.test(SEM.10a.df$TStability)
+
+#VR
+MASS::boxcox(lm(SEM.10b.df$VR ~ 1))
+SEM.10b.df$TVR <- boxcox_transform(SEM.10b.df$VR, 0.6)
+shapiro.test(SEM.10b.df$TVR)
+
+MASS::boxcox(lm(SEM.10a.df$VR ~ 1))
+SEM.10a.df$TVR <- boxcox_transform(SEM.10a.df$VR, 0.5)
+shapiro.test(SEM.10a.df$TVR)
+
+#Richness
+MASS::boxcox(lm(SEM.10b.df$Richness ~ 1))
+SEM.10b.df$TRichness <- boxcox_transform(SEM.10b.df$Richness, 0.5)
+shapiro.test(SEM.10b.df$TRichness)
+
+MASS::boxcox(lm(SEM.10a.df$Richness ~ 1))
+SEM.10a.df$TRichness <- boxcox_transform(SEM.10a.df$Richness, -0.02)
+shapiro.test(SEM.10a.df$TRichness)
+
+#Evenness
+MASS::boxcox(lm(SEM.10b.df$Evenness ~ 1))
+SEM.10b.df$TEvenness <- boxcox_transform(SEM.10a.df$Evenness, -0.2)
+shapiro.test(SEM.10b.df$TEvenness)
+
+MASS::boxcox(lm(SEM.10a.df$Evenness ~ 1))
+SEM.10a.df$TEvenness <- boxcox_transform(SEM.10a.df$Evenness, -0.3)
+shapiro.test(SEM.10a.df$TEvenness)
+
+
+###Lavaan model, 10 year transient phase
+m4.fit <- sem(m1, data=SEM.10b.df, group = "Disturbance")
+summary(m4.fit, stand=TRUE, rsq=TRUE)
+standardizedSolution(m4.fit, type="std.all")
+
+#Save data
+saveRDS(standardizedSolution(m4.fit, type="std.all"),
+        file = here::here("data/SEM_10yr_transient.rds"))
+#object <- readRDS(here("data/SEM_10yr_transient.rds"))
+
+###Lavaan model, 10 year post-transient phase
+m5.fit <- sem(m1, data=SEM.10a.df, group = "Disturbance")
+summary(m5.fit, stand=TRUE, rsq=TRUE)
+standardizedSolution(m5.fit, type="std.all")
+
+#Save data
+saveRDS(standardizedSolution(m5.fit, type="std.all"),
+        file = here::here("data/SEM_10yr_posttransient.rds"))
+#object <- readRDS(here("data/SEM_10yr_posttransient.rds"))
 

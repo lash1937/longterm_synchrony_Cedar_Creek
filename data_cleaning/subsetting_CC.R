@@ -311,3 +311,158 @@ SEM.a.df$Disturbance <- as.numeric(SEM.a.df$Disturbance)
 SEM.a.df <- SEM.a.df %>%
   subset(Micronut!=0) 
 
+##################
+#Create a dataset with a 10 year window instead of 7 years
+##################
+
+#Transient 10 Years Data Subset-----
+before_years <- subset(da.widesynch, as.numeric(year) <= 10)
+before_years$years <- droplevels(before_years$year)
+
+##Transient 10 years dataframe-----
+unique_ID_exp12_10before <- tidyr::unite(before_years, "uniqueID", c(field, exp, plot, disk, ntrt), sep="_")
+
+unique_ID_long_10before <- tidyr::pivot_longer(unique_ID_exp12_10before, cols = 8:(length(unique_ID_exp12_10before)-1),
+                                             names_to = "Species", values_to = "Abundance")
+
+unique_ID_long_10before$Abundance<-as.numeric(unique_ID_long_10before$Abundance)
+unique_ID_long_10before$year<-as.numeric(unique_ID_long_10before$year)
+
+#Diversity-----
+Richness.10b.df <- unique_ID_long_10before %>%
+  dplyr::group_by(uniqueID, year) %>%
+  dplyr::summarise(Rich = sum(Abundance > 0)) %>%
+  dplyr::ungroup() %>%
+  dplyr::group_by(uniqueID) %>%
+  dplyr::summarise(Richness = mean(Rich))
+
+Evenness.10b.df <- unique_ID_long_10before %>%
+  dplyr::group_by(uniqueID, year) %>%
+  dplyr::summarise(Even = Evar(Abundance)) %>% 
+  dplyr::ungroup() %>%
+  dplyr::group_by(uniqueID) %>%
+  dplyr::summarise(Evenness = mean(Even, na.rm=T))
+
+#Synchrony-----
+VR_10before <- variance_ratio(unique_ID_long_10before, time.var = "year",
+                            species.var = "Species", abundance.var = "Abundance",
+                            bootnumber = 1, replicate = "uniqueID",
+                            average.replicates = FALSE)
+
+#Stability-----
+stab_10before <- community_stability(unique_ID_long_10before, time.var = "year",
+                                   abundance.var = "Abundance", replicate.var = "uniqueID")
+
+
+#All Transient 10 year window Variables-----
+# Create consolidated dataframe of diversity metrics, VR, stability, population and 
+# community variance, mean biomass, disturbance, and nutrients
+
+SEM.10b.df <- left_join(Richness.10b.df, Evenness.10b.df) %>%
+  dplyr::left_join(VR_10before)%>%
+  dplyr::left_join(stab_10before)%>%
+  dplyr::select(uniqueID, Richness, Evenness, VR, stability)%>%
+  tidyr::separate(uniqueID, into = c("field", "exp", "plot", "disk", "ntrt"), sep="_", remove = FALSE)%>%
+  dplyr::select(-c(plot)) %>% 
+  dplyr::rename(Disturbance = disk, Nutrients = ntrt, Stability = stability) %>% 
+  mutate(grid = factor(paste0(field, exp))) %>% 
+  dplyr::relocate(grid, .after = exp)
+
+#Add in dummy variables for Field effects
+field10 <- as.data.frame(model.matrix(~ field, data = SEM.10b.df)) %>% 
+  dplyr::rename(fieldA = `(Intercept)`) %>% 
+  dplyr::mutate(uniqueID = SEM.10b.df$uniqueID)
+
+SEM.10b.df <- left_join(SEM.10b.df, field10, by = "uniqueID")
+
+
+#Convert Nutrients to Continuous Values-----
+SEM.10b.df <- SEM.10b.df %>% dplyr::mutate(Micronut=Nutrients, Nitrogen=Nutrients)
+SEM.10b.df$Micronut<-mapvalues(SEM.10b.df$Micronut, from=c( "1", "2", "3" ,"4", "5", "6", "7", "8", "9"), 
+                             to=c("1", "1", "1" ,"1", "1", "1", "1", "1", "0"))
+SEM.10b.df$Nitrogen<-mapvalues(SEM.10b.df$Nitrogen, from=c( "1", "2", "3" ,"4", "5", "6", "7", "8", "9"),
+                             to=c("0.0", "1.0", "2.0" ,"3.4", "5.4", "9.5", "17", "27.2", "0.0"))
+
+SEM.10b.df$Nitrogen <- as.numeric(as.character(SEM.10b.df$Nitrogen))
+SEM.10b.df$Disturbance <- as.numeric(SEM.10b.df$Disturbance)
+
+#Remove Nutrient Control (Micronut = 0)
+SEM.10b.df <- SEM.10b.df %>%
+  subset(Micronut!=0)
+
+
+
+#Post-transient 10 Years Data Subset-----
+after_years <- subset(da.widesynch, year %in% c(1991 ,1992, 1993, 1994, 1996, 1997, 1999, 2000, 2002, 2004))
+after_years$years <- droplevels(after_years$year)
+
+#Post-transient years dataframe-----
+unique_ID_exp12_10after <- tidyr::unite(after_years, "uniqueID", c(field, exp, plot, disk, ntrt), sep="_")
+
+unique_ID_long_10after <- tidyr::pivot_longer(unique_ID_exp12_10after, 8:(length(unique_ID_exp12_10after)-1),
+                                            names_to = "Species", values_to = "Abundance")
+
+unique_ID_long_10after$Abundance<-as.numeric(unique_ID_long_10after$Abundance)
+unique_ID_long_10after$year<-as.numeric(unique_ID_long_10after$year)
+
+#Diversity-----
+Richness.10a.df <- unique_ID_long_10after %>%
+  dplyr::group_by(uniqueID, year) %>%
+  dplyr::summarise(Rich = sum(Abundance > 0)) %>%
+  dplyr::ungroup() %>%
+  dplyr::group_by(uniqueID) %>%
+  dplyr::summarise(Richness = mean(Rich))
+
+Evenness.10a.df <- unique_ID_long_10after %>%
+  dplyr::group_by(uniqueID, year) %>%
+  dplyr::summarise(Even = Evar(Abundance)) %>% 
+  dplyr::ungroup() %>%
+  dplyr::group_by(uniqueID) %>%
+  dplyr::summarise(Evenness = mean(Even, na.rm=T))
+
+#Synchrony-----
+VR_10after <- variance_ratio(unique_ID_long_10after, time.var = "year",
+                           species.var = "Species", abundance.var = "Abundance",
+                           bootnumber = 1, replicate = "uniqueID",
+                           average.replicates = FALSE)
+
+#Stability
+stab_10after <- community_stability(unique_ID_long_10after, time.var = "year",
+                                  abundance.var = "Abundance", replicate.var = "uniqueID")
+
+
+#All Post-transient 10 year Variables
+# Create consolidated dataframe of diversity metrics, VR, stability, population and 
+# community variance, mean biomass, disturbance, and nutrients
+
+SEM.10a.df <- left_join(Richness.10a.df, Evenness.10a.df) %>%
+  dplyr::left_join(VR_10after)%>%
+  dplyr::left_join(stab_10after)%>%
+  dplyr::select(uniqueID, Richness, Evenness, VR, stability)%>%
+  tidyr::separate(uniqueID, into = c("field", "exp", "plot", "disk", "ntrt"), sep="_", remove = FALSE)%>%
+  dplyr::select(-c(plot)) %>% 
+  dplyr::rename(Disturbance = disk, Nutrients = ntrt, Stability = stability) %>% 
+  mutate(grid = factor(paste0(field, exp))) %>% 
+  dplyr::relocate(grid, .after = exp)
+
+#Add in dummy variables for Field effects
+field.10a <- as.data.frame(model.matrix(~ field, data = SEM.10a.df)) %>% 
+  dplyr::rename(fieldA = `(Intercept)`) %>% 
+  dplyr::mutate(uniqueID = SEM.10a.df$uniqueID)
+
+SEM.10a.df <- left_join(SEM.10a.df, field.10a, by = "uniqueID")
+
+#Convert Nutrients to Continuous Values-----
+SEM.10a.df<-SEM.10a.df %>% dplyr::mutate(Micronut=Nutrients, Nitrogen=Nutrients)
+SEM.10a.df$Micronut<-mapvalues(SEM.10a.df$Micronut, from=c( "1", "2", "3" ,"4", "5", "6", "7", "8", "9"), 
+                             to=c("1", "1", "1" ,"1", "1", "1", "1", "1", "0"))
+SEM.10a.df$Nitrogen<-mapvalues(SEM.10a.df$Nitrogen, from=c( "1", "2", "3" ,"4", "5", "6", "7", "8", "9"),
+                             to=c("0.0", "1.0", "2.0" ,"3.4", "5.4", "9.5", "17", "27.2", "0.0"))
+
+SEM.10a.df$Nitrogen<-as.numeric(as.character(SEM.10a.df$Nitrogen))
+SEM.10a.df$Disturbance <- as.numeric(SEM.10a.df$Disturbance)
+
+#Remove Nutrient Control (Micronut = 0)
+SEM.10a.df <- SEM.10a.df %>%
+  subset(Micronut!=0) 
+
