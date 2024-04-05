@@ -150,9 +150,9 @@ Fig1A_newmod<- ggplot() +
   xlab(" ")+
   geom_hline(yintercept=1, color="darkgrey", linetype = "dashed") +
   theme_bw()+
-  theme(axis.text.x = element_text(color = "grey20", size = 11,
+  theme(axis.text.x = element_text(color = "grey20", size = 12,
                                    angle = 45, hjust = 1.0, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 11, 
+        axis.text.y = element_text(color = "grey20", size = 12, 
                                    angle = 0, hjust = .5, vjust = 0, 
                                    face = "plain"),
         axis.title.x = element_text(color = "black", size = 14,
@@ -232,9 +232,9 @@ Fig1B_newmod<- ggplot() +
   lims(y=c(.5,4.25))+
   labs(legend="Disturbance")+
   theme_bw()+
-  theme(axis.text.x = element_text(color = "grey20", size = 11, 
+  theme(axis.text.x = element_text(color = "grey20", size = 12, 
                                    angle = 45, hjust = 1.0, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 11, 
+        axis.text.y = element_text(color = "grey20", size = 12, 
                                    angle = 0, hjust = .5, vjust = 0, 
                                    face = "plain"),
         axis.title.x = element_text(color = "black", size = 14, 
@@ -256,11 +256,12 @@ legend_fig1 <- get_legend(Fig1B_newmod)
 quartz(width = 10, height = 5)
 
 Figure1ab<- Fig1A_newmod / Fig1B_newmod + 
-  plot_layout(ncol=1, widths = c(8,8)) & 
+  plot_layout(ncol=1, nrow= 3, widths = c(8,8), height = c(12,12)) & 
   theme(legend.position = "none")
 
-pdf(file = "Figures/Figure1_AB.pdf",width = 6, height = 6)
-Figure1ab / as_ggplot(legend_fig1) + plot_layout(heights=c(4,4,2))
+# change plot_layout arguments to adjust heights 
+pdf(file = "Figures/Figure1_AB.pdf",width = 8, height = 12)
+Figure1ab / as_ggplot(legend_fig1) + plot_layout(height=c(12,12,2))
 dev.off()
 
 
