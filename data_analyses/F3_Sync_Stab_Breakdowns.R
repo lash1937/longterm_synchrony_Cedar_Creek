@@ -116,6 +116,10 @@ popcomvar_exp12_2$pop<-as.numeric(popcomvar_exp12_2$pop)
 avgpopcommvar<- popcomvar_exp12_2 %>% dplyr::group_by(disk,Nitrogen) %>% 
   dplyr::summarize(meanVR = mean(classicVR), meanpop=mean(pop), meancomm=mean(comm))
 
+
+my_virdis_pal <- c(viridis::viridis(n = 8, direction = -1))
+my_virdis_pal[7:8] <- c("grey40", "black")
+
 Fig3A<- ggplot()+
   geom_point(data = popcomvar_exp12_2, mapping =aes(x=pop,y=comm, col=Nitrogen,shape=disk),alpha=0.4)+
   geom_point(data= avgpopcommvar, mapping = aes(x=meanpop,y=meancomm, fill=Nitrogen,shape=disk),size=3)+
@@ -140,14 +144,18 @@ Fig3A<- ggplot()+
   scale_shape_manual(name = "Disturbance",
                      labels = c("Intact in 1982", "Disturbed in 1982"),
                      values=c(21,24))+
-  scale_fill_viridis_d(option = "D",direction=-1, na.value="grey72",
+  scale_fill_manual(#option = "D",direction=-1,
+    na.value="grey72",
                        name="Nitrogen Addition",
                        breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
-                       labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"))+
-  scale_colour_viridis_d(option = "D",direction=-1, na.value="grey72",
+                       labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
+    values = my_virdis_pal)+
+  scale_colour_manual(#option = "D",direction=-1,
+    na.value="grey72",
                          name="Nitrogen Addition",
                          breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
-                         labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"))+
+                         labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
+    values = my_virdis_pal)+
   guides(fill=guide_legend(override.aes=list(shape=21)))+ 
   guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "left", direction = "verticle"))+ 
   guides(theme(legend.title = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),

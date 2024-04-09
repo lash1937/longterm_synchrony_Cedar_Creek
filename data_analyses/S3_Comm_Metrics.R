@@ -29,7 +29,7 @@ FigS3Richness_bothtime<- ggplot() +
                  col = Disturbance), shape = 21) +
   geom_smooth(data =all_bothtime_r, 
               aes(x=Nitrogen, y=Richness, group = Disturbance, 
-                  col = Disturbance),method="lm",se=FALSE)+
+                  col = Disturbance),method="loess",se=FALSE, span = 5)+
   scale_colour_manual(values = c("#D55E00", "skyblue"),
                       name="Disturbance",
                       breaks=c("0", "1"),
