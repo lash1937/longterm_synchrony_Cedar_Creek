@@ -67,10 +67,6 @@ shapiro.test(SEM.a.df$TEvenness)
 # Produce summary outputs of direct effects of exogenous factors
 # on community properties
 ############################
-#However, this will result in not being able to calculate indirect effects that include 
-  #disturbance as the exogenous factor; instead, we will make the point that SEMs are 
-  #important to use because we can see how richness has a strong indirect effect on stability; 
-  #portfolio effect etc
 
 #Build model used in all SEMs
 m1 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
