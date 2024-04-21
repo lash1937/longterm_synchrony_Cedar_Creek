@@ -105,10 +105,6 @@ saveRDS(standardizedSolution(m2.fit, type="std.all"),
 # of exogenous factors on community properties
 ############################
 
-#Calculate indirect effects of nitrogen through richness and nitrogen through synchrony on 
-  #stability. Eliminate pathways that went through Disturbance, as we no longer have the 
-  #path coefficients necessary to calculate those
-
 #Set vectors, so that each model (2 total) has it's own independent indirect effect#####
 
 m.indirect <- '#Direct effects on Stab
