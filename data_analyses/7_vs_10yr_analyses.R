@@ -42,32 +42,48 @@ window_comparison <- window_comparison %>%
   filter(rhs %in% var_tested) %>%
   filter(op == "~")
 window_comparison$pathway <- as.character(window_comparison$pathway)
-window_comparison$pathway <- as.factor(window_comparison$pathway)
-window_comparison$window <- as.factor(window_comparison$window)
+window_comparison$pathway <- factor(window_comparison$pathway, levels=c("TStability_TVR",
+                                                                        "TStability_TRichness",
+                                                                        "TStability_TEvenness",
+                                                                        "TStability_Nitrogen",
+                                                                        "TVR_TRichness", 
+                                                                        "TVR_TEvenness", 
+                                                                        "TVR_Nitrogen",
+                                                                        "TRichness_Nitrogen",
+                                                                        "TEvenness_TRichness","TEvenness_Nitrogen"), 
+                                    labels = c('Stability~Synchrony', 'Stability~Richness', 'Stability~Evenness', 
+                                               'Stability~Nitrogen', 'Synchrony~Richness', 'Synchrony~Evenness', 
+                                              'Synchrony~Nitrogen', 'Richness~Nitrogen','Evenness~Richness', 'Evenness~Nitrogen'))
+window_comparison$pathway 
+window_comparison$window <- factor(window_comparison$window, levels = c(7, 10))
 window_comparison$y <- 0
+window_comparison$group <- factor(window_comparison$group, levels = c(1,2), labels = c("Intact", "Disturbed"))
+window_comparison$phase <- factor(window_comparison$phase, levels = c("Transient","Post-transient"))
 
 
 windows_test <- ggplot(data = window_comparison, aes(x = pathway, y = y)) +
   geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper, width = 0.2, color = window), position = position_dodge(width = 0.8)) +
-  theme_minimal()+
+  theme_bw()+
   scale_color_manual(values = c("#D55E00", "skyblue"),
                     name="Window",
-                    labels = c("10 years", "7 years"))+
-  facet_wrap(~phase + group)+
-  ylab("")+
+                    labels = c("7 years", "10 years"))+
+  facet_grid(phase~ group)+
+  ylab("Estimate Error")+
   xlab("Pathway")+
   theme(axis.text.x = element_text(color = "grey20", size = 12,
-                                   angle = 90, hjust = -0.12, face = "plain"),
+                                   angle = 90, hjust = .5, face = "plain"),
         axis.text.y = element_text(color = "grey20", size = 12,
-                                   angle = 0, hjust = .5, vjust = 0,
+                                   angle = 0, hjust = .5,
                                    face = "plain"),
-        axis.title.x = element_text(color = "black", size = 12,
+        axis.title.x = element_text(color = "black", size = 14,
                                     angle = 0, hjust = .5, face = "plain"),
-        axis.title.y = element_text(color = "black", size = 12,
+        axis.title.y = element_text(color = "black", size = 14,
                                     angle = 90, hjust = .5, face = "plain"),
         legend.text = element_text(color = "grey20", size = 12,
                                    angle = 0, hjust = 0, face = "plain"))
 
 
-
+pdf(file = "Figures/timewindow_comparison.pdf", width = 6.5, height = 6)
+windows_test
+dev.off()
 

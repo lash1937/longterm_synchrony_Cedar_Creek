@@ -119,12 +119,16 @@ cfa_VR <- ggeffects::ggemmeans(mVRl_lme_log, terms=c("log_N", "disk")) %>%
   mutate(xo = expm1(x))
 
 # determine effect of disturbance with no N addition and high N addition
+
+em.mod <- emtrends(mVRl_lme_log, "disk", var = "log_N")
+
 EM_controlN <- emmeans::emmeans(mVRl_lme_log, ~disk |log_N, at = list(log_N = c(0.0))) #control = log(0+1)=0.0
 pairs(EM_controlN)
 
 EM_highN <- emmeans::emmeans(mVRl_lme_log, ~disk|log_N, at = list(log_N = c(3.3393220)))#highN = log(27.2 +1)=3.3393220
 pairs(EM_highN)
-
+summary(mVRl_lme_log)
+anova(mVRl_lme_log)
 # plot new predicted lines to smooth the quadratic
 Fig1A_newmod<- ggplot() +
   geom_point(data = VR_all_cont_minus9, aes(x=Nitrogen, y=VR, group = disk, 
@@ -150,14 +154,14 @@ Fig1A_newmod<- ggplot() +
   xlab(" ")+
   geom_hline(yintercept=1, color="darkgrey", linetype = "dashed") +
   theme_bw()+
-  theme(axis.text.x = element_text(color = "grey20", size = 12,
+  theme(axis.text.x = element_text(color = "grey20", size = 14,
                                    angle = 45, hjust = 1.0, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 12, 
-                                   angle = 0, hjust = .5, vjust = 0, 
+        axis.text.y = element_text(color = "grey20", size = 14, 
+                                   angle = 0, hjust = .5, 
                                    face = "plain"),
-        axis.title.x = element_text(color = "black", size = 14,
+        axis.title.x = element_text(color = "black", size = 16,
                                     angle = 0, hjust = .5, face = "plain"),
-        axis.title.y = element_text(color = "black", size = 14, 
+        axis.title.y = element_text(color = "black", size = 16, 
                                     angle = 90, hjust = .5, face = "plain"),
         legend.title = element_blank(),
         legend.text = element_blank(),
@@ -201,10 +205,21 @@ aictable(rawaic, nR) #  log linear model fit best
 MuMIn::r.squaredGLMM(mSTl_lme_log)
 an.mSTl_log <- anova(mSTl_lme_log)
 
+
 # determine the average trend across fields for plotting purposes
 cfa_ST <- ggeffects::ggemmeans(mSTl_lme_log, terms=c("log_N", "disk")) %>%
   as_tibble() %>%
   mutate(xo = expm1(x))
+
+# determine effect of N with and without disturbance, using N as a factor to get the effect at each N level
+st_all_cont_factN <- st_all_cont_minus9 %>%
+  mutate(fac_N = as.factor(st_all_cont_minus9$log_N))%>%
+  mutate(fac_disk = as.factor(st_all_cont_minus9$disk))
+mSTl_lme_fac <- nlme::lme(stability ~  fac_N * fac_disk + field,
+                          random = (~ 1 | grid), data = st_all_cont_factN)
+EM_disk0 <- emmeans::emmeans(mSTl_lme_fac, ~fac_N|fac_disk, at = list(disk = c(0)))#highN = log(27.2 +1)=3.3393220
+pairs(EM_disk0)
+
 
 # plot new predicted lines
 Fig1B_newmod<- ggplot() +
@@ -232,17 +247,17 @@ Fig1B_newmod<- ggplot() +
   lims(y=c(.5,4.25))+
   labs(legend="Disturbance")+
   theme_bw()+
-  theme(axis.text.x = element_text(color = "grey20", size = 12, 
+  theme(axis.text.x = element_text(color = "grey20", size = 14, 
                                    angle = 45, hjust = 1.0, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 12, 
-                                   angle = 0, hjust = .5, vjust = 0, 
+        axis.text.y = element_text(color = "grey20", size = 14, 
+                                   angle = 0, hjust = .5, 
                                    face = "plain"),
-        axis.title.x = element_text(color = "black", size = 14, 
+        axis.title.x = element_text(color = "black", size = 16, 
                                     angle = 0, hjust = .5, face = "plain"),
-        axis.title.y = element_text(color = "black", size = 14, 
+        axis.title.y = element_text(color = "black", size = 16, 
                                     angle = 90, hjust = .5, face = "plain"),
         legend.title = element_blank(),
-        legend.text = element_text(color = "grey20", size = 12,
+        legend.text = element_text(color = "grey20", size = 14,
                                    angle = 0, hjust = 0, face = "plain"),
         panel.grid.minor.y=element_blank(),
         panel.grid.major.y=element_blank(),

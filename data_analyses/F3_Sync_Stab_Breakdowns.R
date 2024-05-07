@@ -326,6 +326,7 @@ popcomvar_exp12_2 <- popcomvar_exp12_2 %>%
 popcomvar_exp12_2 <- popcomvar_exp12_2 %>%
   mutate(log_N = log(Nitrogen+1))
 
+
 # test model with and without an interaction
 pop_mod_int <- nlme::lme(pop ~ log_N*disk + field, random = (~1|grid), data=popcomvar_exp12_2)
 pop_mod_noint <- nlme::lme(pop ~ log_N+disk + field, random = (~1|grid), data=popcomvar_exp12_2)
@@ -365,4 +366,19 @@ std_mod_noint <- nlme::lme(stdev_biomass~log_N+disk + field, random = (~1|grid),
 AIC(std_mod_int,std_mod_noint) # interaction fit best
 MuMIn::r.squaredGLMM(std_mod_int)
 an.stdmodint <- anova(std_mod_int)
+
+
+# determine effect of N with and without disturbance, using N as a factor to get the effect at each N level
+biomass_all_cont_factN <- biomass_all_cont_minus9 %>%
+  mutate(fac_N = as.factor(biomass_all_cont_minus9$log_N))%>%
+  mutate(fac_disk = as.factor(biomass_all_cont_minus9$disk))
+std_mod_noint_fac <- nlme::lme(stdev_biomass ~  fac_N * fac_disk + field,
+                          random = (~ 1 | grid), data = biomass_all_cont_factN)
+EM_disk0_stdev <- emmeans::emmeans(std_mod_noint_fac, ~fac_N|fac_disk, at = list(disk = c(0)))#highN = log(27.2 +1)=3.3393220
+pairs(EM_disk0_stdev)
+
+mean_mod_noint_fac <- nlme::lme(mean_biomass ~  fac_N * fac_disk + field,
+                               random = (~ 1 | grid), data = biomass_all_cont_factN)
+EM_disk0_mean <- emmeans::emmeans(mean_mod_noint_fac, ~fac_N|fac_disk, at = list(disk = c(0)))#highN = log(27.2 +1)=3.3393220
+pairs(EM_disk0_mean)
 
