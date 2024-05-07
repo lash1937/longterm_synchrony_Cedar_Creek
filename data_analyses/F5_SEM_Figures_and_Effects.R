@@ -61,6 +61,7 @@ MASS::boxcox(lm(SEM.a.df$Evenness ~ 1))
 SEM.a.df$TEvenness <- boxcox_transform(SEM.a.df$Evenness, 0)
 shapiro.test(SEM.a.df$TEvenness)
 
+#########################################################################################
 
 ############################
 ###SEM model building###
@@ -69,11 +70,11 @@ shapiro.test(SEM.a.df$TEvenness)
 ############################
 
 #Build model used in transient SEMs
+#Set insignificant pathways to 0, let significant pathways freely vary
 m1 <- 'TStability ~ TVR + TRichness + c(0,NA)*TEvenness + c(NA,0)*Nitrogen + fieldB + fieldC
        TVR ~ c(0, NA)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
        TRichness ~  Nitrogen  + fieldB + fieldC
        TEvenness ~ c(0,0)*TRichness + c(0, NA)*Nitrogen  + fieldB + fieldC'
-
 
 
 ###Lavaan model, transient phase
@@ -88,9 +89,15 @@ saveRDS(standardizedSolution(m1.fit, type="std.all"),
 
 
 
+#Build model used in post-transient SEMs
+m2 <- 'TStability ~ TVR + c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen + fieldB + fieldC
+       TVR ~ c(0,0)*TRichness + c(0,0)*TEvenness + c(NA, 0)*Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
+
 ###Lavaan model, post-transient phase
-m2.fit <- sem(m1, data=SEM.a.df, group = "Disturbance", se="bootstrap", test="bootstrap")
-summary(m2.fit, stand=TRUE, rsq=TRUE)
+m2.fit <- sem(m2, data=SEM.a.df, group = "Disturbance")
+summary(m2.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
 standardizedSolution(m2.fit, type="std.all")
 
 #Save data
@@ -100,69 +107,42 @@ saveRDS(standardizedSolution(m2.fit, type="std.all"),
 
 
 #########################################################################################
-######Testing unsaturated model#######
+############################
+###SEM model comparisons###
+# Build and compare models that include disturbance effects, as constructed
+# above, versus those that hold regression estimates constant across both 
+# disturbance treatment groups, thus eliminating disturbance effects.
+############################
 
-#c(nodist, dist) order of setting paths to be zero
-
-#Unsaturated model tests - play with this:
-m.sat.trans <- 'TStability ~ TVR + TRichness + c(0,NA)*TEvenness + c(NA,0)*Nitrogen + fieldB + fieldC
-       TVR ~ c(0, NA)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
-       TRichness ~  Nitrogen  + fieldB + fieldC
-       TEvenness ~ c(0,0)*TRichness + c(0, NA)*Nitrogen  + fieldB + fieldC'
-
-m.sat.posttrans <- 'TStability ~ TVR + c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen + fieldB + fieldC
-       TVR ~ c(0,0)*TRichness + c(0,0)*TEvenness + c(NA, 0)*Nitrogen  + fieldB + fieldC
-       TRichness ~  Nitrogen  + fieldB + fieldC
-       TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
-
-#Transient regression equal
-m.sat.regequal <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
+#Build model used in transient SEMs with equal regressions
+m3 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
        TVR ~ c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
        TRichness ~  Nitrogen  + fieldB + fieldC
        TEvenness ~ c(0,0)*TRichness + Nitrogen  + fieldB + fieldC'
 
-#PostTransient regression equal
-m.sat.regequal <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
-       TVR ~ c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
-       TRichness ~  Nitrogen  + fieldB + fieldC
-       TEvenness ~ c(0,0)*TRichness + Nitrogen  + fieldB + fieldC'
 
-m.sat.posttrans.regequal <- 'TStability ~ TVR + c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen + fieldB + fieldC
+###Lavaan model, transient phase, equal regressions
+m3.fit.er <- sem(m3, data=SEM.b.df, group = "Disturbance", 
+              group.equal = "regressions")
+summary(m3.fit.er, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
+standardizedSolution(m3.fit.er, type="std.all")
+
+#Chi-square model difference test
+lavTestLRT(m1.fit, m3.fit.er)
+
+
+#Build model used in post-transient SEMs with equal regressions
+m4 <- 'TStability ~ TVR + c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen + fieldB + fieldC
        TVR ~ c(0,0)*TRichness + c(0,0)*TEvenness + c(0,0)*Nitrogen  + fieldB + fieldC
        TRichness ~  Nitrogen  + fieldB + fieldC
        TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
 
-###Lavaan model, transient phase
-m3.fit <- sem(m.sat.trans, data=SEM.b.df, group = "Disturbance")
-summary(m3.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
-standardizedSolution(m1.fit, type="std.all")
-
-###Lavaan model, transient phase
-m4.fit <- sem(m.sat.posttrans, data=SEM.a.df, group = "Disturbance")
-summary(m4.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
-standardizedSolution(m1.fit, type="std.all")
-
-###Lavaan model, transient phase - equal group regression
-m3.fit.equalregression <- sem(m.sat.regequal, data=SEM.b.df, group = "Disturbance", 
-              group.equal = "regressions")
-summary(m3.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
-standardizedSolution(m1.fit, type="std.all")
-
-lavTestLRT(m3.fit, m3.fit.equalregression)
-
 ###Lavaan model, posttransient phase - equal group regression
-m4.fit.equalregression <- sem(m.sat.posttrans.regequal, data=SEM.a.df, group = "Disturbance", 
+m4.fit.er <- sem(m4, data=SEM.a.df, group = "Disturbance", 
                               group.equal = "regressions")
-summary(m4.fit.equalregression, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
+summary(m4.fit.er, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
 
-lavTestLRT(m4.fit, m4.fit.equalregression)
-
-
-
-
-
-
-
+lavTestLRT(m2.fit, m4.fit.er)
 
 
 ############################
