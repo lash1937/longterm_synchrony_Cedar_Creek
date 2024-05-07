@@ -51,16 +51,16 @@ shapiro.test(SEM.df$TEvenness)
 # on community properties across all years in the dataset
 ############################
 
-#Create model structure
-#Build model used in all SEMs
-m1 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
-       TVR ~ TRichness + TEvenness + Nitrogen  + fieldB + fieldC
+#Build model used in SEM
+#Set insignificant pathways to 0, let significant pathways freely vary
+m1supp <- 'TStability ~ TVR + c(0, 0)*TRichness + c(NA, 0)*TEvenness + Nitrogen + fieldB + fieldC
+       TVR ~ c(0, NA)*TRichness + c(0, 0)*TEvenness + c(0, NA)*Nitrogen  + fieldB + fieldC
        TRichness ~  Nitrogen  + fieldB + fieldC
-       TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
+       TEvenness ~ c(NA, 0)*TRichness + c(NA, 0)*Nitrogen  + fieldB + fieldC'
 
 #Fit ALL years model 
-msupp.fit <- sem(m1, data=SEM.df, group = "Disturbance", se="bootstrap", test="bootstrap")
-summary(msupp.fit, stand=TRUE, rsq=TRUE)
+msupp.fit <- sem(m1supp, data=SEM.df, group = "Disturbance")
+summary(msupp.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
 standardizedSolution(msupp.fit, type="std.all")
 
 #Save data
