@@ -27,19 +27,19 @@ topbyfunc_avg<-topbyfunc%>% dplyr::group_by(exp,year,ntrt, species) %>% dplyr::s
 totalbiomass_avg<-totalbiomass %>% dplyr::group_by(exp,year,ntrt) %>% dplyr::summarise(meantotalbiomass=mean(totalbiomass))
 
 # subset to only control and high nutrient 
-top5sp_avg_subset<-subset(top5sp_avg, ntrt==1|ntrt==6)
-topbyfunc_subset<-subset<-subset(topbyfunc_avg, ntrt==1|ntrt==6)
-top5sp_avg_subset$ntrt <- factor(top5sp_avg_subset$ntrt, levels = c("1", "6"))
-topbyfunc_subset$ntrt <- factor(topbyfunc_subset$ntrt, levels = c("1", "6"))
-totalbiomass_subset<-subset(totalbiomass_avg, ntrt==1|ntrt==6)
-totalbiomass_subset$ntrt <- factor(totalbiomass_subset$ntrt, levels = c("1", "6"))
+top5sp_avg_subset<-subset(top5sp_avg, ntrt==1|ntrt==8)
+topbyfunc_subset<-subset<-subset(topbyfunc_avg, ntrt==1|ntrt==8)
+top5sp_avg_subset$ntrt <- factor(top5sp_avg_subset$ntrt, levels = c("1", "8"))
+topbyfunc_subset$ntrt <- factor(topbyfunc_subset$ntrt, levels = c("1", "8"))
+totalbiomass_subset<-subset(totalbiomass_avg, ntrt==1|ntrt==8)
+totalbiomass_subset$ntrt <- factor(totalbiomass_subset$ntrt, levels = c("1", "8"))
 totalbiomass_subset<-totalbiomass_subset %>% dplyr::mutate(species="total biomass")
 
 # New facet label names for disk and ntrt ###
 exp.labs <- c("Intact in 1982", "Disturbed in 1982")
 names(exp.labs) <- c("1","2")
-ntrt.labs <- c("Control (0 g N)", "High (9.5 g N)")
-names(ntrt.labs) <- c("1", "6")
+ntrt.labs <- c("Control (0 g N)", "High (27.2 g N)")
+names(ntrt.labs) <- c("1", "8")
 
 top5sp_avg_subset$year<-as.numeric(top5sp_avg_subset$year)
 topbyfunc_subset$year<-as.numeric(topbyfunc_subset$year)
@@ -52,10 +52,10 @@ biomasstopfunc<-topbyfunc_subset%>% ggplot(aes(x=year, y=meanbiomass, group=spec
   ylab(expression(paste("Mean aboveground biomass (g / ", m^2,")")))+
   xlab("")+
   scale_colour_manual(values = c("cornflowerblue", "springgreen", "goldenrod1", "darkblue", "darkred","darkorchid","darkorange","darkgreen", "black"), labels=c('Agr. rep. (C3 grass)', 'Art. lud. (Pe. forb)','Lath. ven. (Legume)', 'Poa pra. (C3 grass)','Poly. conv. (An. forb)','Rub. sp. (Shrub)', 'Schiz. scop. (C4 grass)', 'Soli. rig. (Pe. forb)', 'Total Biomass'))+
-  annotate("rect", xmin = 1982, xmax = 1988, ymin = 0, ymax = 550,alpha = .1,fill = "grey60")+
-  annotate("rect", xmin = 1994, xmax = 2004, ymin = 0, ymax = 550,alpha = .1,fill = "grey60")+
-  annotate(geom="text", x=1985, y=500, label="Transient", size=4)+
-  annotate(geom="text", x=1999, y=500, label="Post-transient", size=4)+
+  annotate("rect", xmin = 1982, xmax = 1988, ymin = 0, ymax = 700,alpha = .1,fill = "grey60")+
+  annotate("rect", xmin = 1994, xmax = 2004, ymin = 0, ymax = 700,alpha = .1,fill = "grey60")+
+  annotate(geom="text", x=1985, y=700, label="Transient", size=4)+
+  annotate(geom="text", x=1999, y=700, label="Post-transient", size=4)+
   theme_bw()+
   theme(axis.text.x = element_text(color = "grey20", size = 14, angle = 0, hjust = .5, face = "plain"),
         axis.text.y = element_text(color = "grey20", size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain"),
