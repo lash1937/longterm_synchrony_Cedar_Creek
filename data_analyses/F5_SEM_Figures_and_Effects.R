@@ -1,9 +1,9 @@
 #####################################
 # This script produces summary outputs of structural equation models,
 # which are used for creating SEM pathway figures. These figures 
-# represent the effects of nitrogen addition and soil 
-# disturbance on community properties, and report all 
-# direct and selected indirect effects.
+# represent the effects of nitrogen addition, dependant on the 
+# presence of soil disturbance treatments, on community properties, 
+# and report all direct and selected indirect effects.
 #####################################
 
 #Packages:
@@ -68,17 +68,11 @@ shapiro.test(SEM.a.df$TEvenness)
 # on community properties
 ############################
 
-#Build model used in all SEMs
-m1 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
-       TVR ~ TRichness + TEvenness + Nitrogen  + fieldB + fieldC
+#Build model used in transient SEMs
+m1 <- 'TStability ~ TVR + TRichness + c(0,NA)*TEvenness + c(NA,0)*Nitrogen + fieldB + fieldC
+       TVR ~ c(0, NA)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
        TRichness ~  Nitrogen  + fieldB + fieldC
-       TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
-
-# #Unsaturated model tests - play with this:
-# m.sat <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
-#        TVR ~ TRichness + TEvenness + Nitrogen  + fieldB + fieldC
-#        TRichness ~  Nitrogen  + fieldB + fieldC
-#        TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
+       TEvenness ~ c(0,0)*TRichness + c(0, NA)*Nitrogen  + fieldB + fieldC'
 
 
 
@@ -108,18 +102,61 @@ saveRDS(standardizedSolution(m2.fit, type="std.all"),
 #########################################################################################
 ######Testing unsaturated model#######
 
-#Check for covariances among the exogenous variables
-lavaanify(m1, group.equal = "Disturbance")
+#c(nodist, dist) order of setting paths to be zero
+
+#Unsaturated model tests - play with this:
+m.sat.trans <- 'TStability ~ TVR + TRichness + c(0,NA)*TEvenness + c(NA,0)*Nitrogen + fieldB + fieldC
+       TVR ~ c(0, NA)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ c(0,0)*TRichness + c(0, NA)*Nitrogen  + fieldB + fieldC'
+
+m.sat.posttrans <- 'TStability ~ TVR + c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen + fieldB + fieldC
+       TVR ~ c(0,0)*TRichness + c(0,0)*TEvenness + c(NA, 0)*Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
+
+#Transient regression equal
+m.sat.regequal <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
+       TVR ~ c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ c(0,0)*TRichness + Nitrogen  + fieldB + fieldC'
+
+#PostTransient regression equal
+m.sat.regequal <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
+       TVR ~ c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ c(0,0)*TRichness + Nitrogen  + fieldB + fieldC'
+
+m.sat.posttrans.regequal <- 'TStability ~ TVR + c(0,0)*TRichness + c(0,0)*TEvenness + Nitrogen + fieldB + fieldC
+       TVR ~ c(0,0)*TRichness + c(0,0)*TEvenness + c(0,0)*Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
 
 ###Lavaan model, transient phase
-m3.fit <- sem(m.sat, data=SEM.b.df, group = "Disturbance")
+m3.fit <- sem(m.sat.trans, data=SEM.b.df, group = "Disturbance")
 summary(m3.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
 standardizedSolution(m1.fit, type="std.all")
 
-#Divide non-categorical variables by 10 to see if mod indices works
-test.semdat <- SEM.b.df %>% 
-        mutate(across(.cols = c(Nitrogen, TStability:TEvenness), .fns = ~.x / 10))
-mtest.fit <- sem(m.sat, data=test.semdat)
+###Lavaan model, transient phase
+m4.fit <- sem(m.sat.posttrans, data=SEM.a.df, group = "Disturbance")
+summary(m4.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
+standardizedSolution(m1.fit, type="std.all")
+
+###Lavaan model, transient phase - equal group regression
+m3.fit.equalregression <- sem(m.sat.regequal, data=SEM.b.df, group = "Disturbance", 
+              group.equal = "regressions")
+summary(m3.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
+standardizedSolution(m1.fit, type="std.all")
+
+lavTestLRT(m3.fit, m3.fit.equalregression)
+
+###Lavaan model, posttransient phase - equal group regression
+m4.fit.equalregression <- sem(m.sat.posttrans.regequal, data=SEM.a.df, group = "Disturbance", 
+                              group.equal = "regressions")
+summary(m4.fit.equalregression, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
+
+lavTestLRT(m4.fit, m4.fit.equalregression)
+
 
 
 
@@ -160,8 +197,7 @@ m.indirect <- '#Direct effects on Stab
 '
 
 #Fit before years model
-m.indirect.fit.b <- sem(m.indirect, data=SEM.b.df, group = "Disturbance", 
-                        se="bootstrap", test="bootstrap")
+m.indirect.fit.b <- sem(m.indirect, data=SEM.b.df, group = "Disturbance")
 summary(m.indirect.fit.b, stand=TRUE, rsq=TRUE) #look at rsq values
 standardizedSolution(m.indirect.fit.b, type="std.all")
 
