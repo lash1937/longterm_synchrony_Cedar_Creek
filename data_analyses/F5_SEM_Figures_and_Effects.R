@@ -74,11 +74,17 @@ m1 <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
        TRichness ~  Nitrogen  + fieldB + fieldC
        TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
 
+# #Unsaturated model tests - play with this:
+# m.sat <- 'TStability ~ TVR + TRichness + TEvenness + Nitrogen + fieldB + fieldC
+#        TVR ~ TRichness + TEvenness + Nitrogen  + fieldB + fieldC
+#        TRichness ~  Nitrogen  + fieldB + fieldC
+#        TEvenness ~ TRichness + Nitrogen  + fieldB + fieldC'
+
 
 
 ###Lavaan model, transient phase
-m1.fit <- sem(m1, data=SEM.b.df, group = "Disturbance", se="bootstrap", test="bootstrap")
-summary(m1.fit, stand=TRUE, rsq=TRUE)
+m1.fit <- sem(m1, data=SEM.b.df, group = "Disturbance")
+summary(m1.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
 standardizedSolution(m1.fit, type="std.all")
 
 #Save data
@@ -97,6 +103,29 @@ standardizedSolution(m2.fit, type="std.all")
 saveRDS(standardizedSolution(m2.fit, type="std.all"),
         file = here::here("data/SEM_posttransient.rds"))
 #object <- readRDS(here("data/SEM_posttransient.rds"))
+
+
+#########################################################################################
+######Testing unsaturated model#######
+
+#Check for covariances among the exogenous variables
+lavaanify(m1, group.equal = "Disturbance")
+
+###Lavaan model, transient phase
+m3.fit <- sem(m.sat, data=SEM.b.df, group = "Disturbance")
+summary(m3.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
+standardizedSolution(m1.fit, type="std.all")
+
+#Divide non-categorical variables by 10 to see if mod indices works
+test.semdat <- SEM.b.df %>% 
+        mutate(across(.cols = c(Nitrogen, TStability:TEvenness), .fns = ~.x / 10))
+mtest.fit <- sem(m.sat, data=test.semdat)
+
+
+
+
+
+
 
 
 ############################
