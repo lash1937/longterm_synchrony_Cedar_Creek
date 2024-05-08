@@ -126,15 +126,15 @@ Fig3A<- ggplot()+
   geom_abline(slope = 1)+
   scale_x_continuous(limits=c(0,0.6))+
   scale_y_continuous(limits=c(0,0.6))+
-  labs(x="Aggregate Population \n Variability", y="Community Variability",tag = "A")+
-  coord_fixed()+
+  labs(x="Aggregate Population \n Variability", y="Community Variability",tag = "B")+
+  #coord_fixed()+
   theme_bw() +
-  theme(axis.text.x = element_text(color = "grey20", size = 14, angle = 0, hjust = .5, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain"),  
-        axis.title.x = element_text(color = "black", size = 16, angle = 0, hjust = .5, face = "plain"),
-        axis.title.y = element_text(color = "black", size = 16, angle = 90, hjust = .5, face = "plain"),
-        legend.title = element_text(color = "black", size = 16, angle = 0, hjust = .5, face = "plain"),
-        legend.text = element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"),
+  theme(axis.text.x = element_text(color = "grey20", size = 12, angle = 0, hjust = .5, face = "plain"),
+        axis.text.y = element_text(color = "grey20", size = 12, angle = 0, hjust = .5, vjust = 0, face = "plain"),  
+        axis.title.x = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),
+        axis.title.y = element_text(color = "black", size = 14, angle = 90, hjust = .5, face = "plain"),
+        legend.title = element_text(color = "black", size = 12, angle = 0, hjust = .5, face = "plain"),
+        legend.text = element_text(color = "grey20", size = 12,angle = 0, hjust = 0, face = "plain"),
         panel.grid.minor.y=element_blank(),
         panel.grid.major.y=element_blank(),
         panel.grid.minor.x=element_blank(),
@@ -142,7 +142,7 @@ Fig3A<- ggplot()+
         legend.position = 'bottom')+
   geom_line(data = avgpopcommvar, mapping = aes(x=meanpop, y=meancomm, group=Nitrogen, col=Nitrogen))+
   scale_shape_manual(name = "Disturbance",
-                     labels = c("Intact in 1982", "Disturbed in 1982"),
+                     labels = c("Intact", "Disturbed"),
                      values=c(21,24))+
   scale_fill_manual(#option = "D",direction=-1,
     na.value="grey72",
@@ -156,8 +156,8 @@ Fig3A<- ggplot()+
                          breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
                          labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
     values = my_virdis_pal)+
-  guides(fill=guide_legend(override.aes=list(shape=21)))+ 
-  guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "left", direction = "verticle"))+ 
+  guides(fill=guide_legend(override.aes=list(shape=21), title = "Nitrogen Addition", title.position = "top", direction = "horizontal"))+ 
+  guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "verticle"))+ 
   guides(theme(legend.title = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),
                legend.text=element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"))) 
 
@@ -263,18 +263,13 @@ biomass_all_cont_minus9andoutliers$Nitrogen<-as.factor(biomass_all_cont_minus9an
     geom_abline(slope = ref_stability)+
     labs(x="Standard Deviation \n of Total Biomass", y="Mean of Total Biomass",tag = "B")+
     theme_bw() +
-    theme(axis.text.x = element_text(color = "grey20", size = 14, 
-                                     angle = 0, hjust = .5, face = "plain"),
-          axis.text.y = element_text(color = "grey20", size = 14,
-                                     angle = 0, hjust = .5, vjust = 0, face = "plain"),  
-          axis.title.x = element_text(color = "black", size = 16, 
-                                      angle = 0, hjust = .5, face = "plain"),
-          axis.title.y = element_text(color = "black", size = 16,
-                                      angle = 90, hjust = .5, face = "plain"),
-          legend.title = element_text(color = "black", size = 16,
-                                      angle = 0, hjust = .5, face = "plain"),
-          legend.text = element_text(color = "grey20", size = 14,
-                                     angle = 0, hjust = 0, face = "plain"),
+    #coord_fixed()+
+    theme(axis.text.x = element_text(color = "grey20", size = 12, angle = 0, hjust = .5, face = "plain"),
+          axis.text.y = element_text(color = "grey20", size = 12, angle = 0, hjust = .5, vjust = 0, face = "plain"),  
+          axis.title.x = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),
+          axis.title.y = element_text(color = "black", size = 14, angle = 90, hjust = .5, face = "plain"),
+          legend.title = element_text(color = "black", size = 12, angle = 0, hjust = .5, face = "plain"),
+          legend.text = element_text(color = "grey20", size = 12,angle = 0, hjust = 0, face = "plain"),
           panel.grid.minor.y=element_blank(),
           panel.grid.major.y=element_blank(),
           panel.grid.minor.x=element_blank(),
@@ -284,36 +279,60 @@ biomass_all_cont_minus9andoutliers$Nitrogen<-as.factor(biomass_all_cont_minus9an
                 aes(x=meanofsd_biomass, y=meanofmean_biomass, 
                     group=Nitrogen, col=Nitrogen))+
     scale_shape_manual(name = "Disturbance",
-                       labels = c("Intact in 1982", "Disturbed in 1982"),
+                       labels = c("Intact", "Disturbed"),
                        values=c(21,24))+
-    scale_fill_viridis_d(option = "D",direction=-1, na.value="grey72",
-                         name="Nitrogen Addition",
-                         breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
-                         labels=c("0.0", "1.0", "2.0", "3.4", 
-                                  "5.4", "9.5", "17.0", "27.2"))+
-    scale_colour_viridis_d(option = "D",direction=-1, na.value="grey72",
-                           name="Nitrogen Addition",
-                           breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
-                           labels=c("0.0", "1.0", "2.0", "3.4", 
-                                    "5.4", "9.5", "17.0", "27.2"))+
-    guides(fill=guide_legend(override.aes=list(shape=21)))+ 
-    guides(shape = guide_legend(override.aes = list(size = 3), 
-                                title = "Disturbance", title.position = "left", 
-                                direction = "verticle"))+ 
-    guides(theme(legend.title = element_text(color = "black", size = 14, 
-                                             angle = 0, hjust = .5, face = "plain"),
-                 legend.text=element_text(color = "grey20", size = 14,
-                                          angle = 0, hjust = 0, face = "plain"))) 
+    scale_fill_manual(#option = "D",direction=-1,
+      na.value="grey72",
+      name="Nitrogen Addition",
+      breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
+      labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
+      values = my_virdis_pal)+
+    scale_colour_manual(#option = "D",direction=-1,
+      na.value="grey72",
+      name="Nitrogen Addition",
+      breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
+      labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
+      values = my_virdis_pal)+
+    guides(fill=guide_legend(override.aes=list(shape=21), title = "Nitrogen Addition", title.position = "top", direction = "horizontal"))+ 
+    guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "verticle"))+ 
+    guides(theme(legend.title = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),
+                 legend.text=element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"))) 
+  
+  
 }
 
-Fig3_fin <-  Fig3A + Fig3B + plot_layout(ncol = 2, guides = 'collect') & 
-  theme(legend.position = 'bottom') 
+# load ggplot objects from F1 script to create figure 1 AB and figure 2 AB
+syncvsN <- readRDS(file = here::here("data/syncvsN.rds"))
+stabvsN <- readRDS(file = here::here("data/stabvsN.rds"))
 
-pdf(file = "Figures/Figure3_AB.pdf", width = 10, height = 6)
-Fig3_fin
+new_figure_1 <- syncvsN + Fig3A + plot_layout(ncol = 2, widths = c(2,1)) &
+  theme(legend.position = 'none')
+
+legend1A <- get_legend(syncvsN)
+legend1B <- get_legend(Fig3A)
+legends1 <- as_ggplot(legend1A) +  as_ggplot(legend1B) + plot_layout(ncol = 2, widths = c(1,2))
+
+pdf(file="Figures/New_Figure1AB.pdf", width = 10, height = 6)
+new_figure_1 / legends1 
 dev.off()
 
+new_figure_2 <- stabvsN + Fig3B + plot_layout(ncol = 2, widths = c(2,1)) &
+  theme(legend.position = 'none')
 
+legend2A <- get_legend(stabvsN)
+legend2B <- get_legend(Fig3B)
+legends2 <- as_ggplot(legend2A) +  as_ggplot(legend2B) + plot_layout(ncol = 2, widths = c(1,2))
+
+pdf(file="Figures/New_Figure2AB.pdf", width = 10, height = 6)
+new_figure_2 / legends2 
+dev.off()
+
+# Fig3_fin <-  Fig3A + Fig3B + plot_layout(ncol = 2, guides = 'collect') & 
+#   theme(legend.position = 'bottom') 
+# 
+# pdf(file = "Figures/Figure3_AB.pdf", width = 10, height = 6)
+# Fig3_fin
+# dev.off()
 
 # modelling the effect of nitrogen and disk on population variability and community variability
 popcomvar_exp12_2$Nitrogen <- as.numeric(as.character(popcomvar_exp12_2$Nitrogen))
@@ -333,8 +352,8 @@ pop_mod_noint <- nlme::lme(pop ~ log_N+disk + field, random = (~1|grid), data=po
 AIC(pop_mod_int, pop_mod_noint) # no interaction fit best
 
 MuMIn::r.squaredGLMM(pop_mod_noint)
-an.popmodnoint <- anova(pop_mod_noint)
 summary(pop_mod_noint)
+anova(pop_mod_noint)
 
 # test model with and without an interaction
 comm_mod_int <- nlme::lme(comm ~ log_N*disk + field, random = (~1|grid), data=popcomvar_exp12_2)
@@ -343,7 +362,7 @@ AIC(comm_mod_int,comm_mod_noint) # no interaction fit best
 MuMIn::r.squaredGLMM(comm_mod_noint)
 an.commmodnoint <- anova(comm_mod_noint)
 summary(comm_mod_noint)
-
+anova(comm_mod_noint)
 # modelling the effect of nitrogen and disk on the mean and standard deviation of total biomass
 # create unique grid variable
 biomass_all_cont_minus9 <-biomass_all_cont_minus9 %>%
@@ -358,15 +377,15 @@ mean_mod_int <- nlme::lme(mean_biomass~log_N*disk + field, random = (~1|grid), d
 mean_mod_noint <- nlme::lme(mean_biomass~log_N + disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
 AIC(mean_mod_int,mean_mod_noint) # interaction fit best
 MuMIn::r.squaredGLMM(mean_mod_int)
-an.meanmodint <- anova(mean_mod_int)
-
+anova(mean_mod_int)
+summary(mean_mod_int)
 # test model with and without an interaction
 std_mod_int <- nlme::lme(stdev_biomass~log_N*disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
 std_mod_noint <- nlme::lme(stdev_biomass~log_N+disk + field, random = (~1|grid), data = biomass_all_cont_minus9)
 AIC(std_mod_int,std_mod_noint) # interaction fit best
 MuMIn::r.squaredGLMM(std_mod_int)
-an.stdmodint <- anova(std_mod_int)
-
+anova(std_mod_int)
+summary(std_mod_int)
 
 # determine effect of N with and without disturbance, using N as a factor to get the effect at each N level
 biomass_all_cont_factN <- biomass_all_cont_minus9 %>%

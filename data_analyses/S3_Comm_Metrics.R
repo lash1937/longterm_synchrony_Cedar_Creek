@@ -62,7 +62,7 @@ FigS3Evenness_bothtime<- ggplot() +
                  col = Disturbance), shape = 21) +
   geom_smooth(data =all_bothtime_e, 
               aes(x=Nitrogen, y=Evenness, group = Disturbance, 
-                  col = Disturbance), method="lm", se=FALSE)+
+                  col = Disturbance), method="loess", se=FALSE)+
   scale_colour_manual(values = c("#D55E00", "skyblue"),
                       name="Disturbance",
                       breaks=c("0", "1"),
@@ -94,7 +94,7 @@ FigS3Synchrony_bothtime<- ggplot() +
                  col = Disturbance), shape = 21) +
   geom_smooth(data =all_bothtime_vr, 
               aes(x=Nitrogen, y=VR, group = Disturbance, 
-                  col = Disturbance), method="lm", se=FALSE)+
+                  col = Disturbance), method="loess", se=FALSE)+
   scale_colour_manual(values = c("#D55E00", "skyblue"),
                       name="Disturbance",
                       breaks=c("0", "1"),
@@ -126,7 +126,7 @@ FigS3Stability_bothtime<- ggplot() +
                  col = Disturbance), shape = 21) +
   geom_smooth(data =all_bothtime_stab, 
               aes(x=Nitrogen, y=Stability, group = Disturbance, 
-                  col = Disturbance),method="lm", se=FALSE)+
+                  col = Disturbance),method="loess", se=FALSE)+
   scale_colour_manual(values = c("#D55E00", "skyblue"),
                       name="Disturbance",
                       breaks=c("0", "1"),

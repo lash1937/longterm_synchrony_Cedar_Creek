@@ -76,7 +76,7 @@ biomasstopfunc<-topbyfunc_subset%>% ggplot(aes(x=year, y=meanbiomass, group=spec
 biomasstopfunc
 
 # save to repo
-pdf(file = "Figures/Figure2_timeseries.pdf", width = 7.5, height = 6)
+pdf(file = "Figures/NewFigure3_timeseries.pdf", width = 7.5, height = 6)
 biomasstopfunc
 dev.off()
 

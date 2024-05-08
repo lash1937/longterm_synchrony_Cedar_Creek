@@ -70,17 +70,12 @@ windows_test <- ggplot(data = window_comparison, aes(x = pathway, y = y)) +
   facet_grid(phase~ group)+
   ylab("Estimate Error")+
   xlab("Pathway")+
-  theme(axis.text.x = element_text(color = "grey20", size = 12,
-                                   angle = 90, hjust = .5, face = "plain"),
-        axis.text.y = element_text(color = "grey20", size = 12,
-                                   angle = 0, hjust = .5,
-                                   face = "plain"),
-        axis.title.x = element_text(color = "black", size = 14,
-                                    angle = 0, hjust = .5, face = "plain"),
-        axis.title.y = element_text(color = "black", size = 14,
-                                    angle = 90, hjust = .5, face = "plain"),
-        legend.text = element_text(color = "grey20", size = 12,
-                                   angle = 0, hjust = 0, face = "plain"))
+  theme(axis.text.x = element_text(color = "grey20", size = 14, angle = 90, hjust = .5, face = "plain"),
+         axis.text.y = element_text(color = "grey20", size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain"),  
+         axis.title.x = element_text(color = "black", size = 16, angle = 0, hjust = .5, face = "plain"),
+         axis.title.y = element_text(color = "black", size = 16, angle = 90, hjust = .5, face = "plain"),
+         legend.title = element_text(color = "black", size = 16, angle = 0, hjust = .5, face = "plain"),
+         legend.text = element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"))
 
 
 pdf(file = "Figures/timewindow_comparison.pdf", width = 6.5, height = 6)

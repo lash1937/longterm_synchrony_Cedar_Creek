@@ -177,6 +177,10 @@ model_response$VR <- rep(VR_seq, times = 32)
 # produce figure
 labels <- c("0" = "Intact in 1982", "1"= "Disturbed in 1982")
 
+
+my_virdis_pal <- c(viridis::viridis(n = 8, direction = -1))
+my_virdis_pal[7:8] <- c("grey40", "black")
+
 fig4_bothtime <- ggplot(data = vr_st_df_bothtime, aes(x=VR,y=Stability, col=Nitrogen))+
   geom_point(shape = 21, alpha = 0.4)+
   facet_grid(transience~ Disturbance, labeller=labeller(Disturbance = labels))+
@@ -198,10 +202,12 @@ fig4_bothtime <- ggplot(data = vr_st_df_bothtime, aes(x=VR,y=Stability, col=Nitr
         panel.grid.major.x=element_blank(),
         text = element_text(size = 16))+
   ylim(0,8) + # should not be less than 0
-  scale_colour_viridis_d(option = "D",direction=-1, na.value="grey72",
-                         name="Nitrogen Addition",
-                         breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
-                         labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"))
+  scale_colour_manual(#option = "D",direction=-1,
+    na.value="grey72",
+    name="Nitrogen Addition",
+    breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
+    labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
+    values = my_virdis_pal)
 fig4_bothtime
 
 pdf(file = "Figures/Figure4_stabilityvssynch_bothtime.pdf",width = 8, height = 5)
@@ -234,10 +240,12 @@ fig2_bothtime_slopes <- ggplot(data = lm_results_bothtime) +
         panel.grid.major.x=element_blank(),
         text = element_text(size = 16))+ # calculate baseline as vline (nitrogen == 0)
   labs(x = 'Slope', y = "Nitrogen addition", tag ="A") +
-  scale_colour_viridis_d(option = "D",direction=-1, na.value="grey72",
-                         name="Nitrogen Addition",
-                         breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
-                         labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2")) +
+  scale_colour_manual(#option = "D",direction=-1,
+    na.value="grey72",
+    name="Nitrogen Addition",
+    breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
+    labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
+    values = my_virdis_pal)+
   geom_vline(data = . %>% group_by(Disturbance) %>% distinct(), 
              aes(xintercept=baseline_slopes), color = 'black', linetype = 'dashed')
 fig2_bothtime_slopes
@@ -262,10 +270,12 @@ fig2_bothtime_int <- ggplot(data = lm_results_bothtime) +
         panel.grid.major.x=element_blank(),
         text = element_text(size = 16))+
   labs(x = 'Intercept', y = "", tag = "B") +
-  scale_colour_viridis_d(option = "D",direction=-1, na.value="grey72",
-                         name="Nitrogen Addition",
-                         breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
-                         labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"))+
+  scale_colour_manual(#option = "D",direction=-1,
+    na.value="grey72",
+    name="Nitrogen Addition",
+    breaks=c(0, 1, 2, 3.4, 5.4, 9.5, 17, 27.2),
+    labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
+    values = my_virdis_pal)+
   geom_vline(data = . %>% group_by(Disturbance) %>% distinct(), 
              aes(xintercept=baseline_ints), color = 'black', linetype = 'dashed')
 fig2_bothtime_int
