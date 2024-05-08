@@ -242,24 +242,43 @@ MASS::boxcox(lm(SEM.10a.df$Evenness ~ 1))
 SEM.10a.df$TEvenness <- boxcox_transform(SEM.10a.df$Evenness, -0.3)
 shapiro.test(SEM.10a.df$TEvenness)
 
+#SEM model for 10 year transient phase
+m5 <- 'TStability ~ TVR + c(0, 0)*TRichness + c(NA, 0)*TEvenness + c(NA, 0)*Nitrogen + fieldB + fieldC
+       TVR ~ c(0, NA)*TRichness + c(0, 0)*TEvenness + c(NA, 0)*Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ c(NA, 0)*TRichness + c(NA, 0)*Nitrogen  + fieldB + fieldC'
+
 
 ###Lavaan model, 10 year transient phase
-m4.fit <- sem(m1, data=SEM.10b.df, group = "Disturbance", se="bootstrap", test="bootstrap")
-summary(m4.fit, stand=TRUE, rsq=TRUE)
-standardizedSolution(m4.fit, type="std.all")
-
-#Save data
-saveRDS(standardizedSolution(m4.fit, type="std.all"),
-        file = here::here("data/SEM_10yr_transient.rds"))
-#object <- readRDS(here("data/SEM_10yr_transient.rds"))
-
-###Lavaan model, 10 year post-transient phase
-m5.fit <- sem(m1, data=SEM.10a.df, group = "Disturbance", se="bootstrap", test="bootstrap")
-summary(m5.fit, stand=TRUE, rsq=TRUE)
+m5.fit <- sem(m5, data=SEM.10b.df, group = "Disturbance")
+summary(m5.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
 standardizedSolution(m5.fit, type="std.all")
 
 #Save data
 saveRDS(standardizedSolution(m5.fit, type="std.all"),
+        file = here::here("data/SEM_10yr_transient.rds"))
+#object <- readRDS(here("data/SEM_10yr_transient.rds"))
+
+#Compare 7 year model fit against 10 year model fit
+lavTestLRT(m1.fit, m5.fit)
+
+#SEM model for 10 year transient phase
+m6 <- 'TStability ~ TVR + c(0, 0)*TRichness + c(0, 0)*TEvenness + Nitrogen + fieldB + fieldC
+       TVR ~ c(0, 0)*TRichness + c(0, 0)*TEvenness + c(0, 0)*Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ c(NA, 0)*TRichness + Nitrogen  + fieldB + fieldC'
+
+
+###Lavaan model, 10 year post-transient phase
+m6.fit <- sem(m6, data=SEM.10a.df, group = "Disturbance")
+summary(m6.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
+standardizedSolution(m6.fit, type="std.all")
+
+#Save data
+saveRDS(standardizedSolution(m6.fit, type="std.all"),
         file = here::here("data/SEM_10yr_posttransient.rds"))
 #object <- readRDS(here("data/SEM_10yr_posttransient.rds"))
+
+#Compare 7 year model fit against 10 year model fit
+lavTestLRT(m2.fit, m6.fit)
 
