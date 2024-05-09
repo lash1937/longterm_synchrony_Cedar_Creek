@@ -153,7 +153,39 @@ lavTestLRT(m2.fit, m4.fit.er)
 
 #Set vectors, so that each model (2 total) has it's own independent indirect effect#####
 
-m.indirect <- '#Direct effects on Stab
+m.indirect.b <- '#Direct effects on Stab
+                TStability ~ c(c1.g1, 0)*Nitrogen + c(0, b2.g2)*TEvenness + 
+                c(b4.g1, b4.g2)*TRichness + c(d1.g1, d1.g2)*TVR
+               #Mediators
+                TVR ~ c(a2.g1, a2.g2)*Nitrogen + c(0, b3.g2)*TRichness + 
+                c(0, 0)*TEvenness
+                TRichness ~ c(a3.g1, a3.g2)*Nitrogen  
+                TEvenness ~ c(0, 0)*TRichness + c(0, a1.g2)*Nitrogen 
+               #Extra variables
+                TStability ~ fieldB + fieldC
+                TVR ~ fieldB + fieldC
+                TRichness ~ fieldB + fieldC
+                TEvenness ~ fieldB + fieldC
+                
+               #Indirect effects Group 1
+                g1ind_eff_NSyS := a2.g1 * d1.g1
+                g1ind_eff_NRS := a3.g1 * b4.g1
+                
+                #Indirect effects Group 2
+                g2ind_eff_NSyS := a2.g2 * d1.g2
+                g2ind_eff_NRS := a3.g2 * b4.g2
+'
+
+#Fit before years model
+m.indirect.fit.b <- sem(m.indirect.b, data=SEM.b.df, group = "Disturbance")
+summary(m.indirect.fit.b, stand=TRUE, rsq=TRUE) #look at rsq values
+standardizedSolution(m.indirect.fit.b, type="std.all")
+
+#Save data
+saveRDS(standardizedSolution(m.indirect.fit.b, type="std.all"), 
+        file = here::here("data/SEM_indirect_transient.rds")) 
+
+m.indirect.a <- '#Direct effects on Stab
                 TStability ~ c(c1.g1, c1.g2)*Nitrogen + c(b2.g1, b2.g2)*TEvenness + 
                 c(b4.g1, b4.g2)*TRichness + c(d1.g1, d1.g2)*TVR
                #Mediators
@@ -176,18 +208,8 @@ m.indirect <- '#Direct effects on Stab
                 g2ind_eff_NRS := a3.g2 * b4.g2
 '
 
-#Fit before years model
-m.indirect.fit.b <- sem(m.indirect, data=SEM.b.df, group = "Disturbance")
-summary(m.indirect.fit.b, stand=TRUE, rsq=TRUE) #look at rsq values
-standardizedSolution(m.indirect.fit.b, type="std.all")
-
-#Save data
-saveRDS(standardizedSolution(m.indirect.fit.b, type="std.all"), 
-        file = here::here("data/SEM_indirect_transient.rds")) 
-
 #Fit after years model
-m.indirect.fit.a <- sem(m.indirect, data=SEM.a.df, se="bootstrap", test="bootstrap", 
-                        se="bootstrap", test="bootstrap")
+m.indirect.fit.a <- sem(m.indirect.a, data=SEM.a.df, group = "Disturbance")
 summary(m.indirect.fit.a, stand=TRUE, rsq=TRUE)
 standardizedSolution(m.indirect.fit.a, type="std.all")
 
@@ -253,6 +275,7 @@ m5 <- 'TStability ~ TVR + c(0, 0)*TRichness + c(NA, 0)*TEvenness + c(NA, 0)*Nitr
 m5.fit <- sem(m5, data=SEM.10b.df, group = "Disturbance")
 summary(m5.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
 standardizedSolution(m5.fit, type="std.all")
+fisherC(m5.fit)
 
 #Save data
 saveRDS(standardizedSolution(m5.fit, type="std.all"),
