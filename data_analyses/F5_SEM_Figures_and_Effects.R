@@ -152,20 +152,25 @@ lavTestLRT(m2.fit, m4.fit.er)
 ############################
 
 #Set vectors, so that each model (2 total) has it's own independent indirect effect#####
+m1 <- 'TStability ~ TVR + TRichness + c(0,NA)*TEvenness + c(NA,0)*Nitrogen + fieldB + fieldC
+       TVR ~ c(0, NA)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
+       TRichness ~  Nitrogen  + fieldB + fieldC
+       TEvenness ~ c(0,0)*TRichness + c(0, NA)*Nitrogen  + fieldB + fieldC'
+
 
 m.indirect.b <- '#Direct effects on Stab
                 TStability ~ c(c1.g1, 0)*Nitrogen + c(0, b2.g2)*TEvenness + 
-                c(b4.g1, b4.g2)*TRichness + c(d1.g1, d1.g2)*TVR
+                c(b4.g1, b4.g2)*TRichness + c(d1.g1, d1.g2)*TVR + c(NA,NA)*fieldB + c(NA,NA)*fieldC
                #Mediators
                 TVR ~ c(a2.g1, a2.g2)*Nitrogen + c(0, b3.g2)*TRichness + 
-                c(0, 0)*TEvenness
-                TRichness ~ c(a3.g1, a3.g2)*Nitrogen  
-                TEvenness ~ c(0, 0)*TRichness + c(0, a1.g2)*Nitrogen 
+                c(0, 0)*TEvenness + fieldB + fieldC
+                TRichness ~ c(a3.g1, a3.g2)*Nitrogen + c(NA,NA)*fieldB + c(NA,NA)*fieldC
+                TEvenness ~ c(0, 0)*TRichness + c(0, a1.g2)*Nitrogen + c(NA,NA)*fieldB + c(NA,NA)*fieldC
                #Extra variables
-                TStability ~ fieldB + fieldC
-                TVR ~ fieldB + fieldC
-                TRichness ~ fieldB + fieldC
-                TEvenness ~ fieldB + fieldC
+                # TStability ~ fieldB + fieldC
+                # TVR ~ fieldB + fieldC
+                # TRichness ~ fieldB + fieldC
+                # TEvenness ~ fieldB + fieldC
                 
                #Indirect effects Group 1
                 g1ind_eff_NSyS := a2.g1 * d1.g1
@@ -185,6 +190,39 @@ standardizedSolution(m.indirect.fit.b, type="std.all")
 saveRDS(standardizedSolution(m.indirect.fit.b, type="std.all"), 
         file = here::here("data/SEM_indirect_transient.rds")) 
 
+m.indirect.a <- '#Direct effects on Stab
+                TStability ~ c(c1.g1, c1.g2)*Nitrogen + c(0, 0)*TEvenness + 
+                c(0, 0)*TRichness + c(d1.g1, d1.g2)*TVR
+               #Mediators
+                TVR ~ c(a2.g1, 0)*Nitrogen + c(0, 0)*TRichness + 
+                c(0, 0)*TEvenness
+                TRichness ~ c(a3.g1, a3.g2)*Nitrogen  
+                TEvenness ~ c(e1.g1, e1.g2)*TRichness + c(a1.g1, a1.g2)*Nitrogen 
+               #Extra variables
+                TStability ~ fieldB + fieldC
+                TVR ~ fieldB + fieldC
+                TRichness ~ fieldB + fieldC
+                TEvenness ~ fieldB + fieldC
+                
+               #Indirect effects Group 1
+                g1ind_eff_NSyS := a2.g1 * d1.g1
+                g1ind_eff_NRS := a3.g1 * 0
+                
+                #Indirect effects Group 2
+                g2ind_eff_NSyS := 0 * d1.g2
+                g2ind_eff_NRS := a3.g2 * 0
+'
+
+#Fit after years model
+m.indirect.fit.a <- sem(m.indirect.a, data=SEM.a.df, group = "Disturbance")
+summary(m.indirect.fit.a, stand=TRUE, rsq=TRUE)
+standardizedSolution(m.indirect.fit.a, type="std.all")
+
+#Save data
+saveRDS(standardizedSolution(m.indirect.fit.a, type="std.all"), 
+        file = here::here("data/SEM_indirect_posttransient.rds"))
+
+#Original model
 m.indirect.a <- '#Direct effects on Stab
                 TStability ~ c(c1.g1, c1.g2)*Nitrogen + c(b2.g1, b2.g2)*TEvenness + 
                 c(b4.g1, b4.g2)*TRichness + c(d1.g1, d1.g2)*TVR
@@ -208,14 +246,6 @@ m.indirect.a <- '#Direct effects on Stab
                 g2ind_eff_NRS := a3.g2 * b4.g2
 '
 
-#Fit after years model
-m.indirect.fit.a <- sem(m.indirect.a, data=SEM.a.df, group = "Disturbance")
-summary(m.indirect.fit.a, stand=TRUE, rsq=TRUE)
-standardizedSolution(m.indirect.fit.a, type="std.all")
-
-#Save data
-saveRDS(standardizedSolution(m.indirect.fit.a, type="std.all"), 
-        file = here::here("data/SEM_indirect_posttransient.rds")) 
 
 
 
