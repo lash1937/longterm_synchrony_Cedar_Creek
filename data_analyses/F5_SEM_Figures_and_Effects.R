@@ -151,27 +151,34 @@ lavTestLRT(m2.fit, m4.fit.er)
 # of exogenous factors on community properties
 ############################
 
-#Set vectors, so that each model (2 total) has it's own independent indirect effect#####
-m1 <- 'TStability ~ TVR + TRichness + c(0,NA)*TEvenness + c(NA,0)*Nitrogen + fieldB + fieldC
-       TVR ~ c(0, NA)*TRichness + c(0,0)*TEvenness + Nitrogen  + fieldB + fieldC
-       TRichness ~  Nitrogen  + fieldB + fieldC
-       TEvenness ~ c(0,0)*TRichness + c(0, NA)*Nitrogen  + fieldB + fieldC'
-
 
 m.indirect.b <- '#Direct effects on Stab
-                TStability ~ c(c1.g1, 0)*Nitrogen + c(0, b2.g2)*TEvenness + 
-                c(b4.g1, b4.g2)*TRichness + c(d1.g1, d1.g2)*TVR + c(NA,NA)*fieldB + c(NA,NA)*fieldC
-               #Mediators
-                TVR ~ c(a2.g1, a2.g2)*Nitrogen + c(0, b3.g2)*TRichness + 
-                c(0, 0)*TEvenness + fieldB + fieldC
-                TRichness ~ c(a3.g1, a3.g2)*Nitrogen + c(NA,NA)*fieldB + c(NA,NA)*fieldC
-                TEvenness ~ c(0, 0)*TRichness + c(0, a1.g2)*Nitrogen + c(NA,NA)*fieldB + c(NA,NA)*fieldC
-               #Extra variables
-                # TStability ~ fieldB + fieldC
-                # TVR ~ fieldB + fieldC
-                # TRichness ~ fieldB + fieldC
-                # TEvenness ~ fieldB + fieldC
+                TStability ~ c(c1.g1, c1.g2)*Nitrogen + c(b2.g1, b2.g2)*TEvenness + 
+                c(b4.g1, b4.g2)*TRichness + c(d1.g1, d1.g2)*TVR
                 
+               #Mediators
+                TVR ~ c(a2.g1, a2.g2)*Nitrogen + c(b3.g1, b3.g2)*TRichness + 
+                c(b1.g1, b1.g2)*TEvenness
+                TRichness ~ c(a3.g1, a3.g2)*Nitrogen
+                TEvenness ~ c(e1.g1, e1.g2)*TRichness + c(a1.g1, a1.g2)*Nitrogen
+                
+                #Extra variables
+                TStability ~ fieldB + fieldC
+                TVR ~ fieldB + fieldC
+                TRichness ~ fieldB + fieldC
+                TEvenness ~ fieldB + fieldC
+                
+               # #Set insignificant pathways to zero
+                c1.g2 == 0
+                b2.g1 == 0
+                b3.g1 == 0
+                b1.g1 == 0
+                b1.g2 == 0
+                e1.g1 == 0
+                e1.g2 == 0
+                a1.g1 == 0
+                
+        
                #Indirect effects Group 1
                 g1ind_eff_NSyS := a2.g1 * d1.g1
                 g1ind_eff_NRS := a3.g1 * b4.g1
