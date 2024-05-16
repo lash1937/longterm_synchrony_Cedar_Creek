@@ -168,7 +168,7 @@ m.indirect.b <- '#Direct effects on Stab
                 TRichness ~ fieldB + fieldC
                 TEvenness ~ fieldB + fieldC
                 
-               # #Set insignificant pathways to zero
+               #Set insignificant pathways to zero
                 c1.g2 == 0
                 b2.g1 == 0
                 b3.g1 == 0
@@ -198,51 +198,31 @@ saveRDS(standardizedSolution(m.indirect.fit.b, type="std.all"),
         file = here::here("data/SEM_indirect_transient.rds")) 
 
 m.indirect.a <- '#Direct effects on Stab
-                TStability ~ c(c1.g1, c1.g2)*Nitrogen + c(0, 0)*TEvenness + 
-                c(0, 0)*TRichness + c(d1.g1, d1.g2)*TVR
-               #Mediators
-                TVR ~ c(a2.g1, 0)*Nitrogen + c(0, 0)*TRichness + 
-                c(0, 0)*TEvenness
-                TRichness ~ c(a3.g1, a3.g2)*Nitrogen  
-                TEvenness ~ c(e1.g1, e1.g2)*TRichness + c(a1.g1, a1.g2)*Nitrogen 
-               #Extra variables
-                TStability ~ fieldB + fieldC
-                TVR ~ fieldB + fieldC
-                TRichness ~ fieldB + fieldC
-                TEvenness ~ fieldB + fieldC
-                
-               #Indirect effects Group 1
-                g1ind_eff_NSyS := a2.g1 * d1.g1
-                g1ind_eff_NRS := a3.g1 * 0
-                
-                #Indirect effects Group 2
-                g2ind_eff_NSyS := 0 * d1.g2
-                g2ind_eff_NRS := a3.g2 * 0
-'
-
-#Fit after years model
-m.indirect.fit.a <- sem(m.indirect.a, data=SEM.a.df, group = "Disturbance")
-summary(m.indirect.fit.a, stand=TRUE, rsq=TRUE)
-standardizedSolution(m.indirect.fit.a, type="std.all")
-
-#Save data
-saveRDS(standardizedSolution(m.indirect.fit.a, type="std.all"), 
-        file = here::here("data/SEM_indirect_posttransient.rds"))
-
-#Original model
-m.indirect.a <- '#Direct effects on Stab
                 TStability ~ c(c1.g1, c1.g2)*Nitrogen + c(b2.g1, b2.g2)*TEvenness + 
                 c(b4.g1, b4.g2)*TRichness + c(d1.g1, d1.g2)*TVR
+                
                #Mediators
                 TVR ~ c(a2.g1, a2.g2)*Nitrogen + c(b3.g1, b3.g2)*TRichness + 
                 c(b1.g1, b1.g2)*TEvenness
                 TRichness ~ c(a3.g1, a3.g2)*Nitrogen  
                 TEvenness ~ c(e1.g1, e1.g2)*TRichness + c(a1.g1, a1.g2)*Nitrogen 
+                
                #Extra variables
                 TStability ~ fieldB + fieldC
                 TVR ~ fieldB + fieldC
                 TRichness ~ fieldB + fieldC
                 TEvenness ~ fieldB + fieldC
+                
+                #Set insignificant pathways to zero
+                 b2.g1 == 0
+                 b2.g2 == 0
+                 b4.g1 == 0
+                 b4.g2 == 0
+                 a2.g2 == 0
+                 b3.g1 == 0
+                 b3.g2 == 0
+                 b1.g1 == 0
+                 b1.g2 == 0
                 
                #Indirect effects Group 1
                 g1ind_eff_NSyS := a2.g1 * d1.g1
@@ -253,8 +233,14 @@ m.indirect.a <- '#Direct effects on Stab
                 g2ind_eff_NRS := a3.g2 * b4.g2
 '
 
+#Fit after years model
+m.indirect.fit.a <- sem(m.indirect.a, data=SEM.a.df, group = "Disturbance")
+summary(m.indirect.fit.a, stand=TRUE, rsq=TRUE)
+standardizedSolution(m.indirect.fit.a, type="std.all")
 
-
+#Save data
+saveRDS(standardizedSolution(m.indirect.fit.a, type="std.all"), 
+        file = here::here("data/SEM_indirect_posttransient.rds"))
 
 ######################
 # Compare SEM pathway outputs when using a 10 year window
