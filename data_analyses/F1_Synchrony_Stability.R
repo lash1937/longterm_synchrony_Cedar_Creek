@@ -155,6 +155,8 @@ Fig1A_newmod<- ggplot() +
   geom_hline(yintercept=1, color="darkgrey", linetype = "dashed") +
   theme_bw()+
   #coord_fixed()+
+  annotate("text", x = 1.2, y=1.8, label = "Synchrony", color = "darkgrey", size = 3.5) + 
+  annotate("text", x = 2.0, y=0.1, label = "Compensation", color = "darkgrey", size = 3.5) +  
   theme(axis.text.x = element_text(color = "grey20", size = 12,
                                    angle = 45, hjust = 1.0, face = "plain"),
         axis.text.y = element_text(color = "grey20", size = 12, 
