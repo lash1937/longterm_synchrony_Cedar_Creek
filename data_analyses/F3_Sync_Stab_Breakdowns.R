@@ -141,6 +141,8 @@ Fig3A<- ggplot()+
         panel.grid.major.x=element_blank(),
         legend.position = 'bottom')+
   geom_line(data = avgpopcommvar, mapping = aes(x=meanpop, y=meancomm, group=Nitrogen, col=Nitrogen))+
+  annotate("text", x = 0.05, y=0.6, label = "Synchrony", color = "darkgrey", size = 3.5) + 
+  annotate("text", x = 0.5, y=0.05, label = "Compensation", color = "darkgrey", size = 3.5) +  
   scale_shape_manual(name = "Disturbance",
                      labels = c("Intact", "Disturbed"),
                      values=c(21,24))+
