@@ -178,9 +178,8 @@ Fig1A_newmod<- ggplot() +
   
 # back transform x axis
 
-
 # ---------------------------------------------------------------------------
-#### Fig 1B. The effect of global change drivers on stability ####
+#### Fig 2A. The effect of global change drivers on stability ####
 
 # compare a linear model to a quadratic model to best describe the relationship 
 # between stability and global change drivers
@@ -221,7 +220,7 @@ cfa_ST <- ggeffects::ggemmeans(mSTl_lme_log, terms=c("log_N", "disk")) %>%
 
 
 # plot new predicted lines
-Fig1B_newmod<- ggplot() +
+Fig2A_newmod<- ggplot() +
   geom_point(data = st_all_cont_minus9, aes(x=Nitrogen, y=stability, 
                                             group = disk, 
                                             col = disk), shape = 21) +
@@ -268,28 +267,6 @@ Fig1B_newmod<- ggplot() +
   labs(tag = "A")+
   guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "verticle"))
 
-
-
 # save ggplot objects to combine plots from another script
 saveRDS(Fig1A_newmod, file = here::here("data/syncvsN.rds"))
-saveRDS(Fig1B_newmod, file = here::here("data/stabvsN.rds"))
-
-
-
-
-# combine to produce figure as a pdf
-# legend_fig1 <- get_legend(Fig1B_newmod)
-# 
-# quartz(width = 10, height = 5)
-# 
-# Figure1ab<- Fig1A_newmod / Fig1B_newmod + 
-#   plot_layout(ncol=1, nrow= 3, widths = c(8,8), height = c(12,12)) & 
-#   theme(legend.position = "none")
-# 
-# # change plot_layout arguments to adjust heights 
-# pdf(file = "Figures/Figure1_AB.pdf",width = 8, height = 12)
-# Figure1ab / as_ggplot(legend_fig1) + plot_layout(height=c(12,12,2))
-# dev.off()
-
-
-
+saveRDS(Fig2A_newmod, file = here::here("data/stabvsN.rds"))
