@@ -53,20 +53,20 @@ and Box-Cox transformations (/Functions) and exported figure files (/Figures).
 
 3.  **Data Analyses**
 
-    *F1_Synchrony_Stability.R* - analyses for global change driver effects on
+    *F1A_Sync_F2A_Stab.R* - analyses for global change driver effects on
     synchrony and stability.
 
-    *F2_biomass.R* - analyses for total biomass through time across
+    *F3_biomass.R* - analyses for total biomass through time across
     dominant species.
 
-    *F3_Sync_Stab_Breakdowns.R* - analyses for synchrony and stability metric
+    *F1B_popcomm_F2B_meanstd.R* - analyses for synchrony and stability metric
     breakdown comparisons.
 
     *F4_S2_Sync_Stab_Relationship.R* - analyses for synchrony-stability
     relationship across successional timescales.
 
     *F5_SEM_Figures_and_Effects.R* - analyses for calculating direct and
-    indirect SEM effects.
+    indirect SEM effects across successional timescales.
 
     *S1_Control_Treatment_Comparison.R* - analyses for comparing two
     control treatments.
@@ -74,14 +74,18 @@ and Box-Cox transformations (/Functions) and exported figure files (/Figures).
     *S3_Comm_Metrics.R* - visualizing community metrics across
     successional timescales.
 
-    *S4_SEM_Figures_and_Effects_supp.R* - analyses for calculating
-    supplemental direct and indirect SEM effects.
+    *S4_7_vs_10yr_analyses.R - analyses for comparing the robustness of results
+    for two different lengths of time.
+
+
+    *S5_Full_Timeseries_SEM.R* - analyses for calculating
+    supplemental direct and indirect SEM effects for the whole timeseries.
     
-4.  **Functions:**
+5.  **Functions:**
 
     *functions.R* - supporting script with functions for Evar metric,
     Box-Cox transformations, and AIC comparisons.
     
-5.  **Figures:**
+6.  **Figures:**
 
     Folder to render all figures from the manuscript
