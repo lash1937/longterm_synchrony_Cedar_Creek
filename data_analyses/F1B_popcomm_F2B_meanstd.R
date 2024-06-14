@@ -1,12 +1,12 @@
 #####################################
-# This script produces figure 3, used to compare the component 
+# This script is used to compare the component 
 # metrics of synchrony and stability
 ########################
 
 # Read in data and functions from source code
 source(here::here("data_cleaning/subsetting_CC.R"))
 
-#### Fig 3A. comparing population variance to community variance. ####
+#### Fig 1B. comparing population variance to community variance. ####
 # prepare E001 data for analyses
 sub_exp1_long <- da.widesynch %>% 
   dplyr::filter(exp == "1") %>% 
@@ -120,7 +120,7 @@ avgpopcommvar<- popcomvar_exp12_2 %>% dplyr::group_by(disk,Nitrogen) %>%
 my_virdis_pal <- c(viridis::viridis(n = 8, direction = -1))
 my_virdis_pal[7:8] <- c("grey40", "black")
 
-Fig3A<- ggplot()+
+Fig2A<- ggplot()+
   geom_point(data = popcomvar_exp12_2, mapping =aes(x=pop,y=comm, col=Nitrogen,shape=disk),alpha=0.4)+
   geom_point(data= avgpopcommvar, mapping = aes(x=meanpop,y=meancomm, fill=Nitrogen,shape=disk),size=3)+
   geom_abline(slope = 1)+
@@ -141,8 +141,8 @@ Fig3A<- ggplot()+
         panel.grid.major.x=element_blank(),
         legend.position = 'bottom')+
   geom_line(data = avgpopcommvar, mapping = aes(x=meanpop, y=meancomm, group=Nitrogen, col=Nitrogen))+
-  annotate("text", x = 0.05, y=0.6, label = "Synchrony", color = "darkgrey", size = 3.5) + 
-  annotate("text", x = 0.5, y=0.05, label = "Compensation", color = "darkgrey", size = 3.5) +  
+  annotate("text", x = 0.08, y=0.6, label = "Synchrony", color = "darkgrey", size = 3.5) + 
+  annotate("text", x = 0.5, y=0.01, label = "Compensation", color = "darkgrey", size = 3.5) +  
   scale_shape_manual(name = "Disturbance",
                      labels = c("Intact", "Disturbed"),
                      values=c(21,24))+
@@ -163,7 +163,7 @@ Fig3A<- ggplot()+
   guides(theme(legend.title = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),
                legend.text=element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"))) 
 
-#### Fig 3B. comparing mean to the standard deviation of total biomass ####
+#### Fig 2B. comparing mean to the standard deviation of total biomass ####
 # create total biomass data fram
 biomass_df <- unique_ID_long %>%
   dplyr::group_by(uniqueID, year)%>%
@@ -255,7 +255,7 @@ biomass_all_cont_minus9andoutliers$Nitrogen<-as.factor(biomass_all_cont_minus9an
   ggplot() +
     geom_line(data=ref_line, mapping=aes(x=x, y=y))
   
-  Fig3B<- ggplot()+
+  Fig2B<- ggplot()+
     geom_point(data = biomass_all_cont_minus9andoutliers, mapping = 
                  aes(x=stdev_biomass,y=mean_biomass, 
                      col=Nitrogen,shape=disk),alpha=0.4)+
@@ -303,11 +303,11 @@ biomass_all_cont_minus9andoutliers$Nitrogen<-as.factor(biomass_all_cont_minus9an
   
 }
 
-# load ggplot objects from F1 script to create figure 1 AB and figure 2 AB
+# load ggplot objects from another script to create figure 1 AB and figure 2 AB
 syncvsN <- readRDS(file = here::here("data/syncvsN.rds"))
 stabvsN <- readRDS(file = here::here("data/stabvsN.rds"))
 
-new_figure_1 <- syncvsN + Fig3A + plot_layout(ncol = 2, widths = c(2,1)) &
+new_figure_1 <- syncvsN + Fig2A + plot_layout(ncol = 2, widths = c(2,1)) &
   theme(legend.position = 'none')
 
 legend1A <- get_legend(syncvsN)
@@ -318,7 +318,7 @@ pdf(file="Figures/New_Figure1AB.pdf", width = 10, height = 6)
 new_figure_1 / legends1 
 dev.off()
 
-new_figure_2 <- stabvsN + Fig3B + plot_layout(ncol = 2, widths = c(2,1)) &
+new_figure_2 <- stabvsN + Fig2B + plot_layout(ncol = 2, widths = c(2,1)) &
   theme(legend.position = 'none')
 
 legend2A <- get_legend(stabvsN)
@@ -328,13 +328,6 @@ legends2 <- as_ggplot(legend2A) +  as_ggplot(legend2B) + plot_layout(ncol = 2, w
 pdf(file="Figures/New_Figure2AB.pdf", width = 10, height = 6)
 new_figure_2 / legends2 
 dev.off()
-
-# Fig3_fin <-  Fig3A + Fig3B + plot_layout(ncol = 2, guides = 'collect') & 
-#   theme(legend.position = 'bottom') 
-# 
-# pdf(file = "Figures/Figure3_AB.pdf", width = 10, height = 6)
-# Fig3_fin
-# dev.off()
 
 # modelling the effect of nitrogen and disk on population variability and community variability
 popcomvar_exp12_2$Nitrogen <- as.numeric(as.character(popcomvar_exp12_2$Nitrogen))
@@ -346,7 +339,6 @@ popcomvar_exp12_2 <- popcomvar_exp12_2 %>%
 # log nitrogen for linear fit
 popcomvar_exp12_2 <- popcomvar_exp12_2 %>%
   mutate(log_N = log(Nitrogen+1))
-
 
 # test model with and without an interaction
 pop_mod_int <- nlme::lme(pop ~ log_N*disk + field, random = (~1|grid), data=popcomvar_exp12_2)
@@ -365,6 +357,7 @@ MuMIn::r.squaredGLMM(comm_mod_noint)
 an.commmodnoint <- anova(comm_mod_noint)
 summary(comm_mod_noint)
 anova(comm_mod_noint)
+
 # modelling the effect of nitrogen and disk on the mean and standard deviation of total biomass
 # create unique grid variable
 biomass_all_cont_minus9 <-biomass_all_cont_minus9 %>%

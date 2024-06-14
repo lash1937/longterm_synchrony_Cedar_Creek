@@ -1,6 +1,6 @@
 
 #####################################
-# This script produces figure 2, breaking down total biomass across functional groups
+# This script produces figure 3, breaking down total biomass across functional groups
 #####################################
 
 # Read in data and functions from source code
