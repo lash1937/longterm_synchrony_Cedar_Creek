@@ -120,7 +120,7 @@ avgpopcommvar<- popcomvar_exp12_2 %>% dplyr::group_by(disk,Nitrogen) %>%
 my_virdis_pal <- c(viridis::viridis(n = 8, direction = -1))
 my_virdis_pal[7:8] <- c("grey40", "black")
 
-Fig2A<- ggplot()+
+Fig1B<- ggplot()+
   geom_point(data = popcomvar_exp12_2, mapping =aes(x=pop,y=comm, col=Nitrogen,shape=disk),alpha=0.4)+
   geom_point(data= avgpopcommvar, mapping = aes(x=meanpop,y=meancomm, fill=Nitrogen,shape=disk),size=3)+
   geom_abline(slope = 1)+
@@ -307,11 +307,11 @@ biomass_all_cont_minus9andoutliers$Nitrogen<-as.factor(biomass_all_cont_minus9an
 syncvsN <- readRDS(file = here::here("data/syncvsN.rds"))
 stabvsN <- readRDS(file = here::here("data/stabvsN.rds"))
 
-new_figure_1 <- syncvsN + Fig2A + plot_layout(ncol = 2, widths = c(2,1)) &
+new_figure_1 <- syncvsN + Fig1B + plot_layout(ncol = 2, widths = c(2,1)) &
   theme(legend.position = 'none')
 
 legend1A <- get_legend(syncvsN)
-legend1B <- get_legend(Fig3A)
+legend1B <- get_legend(Fig1B)
 legends1 <- as_ggplot(legend1A) +  as_ggplot(legend1B) + plot_layout(ncol = 2, widths = c(1,2))
 
 pdf(file="Figures/New_Figure1AB.pdf", width = 10, height = 6)
@@ -322,7 +322,7 @@ new_figure_2 <- stabvsN + Fig2B + plot_layout(ncol = 2, widths = c(2,1)) &
   theme(legend.position = 'none')
 
 legend2A <- get_legend(stabvsN)
-legend2B <- get_legend(Fig3B)
+legend2B <- get_legend(Fig2B)
 legends2 <- as_ggplot(legend2A) +  as_ggplot(legend2B) + plot_layout(ncol = 2, widths = c(1,2))
 
 pdf(file="Figures/New_Figure2AB.pdf", width = 10, height = 6)
