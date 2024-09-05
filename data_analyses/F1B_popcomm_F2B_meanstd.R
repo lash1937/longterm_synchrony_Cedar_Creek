@@ -159,7 +159,7 @@ Fig1B<- ggplot()+
                          labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
     values = my_virdis_pal)+
   guides(fill=guide_legend(override.aes=list(shape=21), title = "Nitrogen Addition", title.position = "top", direction = "horizontal"))+ 
-  guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "verticle"))+ 
+  guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "vertical"))+ 
   guides(theme(legend.title = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),
                legend.text=element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"))) 
 
@@ -296,7 +296,7 @@ biomass_all_cont_minus9andoutliers$Nitrogen<-as.factor(biomass_all_cont_minus9an
       labels=c("0.0", "1.0", "2.0", "3.4", "5.4", "9.5", "17.0", "27.2"),
       values = my_virdis_pal)+
     guides(fill=guide_legend(override.aes=list(shape=21), title = "Nitrogen Addition", title.position = "top", direction = "horizontal"))+ 
-    guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "verticle"))+ 
+    guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "vertical"))+ 
     guides(theme(legend.title = element_text(color = "black", size = 14, angle = 0, hjust = .5, face = "plain"),
                  legend.text=element_text(color = "grey20", size = 14,angle = 0, hjust = 0, face = "plain"))) 
   
