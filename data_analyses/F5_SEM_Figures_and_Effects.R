@@ -298,7 +298,7 @@ m5 <- 'TStability ~ TVR + c(0, 0)*TRichness + c(NA, 0)*TEvenness + c(NA, 0)*Nitr
 m5.fit <- sem(m5, data=SEM.10b.df, group = "Disturbance")
 summary(m5.fit, fit.measures=TRUE, stand=TRUE, rsq=TRUE)
 standardizedSolution(m5.fit, type="std.all")
-fisherC(m5.fit)
+#fisherC(m5.fit) # function not found
 
 #Save data
 saveRDS(standardizedSolution(m5.fit, type="std.all"),
