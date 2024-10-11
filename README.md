@@ -73,7 +73,7 @@ and Box-Cox transformations (/Functions) and exported figure files (/Figures).
     *S3_Comm_Metrics.R* - visualizing community metrics across
     successional timescales.
 
-    *S4_7_vs_10yr_analyses.R - analyses for comparing the robustness of results
+    *S4_7_vs_10yr_analyses.R* - analyses for comparing the robustness of results
     for two different lengths of time.
 
 
