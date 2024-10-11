@@ -174,7 +174,7 @@ Fig1A_newmod<- ggplot() +
         panel.grid.major.y=element_blank(),
         panel.grid.minor.x=element_blank(),
         panel.grid.major.x=element_blank()) + labs(tag = "A")+
-  guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "verticle"))
+  guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "vertical"))
   
 # back transform x axis
 
@@ -265,7 +265,7 @@ Fig2A_newmod<- ggplot() +
         panel.grid.major.x=element_blank())+
   #theme(legend.position="top") 
   labs(tag = "A")+
-  guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "verticle"))
+  guides(shape = guide_legend(override.aes = list(size = 3), title = "Disturbance", title.position = "top", direction = "vertical"))
 
 # save ggplot objects to combine plots from another script
 saveRDS(Fig1A_newmod, file = here::here("data/syncvsN.rds"))
