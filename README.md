@@ -1,8 +1,7 @@
 # longterm_synchrony_Cedar_Creek
 
-Code for the paper "Short-term versus multi-decadal responses of
-community synchrony, biodiversity, and stability to multiple global
-change drivers."
+Code for the paper "Effects of disturbance and fertilization on plant community 
+synchrony, biodiversity, and stability through succession."
 
 Contains: 1. Raw community data (/data), 2. Cleaned data and subsetted
 dataframes (/data_cleaning), and 3. All models, analyses, and visualization
